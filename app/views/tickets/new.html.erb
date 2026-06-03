@@ -1,0 +1,34 @@
+<div class="card border-0 shadow-sm" style="max-width: 680px;">
+  <div class="card-header bg-white fw-bold">Submit a New Ticket</div>
+  <div class="card-body">
+    <%= form_with model: @ticket, local: true do |f| %>
+
+      <div class="mb-3">
+        <%= f.label :ticket_type, "Ticket Type", class: "form-label fw-bold" %>
+        <%= f.select :ticket_type,
+            Ticket::TICKET_TYPES.map { |t| [t.humanize, t] },
+            { prompt: "Select a type" },
+            class: "form-select" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :title, "Title", class: "form-label fw-bold" %>
+        <%= f.text_field :title, class: "form-control", placeholder: "Short summary of your issue" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :location_id, "Location", class: "form-label fw-bold" %>
+        <%= f.collection_select :location_id,
+            Location.active.ordered, :id, :name,
+            { prompt: "Select your location" },
+            class: "form-select" %>
+      </div>
+
+      <div class="d-flex gap-2">
+        <%= f.submit "Submit Ticket", class: "btn btn-primary" %>
+        <%= link_to "Cancel", tickets_path, class: "btn btn-outline-secondary" %>
+      </div>
+
+    <% end %>
+  </div>
+</div>

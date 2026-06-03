@@ -3,6 +3,8 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!
 
+  layout :set_layout
+
   private
 
   # ── Role guards ────────────────────────────────────────────────────────────
@@ -23,6 +25,18 @@ class ApplicationController < ActionController::Base
     unauthorized! unless current_user.admin? || current_user.manager? || current_user.agent?
   end
 
+  def set_layout
+    return "application" unless user_signed_in?
+
+    case current_user.role
+    when "admin"    then "admin"
+    when "agent"    then "agent"
+    when "manager"  then "manager"
+    when "customer" then "customer"
+    else "application"
+    end
+  end
+
   def unauthorized!
     flash[:alert] = "You are not authorized to perform this action."
     redirect_back(fallback_location: root_path)
@@ -32,13 +46,13 @@ class ApplicationController < ActionController::Base
 
   def after_sign_in_path_for(resource)
     if resource.admin?
-      admin_dashboard_path
+      admin_root_path
     elsif resource.agent?
-      agent_dashboard_path
+      agent_root_path
     elsif resource.manager?
-      manager_dashboard_path
+      manager_root_path
     else
-      customer_dashboard_path
+      customer_root_path
     end
   end
 

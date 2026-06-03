@@ -1,0 +1,54 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="mb-0" style="font-family: Poppins;">Notifications</h4>
+  <% if @notifications.any?(&:unread?) %>
+    <%= button_to "Mark All as Read",
+        mark_all_read_ticket_notifications_path,
+        method: :patch,
+        class: "btn btn-sm btn-outline-secondary" %>
+  <% end %>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <% if @notifications.any? %>
+      <% @notifications.each do |notification| %>
+        <div class="d-flex justify-content-between align-items-start px-4 py-3 border-bottom
+          <%= notification.unread? ? 'bg-light' : '' %>">
+
+          <div>
+            <div class="fw-bold" style="font-size:14px;">
+              <%= link_to notification.ticket.title,
+                  ticket_path(notification.ticket),
+                  class: "text-dark text-decoration-none" %>
+              <% if notification.unread? %>
+                <span class="badge bg-primary ms-1" style="font-size:10px;">New</span>
+              <% end %>
+            </div>
+            <div class="text-muted" style="font-size:13px;">
+              <%= notification.details %>
+            </div>
+            <div class="text-muted mt-1" style="font-size:12px;">
+              <%= notification.created_at.strftime("%b %d, %Y %I:%M %p") %>
+              <% if notification.responded_by.present? %>
+                &middot; by <%= notification.responded_by.fullname %>
+              <% end %>
+            </div>
+          </div>
+
+          <% if notification.unread? %>
+            <%= button_to "Mark Read",
+                mark_read_ticket_notification_path(notification),
+                method: :patch,
+                class: "btn btn-sm btn-outline-secondary ms-3 mt-1" %>
+          <% end %>
+
+        </div>
+      <% end %>
+    <% else %>
+      <div class="text-center text-muted py-5">
+        <i class="bi bi-bell-slash" style="font-size:2rem;"></i>
+        <p class="mt-2">No notifications yet.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

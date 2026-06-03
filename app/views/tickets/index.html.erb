@@ -1,0 +1,141 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="mb-0" style="font-family: Poppins;">
+    <% if params[:unassigned].present? %>
+      Unassigned Tickets
+    <% elsif params[:status].present? %>
+      <%= params[:status].humanize %> Tickets
+    <% elsif current_user.customer? %>
+      My Tickets
+    <% else %>
+      All Tickets
+    <% end %>
+  </h4>
+  <% if current_user.customer? || current_user.agent? || current_user.manager? %>
+    <%= link_to "+ New Ticket", new_ticket_path, class: "btn btn-primary btn-sm" %>
+  <% end %>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body py-2">
+    <%= form_with url: tickets_path, method: :get, local: true, class: "row g-2 align-items-end" do |f| %>
+
+      <div class="col-md-3">
+        <%= label_tag :status, "Status", class: "form-label mb-1 fw-bold" %>
+        <%= select_tag :status,
+            options_for_select(
+              [["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]],
+              params[:status]
+            ),
+            class: "form-select form-select-sm" %>
+      </div>
+
+      <div class="col-md-3">
+        <%= label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold" %>
+        <%= select_tag :ticket_type,
+            options_for_select(
+              [["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] },
+              params[:ticket_type]
+            ),
+            class: "form-select form-select-sm" %>
+      </div>
+
+      <% unless current_user.customer? %>
+        <div class="col-md-3">
+          <%= label_tag :unassigned, "Assignment", class: "form-label mb-1 fw-bold" %>
+          <%= select_tag :unassigned,
+              options_for_select(
+                [["All", ""], ["Unassigned only", "true"]],
+                params[:unassigned]
+              ),
+              class: "form-select form-select-sm" %>
+        </div>
+      <% end %>
+
+      <div class="col-md-2">
+        <%= f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100" %>
+      </div>
+
+      <div class="col-md-1">
+        <%= link_to "Clear", tickets_path, class: "btn btn-outline-secondary btn-sm w-100" %>
+      </div>
+
+    <% end %>
+  </div>
+</div>
+
+<!-- Tickets Table -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <% if @tickets.any? %>
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Location</th>
+            <% unless current_user.customer? %>
+              <th>Customer</th>
+              <th>Assignee</th>
+            <% end %>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @tickets.each do |ticket| %>
+            <tr>
+              <td class="text-muted" style="font-size:13px;">#<%= ticket.id %></td>
+              <td>
+                <%= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-bold" %>
+              </td>
+              <td>
+                <span class="badge bg-secondary"><%= ticket.ticket_type.humanize %></span>
+              </td>
+              <td>
+                <% color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" } %>
+                <span class="badge bg-<%= color[ticket.status] %>">
+                  <%= ticket.status.humanize %>
+                </span>
+              </td>
+              <td><%= ticket.location&.name || "-" %></td>
+              <% unless current_user.customer? %>
+                <td><%= ticket.customer&.fullname || "-" %></td>
+                <td>
+                  <% if ticket.assignee.present? %>
+                    <%= ticket.assignee.fullname %>
+                  <% else %>
+                    <span class="text-danger">Unassigned</span>
+                    <% if current_user.agent? %>
+                      <%= button_to "Grab",
+                          self_assign_ticket_path(ticket),
+                          method: :patch,
+                          class: "btn btn-xs btn-outline-success ms-1",
+                          style: "font-size:11px; padding: 1px 6px;" %>
+                    <% end %>
+                  <% end %>
+                </td>
+              <% end %>
+              <td style="font-size:13px;">
+                <%= ticket.created_at.strftime("%b %d, %Y") %>
+              </td>
+              <td>
+                <%= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="text-center text-muted py-5">
+        <i class="bi bi-ticket-perforated" style="font-size: 2rem;"></i>
+        <p class="mt-2">No tickets found.</p>
+        <% if current_user.customer? %>
+          <%= link_to "Submit your first ticket", new_ticket_path, class: "btn btn-primary btn-sm" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

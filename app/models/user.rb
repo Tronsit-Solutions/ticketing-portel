@@ -10,9 +10,15 @@ class User < ApplicationRecord
 
   belongs_to :team, optional: true
 
+  has_many :assigned_tickets,  class_name: "Ticket", foreign_key: :assignee_id, dependent: :nullify
+  has_many :customer_tickets,  class_name: "Ticket", foreign_key: :customer_id,  dependent: :nullify
+
   ROLES = %w[admin agent manager customer].freeze
   validates :fullname,  presence: true
   validates :role,      inclusion: { in: ROLES }
+
+  scope :agents,  -> { where(role: "agent") }
+  scope :active,  -> { where(is_active: true) }
 
   def admin?;    role == "admin"    end
   def agent?;    role == "agent"    end

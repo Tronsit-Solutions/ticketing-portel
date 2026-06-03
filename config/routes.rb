@@ -1,7 +1,26 @@
 Rails.application.routes.draw do
+  root "devise/sessions#new"
+
   devise_for :users, controllers: {
     sessions: 'users/sessions'
   }
+  namespace :admin do
+    root "dashboard#index"
+  end
+
+  namespace :manager do
+    root "dashboard#index"
+  end
+
+  namespace :agent do
+    root "dashboard#index"
+  end
+
+  namespace :customer do
+    root "dashboard#index"
+  end
+
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -12,6 +31,21 @@ Rails.application.routes.draw do
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+
+  resources :tickets, only: [:index, :show, :new, :create] do
+    member do
+      patch :assign
+      patch :self_assign
+      patch :close
+    end
+    resources :ticket_details, only: [:create]
+  end
+
+  resources :ticket_notifications, only: [:index] do
+    member    { patch :mark_read }
+    collection { patch :mark_all_read }
+  end
+  resources :users, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+    member { patch :deactivate }
+  end
 end

@@ -12,4 +12,12 @@ class TicketNotification < ApplicationRecord
   scope :read,      -> { where(status: "read") }
   scope :recent,    -> { order(created_at: :desc) }
   scope :for_user,  ->(user) { where(receiver: user) }
+
+  def unread?
+    status == "unread"
+  end
+
+  def read?
+    status == "read"
+  end
 end
