@@ -1,6 +1,13 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h5 class="mb-0"><%= @ticket.title %></h5>
+    <h5 class="mb-0">
+      <%= @ticket.title %>
+      <% if @ticket.on_behalf? %>
+        <span class="badge bg-warning text-dark ms-2" style="font-size:11px;">
+          On Behalf — created by <%= @ticket.created_by.fullname %>
+        </span>
+      <% end %>
+    </h5>
     <small class="text-muted">
       #<%= @ticket.id %> &middot;
       <%= @ticket.ticket_type.humanize %> &middot;
@@ -129,6 +136,15 @@
           <small class="text-muted">Location</small>
           <div><%= @ticket.location&.name || "-" %></div>
         </div>
+        <% if @ticket.on_behalf? %>
+          <div class="mb-2">
+            <small class="text-muted">Created By</small>
+            <div>
+              <%= @ticket.created_by.fullname %>
+              <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">On Behalf</span>
+            </div>
+          </div>
+        <% end %>
       </div>
     </div>
 

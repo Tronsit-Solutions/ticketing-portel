@@ -17,8 +17,9 @@ class User < ApplicationRecord
   validates :fullname,  presence: true
   validates :role,      inclusion: { in: ROLES }
 
-  scope :agents,  -> { where(role: "agent") }
-  scope :active,  -> { where(is_active: true) }
+  scope :agents,    -> { where(role: "agent") }
+  scope :customers, -> { where(role: "customer") }
+  scope :active,    -> { where(is_active: true) }
 
   def admin?;    role == "admin"    end
   def agent?;    role == "agent"    end

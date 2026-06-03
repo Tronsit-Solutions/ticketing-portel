@@ -1,4 +1,5 @@
 class Manager::DashboardController < ApplicationController
+  layout "manager"
   before_action :require_admin_or_manager!
 
   def index

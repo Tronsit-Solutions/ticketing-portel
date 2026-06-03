@@ -18,7 +18,8 @@ class Ticket < ApplicationRecord
   belongs_to :customer,    class_name: "User", optional: true
   belongs_to :assignee,    class_name: "User", optional: true
   belongs_to :assigned_by, class_name: "User", optional: true
-  belongs_to :resolved_by, class_name: "User", optional: true
+  belongs_to :resolved_by,  class_name: "User", optional: true
+  belongs_to :created_by,   class_name: "User", optional: true
 
   has_many :ticket_assignments,   dependent: :destroy
   has_many :ticket_details,       dependent: :destroy
@@ -38,6 +39,10 @@ class Ticket < ApplicationRecord
   scope :unassigned,  -> { where(assignee_id: nil) }
   scope :assigned,    -> { where.not(assignee_id: nil) }
   scope :recent,      -> { order(created_at: :desc) }
+
+  def on_behalf?
+    created_by.present? && created_by != customer
+  end
 
   # Callbacks
   before_update :set_resolved_at, if: :status_changed_to_closed?

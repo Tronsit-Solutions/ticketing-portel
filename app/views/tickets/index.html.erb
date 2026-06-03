@@ -90,6 +90,9 @@
               <td class="text-muted" style="font-size:13px;">#<%= ticket.id %></td>
               <td>
                 <%= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-bold" %>
+                <% if ticket.on_behalf? %>
+                  <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">On Behalf</span>
+                <% end %>
               </td>
               <td>
                 <span class="badge bg-secondary"><%= ticket.ticket_type.humanize %></span>

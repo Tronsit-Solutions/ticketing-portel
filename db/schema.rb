@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_03_123602) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_03_190722) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -99,8 +99,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_03_123602) do
     t.datetime "resolved_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "created_by_id"
     t.index ["assigned_by_id"], name: "index_tickets_on_assigned_by_id"
     t.index ["assignee_id"], name: "index_tickets_on_assignee_id"
+    t.index ["created_by_id"], name: "index_tickets_on_created_by_id"
     t.index ["customer_id"], name: "index_tickets_on_customer_id"
     t.index ["location_id"], name: "index_tickets_on_location_id"
     t.index ["resolved_by_id"], name: "index_tickets_on_resolved_by_id"
@@ -146,6 +148,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_03_123602) do
   add_foreign_key "tickets", "locations"
   add_foreign_key "tickets", "users", column: "assigned_by_id"
   add_foreign_key "tickets", "users", column: "assignee_id"
+  add_foreign_key "tickets", "users", column: "created_by_id"
   add_foreign_key "tickets", "users", column: "customer_id"
   add_foreign_key "tickets", "users", column: "resolved_by_id"
   add_foreign_key "users", "teams"

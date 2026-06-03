@@ -1,4 +1,3 @@
-<h4 class="mb-4" style="font-family: Poppins;">Agent Dashboard</h4>
 
 <!-- Stat Cards -->
 <div class="row g-3 mb-4">
@@ -16,8 +15,10 @@
     <div class="card border-0 shadow-sm">
       <div class="card-body">
         <div class="text-muted" style="font-size:13px;">Unassigned Pool</div>
-        <div class="fs-3 fw-bold text-danger"><%= @unassigned_tickets %></div>
-        <%= link_to "Pick a ticket", tickets_path(unassigned: true), class: "btn btn-sm btn-outline-danger mt-2" %>
+        <div class="d-flex align-items-center gap-3">
+          <div class="fs-3 fw-bold text-danger"><%= @unassigned_tickets %></div>
+          <%= link_to "Pick a ticket", tickets_path(unassigned: true), class: "btn btn-sm btn-outline-danger" %>
+        </div>
       </div>
     </div>
   </div>
