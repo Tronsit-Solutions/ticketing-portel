@@ -13,6 +13,17 @@ class Ticket < ApplicationRecord
     termination
   ].freeze
 
+  CATALOGUE = [
+    { type: "technical_support", label: "Technical Support", icon: "bi-headset"     },
+    { type: "carecloud",         label: "CareCloud",         icon: "bi-cloud"        },
+    { type: "ehr_change",        label: "EHR Change",        icon: "bi-file-medical" },
+    { type: "bright_ideas",      label: "Bright Ideas",      icon: "bi-lightbulb"    },
+    { type: "great_work",        label: "Great Work",        icon: "bi-trophy"       },
+    { type: "hr",                label: "Human Resources",   icon: "bi-people"       },
+    { type: "hiring",            label: "Hiring",            icon: "bi-person-plus"  },
+    { type: "termination",       label: "Termination",       icon: "bi-person-dash"  },
+  ].freeze
+
   # Associations
   belongs_to :location,    optional: true
   belongs_to :customer,    class_name: "User", optional: true
@@ -31,6 +42,15 @@ class Ticket < ApplicationRecord
   validates :ticket_type, inclusion: { in: TICKET_TYPES }
   validates :status,      inclusion: { in: STATUSES }
 
+  # Metadata accessor helpers
+  def description
+    metadata["description"]
+  end
+
+  def description=(val)
+    self.metadata = (metadata || {}).merge("description" => val)
+  end
+
   # Scopes
   scope :open,        -> { where(status: "open") }
   scope :in_progress, -> { where(status: "in_progress") }
@@ -41,7 +61,7 @@ class Ticket < ApplicationRecord
   scope :recent,      -> { order(created_at: :desc) }
 
   def on_behalf?
-    created_by.present? && created_by != customer
+    created_by.present?
   end
 
   # Callbacks

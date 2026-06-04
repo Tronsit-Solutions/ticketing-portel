@@ -32,9 +32,8 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
 
-  resource :on_behalf, only: [:new, :create], controller: "on_behalf"
-
   resources :tickets, only: [:index, :show, :new, :create] do
+    collection { get :catalogue }
     member do
       patch :assign
       patch :self_assign

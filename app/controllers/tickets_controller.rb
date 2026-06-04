@@ -1,6 +1,10 @@
 class TicketsController < ApplicationController
   before_action :set_ticket, only: [:show, :assign, :self_assign, :close]
 
+  def catalogue
+    @catalogue = Ticket::CATALOGUE
+  end
+
   def index
     @tickets = if current_user.customer?
       Ticket.where(customer: current_user).recent
@@ -8,10 +12,10 @@ class TicketsController < ApplicationController
       Ticket.all.recent
     end.includes(:customer, :assignee, :location)
 
-    @tickets = @tickets.where(status: params[:status])              if params[:status].present?
-    @tickets = @tickets.where(ticket_type: params[:ticket_type])    if params[:ticket_type].present?
-    @tickets = @tickets.where(assignee_id: nil)                     if params[:unassigned].present?
-    @tickets = @tickets.where(assignee_id: params[:assignee_id])    if params[:assignee_id].present?
+    @tickets = @tickets.where(status: params[:status])           if params[:status].present?
+    @tickets = @tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
+    @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present?
+    @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
   end
 
   def show
@@ -20,15 +24,46 @@ class TicketsController < ApplicationController
   end
 
   def new
-    @ticket = Ticket.new
+    @ticket      = Ticket.new(ticket_type: params[:ticket_type])
+    @ticket_type = Ticket::CATALOGUE.find { |c| c[:type] == params[:ticket_type] }
+    @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
   end
 
   def create
     @ticket = Ticket.new(ticket_params)
-    @ticket.customer = current_user
+
+    if current_user.agent? || current_user.admin?
+      @ticket.customer    = User.find(params[:ticket][:customer_id])
+      @ticket.created_by  = current_user
+      @ticket.assignee    = current_user
+      @ticket.assigned_by = current_user
+      @ticket.assigned_at = Time.current
+      @ticket.status      = "in_progress"
+    else
+      @ticket.customer = current_user
+    end
+
     if @ticket.save
+      if @ticket.on_behalf?
+        TicketAssignment.create!(
+          ticket:        @ticket,
+          assigned_to:   current_user,
+          assigned_from: nil,
+          assigned_by:   current_user,
+          reason:        "Created on behalf of #{@ticket.customer.fullname}"
+        )
+        TicketNotification.create!(
+          ticket:       @ticket,
+          responded_by: current_user,
+          receiver:     @ticket.customer,
+          details:      "A ticket has been submitted on your behalf: #{@ticket.title}",
+          status:       "unread"
+        )
+      end
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
+      @ticket_type = Ticket::CATALOGUE.find { |c| c[:type] == params[:ticket][:ticket_type] }
+      @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
       render :new, status: :unprocessable_entity
     end
   end
@@ -36,10 +71,10 @@ class TicketsController < ApplicationController
   def assign
     before_assignee = @ticket.assignee
     @ticket.update!(
-      assignee_id:    params[:assignee_id],
-      assigned_by:    current_user,
-      assigned_at:    Time.current,
-      status:         "in_progress"
+      assignee_id: params[:assignee_id],
+      assigned_by: current_user,
+      assigned_at: Time.current,
+      status:      "in_progress"
     )
     TicketAssignment.create!(
       ticket:        @ticket,
@@ -79,6 +114,6 @@ class TicketsController < ApplicationController
   end
 
   def ticket_params
-    params.require(:ticket).permit(:ticket_type, :title, :location_id)
+    params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: {})
   end
 end
