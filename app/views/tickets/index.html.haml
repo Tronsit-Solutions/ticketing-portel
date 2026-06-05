@@ -9,8 +9,7 @@
       My Tickets
     - else
       All Tickets
-  - if current_user.customer? || current_user.agent? || current_user.manager?
-    = link_to "+ New Ticket", new_ticket_path, class: "btn btn-primary btn-sm"
+
 / Filters
 .card.border-0.shadow-sm.mb-4
   .card-body.py-2
