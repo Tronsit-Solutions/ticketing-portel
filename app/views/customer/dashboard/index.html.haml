@@ -1,0 +1,55 @@
+%h4.mb-4{:style => "font-family: Poppins;"} My Support Tickets
+/ Stat Cards
+.row.g-3.mb-4
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Total Submitted
+        .fs-3.fw-bold= @my_tickets.count
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Open
+        .fs-3.fw-bold.text-primary= @open_tickets
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Closed
+        .fs-3.fw-bold.text-success= @closed_tickets
+/ Unread Notifications Banner
+- if @notifications.any?
+  .alert.alert-info.d-flex.justify-content-between.align-items-center
+    %span
+      You have
+      %strong= @notifications.count
+      unread notification(s).
+    = link_to "View", ticket_notifications_path, class: "btn btn-sm btn-info"
+/ Tickets Table
+.card.border-0.shadow-sm
+  .card-header.bg-white.d-flex.justify-content-between.align-items-center
+    %span.fw-bold My Tickets
+    = link_to "+ New Ticket", new_ticket_path, class: "btn btn-sm btn-primary"
+  .card-body.p-0
+    %table.table.table-hover.mb-0
+      %thead.table-light
+        %tr
+          %th #
+          %th Title
+          %th Type
+          %th Status
+          %th Assigned To
+          %th Created
+          %th
+      %tbody
+        - @my_tickets.each do |ticket|
+          %tr
+            %td= ticket.id
+            %td= ticket.title
+            %td
+              %span.badge.bg-secondary= ticket.ticket_type.humanize
+            %td
+              - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+              %span{:class => "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
+            %td= ticket.assignee&.fullname || "<span class='text-muted'>Pending</span>".html_safe
+            %td= ticket.created_at.strftime("%b %d, %Y")
+            %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"

@@ -1,0 +1,5 @@
+.card.border-0.shadow-sm{:style => "max-width: 680px;"}
+  .card-header.bg-white.fw-bold
+    Edit User — #{@user.fullname}
+  .card-body
+    = render "form", user: @user

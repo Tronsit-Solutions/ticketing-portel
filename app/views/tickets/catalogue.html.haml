@@ -1,0 +1,18 @@
+%h5.mb-4.fw-bold
+  - if current_user.agent? || current_user.admin?
+    Create Ticket On Behalf Of a Customer
+  - else
+    Submit a Support Ticket
+.card.border-0.shadow-sm
+  .card-body.p-0
+    .px-4.py-3.border-bottom.text-muted{:style => "font-size: 14px;"}
+      To create a new ticket, kindly select a suitable service catalogue
+    - @catalogue.each do |item|
+      = link_to new_ticket_path(ticket_type: item[:type]),                                                               |
+        class: "d-flex align-items-center gap-3 px-4 py-3 border-bottom text-dark text-decoration-none catalogue-row" do |
+        %i{:class => "bi #{item[:icon]}", :style => "font-size: 22px; width: 28px; text-align: center; color: #374151;"}
+        %span{:style => "font-size: 15px; font-weight: 500;"}= item[:label]
+        %i.bi.bi-chevron-right.ms-auto.text-muted{:style => "font-size: 13px;"}
+:css
+  .catalogue-row:hover { background-color: #f8f9ff; }
+  .catalogue-row:last-child { border-bottom: none !important; }

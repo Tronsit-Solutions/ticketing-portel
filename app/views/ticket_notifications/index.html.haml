@@ -1,0 +1,35 @@
+.d-flex.justify-content-between.align-items-center.mb-4
+  %h4.mb-0{:style => "font-family: Poppins;"} Notifications
+  - if @notifications.any?(&:unread?)
+    = button_to "Mark All as Read",             |
+      mark_all_read_ticket_notifications_path,  |
+      method: :patch,                           |
+      class: "btn btn-sm btn-outline-secondary" |
+.card.border-0.shadow-sm
+  .card-body.p-0
+    - if @notifications.any?
+      - @notifications.each do |notification|
+        %div{:class => "d-flex justify-content-between align-items-start px-4 py-3 border-bottom
+          #{notification.unread? ? 'bg-light' : ''}"}
+          %div
+            .fw-bold{:style => "font-size:14px;"}
+              = link_to notification.ticket.title,      |
+                ticket_path(notification.ticket),       |
+                class: "text-dark text-decoration-none" |
+              - if notification.unread?
+                %span.badge.bg-primary.ms-1{:style => "font-size:10px;"} New
+            .text-muted{:style => "font-size:13px;"}
+              = notification.details
+            .text-muted.mt-1{:style => "font-size:12px;"}
+              = notification.created_at.strftime("%b %d, %Y %I:%M %p")
+              - if notification.responded_by.present?
+                · by #{notification.responded_by.fullname}
+          - if notification.unread?
+            = button_to "Mark Read",                              |
+              mark_read_ticket_notification_path(notification),   |
+              method: :patch,                                     |
+              class: "btn btn-sm btn-outline-secondary ms-3 mt-1" |
+    - else
+      .text-center.text-muted.py-5
+        %i.bi.bi-bell-slash{:style => "font-size:2rem;"}
+        %p.mt-2 No notifications yet.

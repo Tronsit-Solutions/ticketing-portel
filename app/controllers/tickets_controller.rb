@@ -44,6 +44,8 @@ class TicketsController < ApplicationController
     end
 
     if @ticket.save
+      save_attachments(@ticket)
+
       if @ticket.on_behalf?
         TicketAssignment.create!(
           ticket:        @ticket,
@@ -115,5 +117,18 @@ class TicketsController < ApplicationController
 
   def ticket_params
     params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: {})
+  end
+
+  def save_attachments(ticket)
+    return unless params[:ticket_attachments].present?
+    image_exts = %w[jpg jpeg png gif webp]
+    params[:ticket_attachments].each do |file|
+      ext = File.extname(file.original_filename).delete(".").downcase
+      if image_exts.include?(ext)
+        ticket.ticket_files.create!(image: file)
+      else
+        ticket.ticket_files.create!(file: file)
+      end
+    end
   end
 end

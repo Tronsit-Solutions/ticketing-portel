@@ -1,0 +1,48 @@
+/ Stat Cards
+.row.g-3.mb-4
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Assigned to Me
+        .fs-3.fw-bold.text-warning= @assigned_tickets
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Unassigned Pool
+        .d-flex.align-items-center.gap-3
+          .fs-3.fw-bold.text-danger= @unassigned_tickets
+          = link_to "Pick a ticket", tickets_path(unassigned: true), class: "btn btn-sm btn-outline-danger"
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Closed by Me
+        .fs-3.fw-bold.text-success= @closed_tickets
+/ My Tickets Table
+.card.border-0.shadow-sm
+  .card-header.bg-white.d-flex.justify-content-between.align-items-center
+    %span.fw-bold My Assigned Tickets
+    = link_to "View All", tickets_path(assignee_id: current_user.id), class: "btn btn-sm btn-outline-primary"
+  .card-body.p-0
+    %table.table.table-hover.mb-0
+      %thead.table-light
+        %tr
+          %th #
+          %th Title
+          %th Type
+          %th Status
+          %th Customer
+          %th Created
+          %th
+      %tbody
+        - @my_tickets.each do |ticket|
+          %tr
+            %td= ticket.id
+            %td= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
+            %td
+              %span.badge.bg-secondary= ticket.ticket_type.humanize
+            %td
+              - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+              %span{:class => "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
+            %td= ticket.customer&.fullname || "-"
+            %td= ticket.created_at.strftime("%b %d, %Y")
+            %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"

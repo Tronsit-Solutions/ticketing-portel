@@ -1,0 +1,34 @@
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    %title= content_for(:title) || "Ticketing Portal"
+    %meta{:content => "width=device-width,initial-scale=1", :name => "viewport"}/
+    %meta{:content => "yes", :name => "apple-mobile-web-app-capable"}/
+    = csrf_meta_tags
+    = csp_meta_tag
+    = yield :head
+    %link{:href => "/manifest.json", :rel => "manifest"}/
+    %link{:href => "/icon.png", :rel => "icon", :type => "image/png"}/
+    %link{:href => "/icon.svg", :rel => "icon", :type => "image/svg+xml"}/
+    %link{:href => "/icon.png", :rel => "apple-touch-icon"}/
+    = stylesheet_link_tag "application", "data-turbo-track": "reload"
+    = javascript_importmap_tags
+  %body
+    %nav.navbar.navbar-expand-lg.navbar-dark.bg-dark
+      .container
+        = link_to "Ticketing Portal", new_user_session_path, class: "navbar-brand"
+        %button.navbar-toggler{"data-bs-target" => "#navbarNav", "data-bs-toggle" => "collapse", :type => "button"}
+          %span.navbar-toggler-icon
+        #navbarNav.collapse.navbar-collapse
+          %ul.navbar-nav.ms-auto
+    %main.container.my-4
+      - if notice
+        .alert.alert-success.alert-dismissible.fade.show{:role => "alert"}
+          = notice
+          %button.btn-close{"data-bs-dismiss" => "alert", :type => "button"}
+      - if alert
+        .alert.alert-danger.alert-dismissible.fade.show{:role => "alert"}
+          = alert
+          %button.btn-close{"data-bs-dismiss" => "alert", :type => "button"}
+      = yield

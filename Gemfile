@@ -32,6 +32,7 @@ gem "mini_magick"
 # UI
 gem "bootstrap", "~> 5.3"
 gem "dartsass-sprockets"
+gem "haml-rails"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -45,6 +46,7 @@ end
 group :development do
   gem "web-console"
   gem "annotate"
+  gem "html2haml"
 end
 
 group :test do

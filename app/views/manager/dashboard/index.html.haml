@@ -1,0 +1,36 @@
+%h4.mb-4{:style => "font-family: Poppins;"} Manager Dashboard
+/ Stat Cards
+.row.g-3.mb-4
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Total Tickets
+        .fs-3.fw-bold= @total_tickets
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Open Tickets
+        .fs-3.fw-bold.text-primary= @open_tickets
+  .col-md-4
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Closed Tickets
+        .fs-3.fw-bold.text-success= @closed_tickets
+/ Agents in Team
+.card.border-0.shadow-sm.mb-4
+  .card-header.bg-white.fw-bold Agents in My Team
+  .card-body.p-0
+    %table.table.table-hover.mb-0
+      %thead.table-light
+        %tr
+          %th Name
+          %th Email
+          %th Active
+          %th Assigned Tickets
+      %tbody
+        - @agents.each do |agent|
+          %tr
+            %td= agent.fullname
+            %td= agent.email
+            %td= agent.is_active? ? "Yes" : "No"
+            %td= agent.assigned_tickets.in_progress.count

@@ -1,0 +1,52 @@
+%h4.mb-4{:style => "font-family: Poppins;"} Dashboard
+/ Stat Cards
+.row.g-3.mb-4
+  .col-md-3
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Total Tickets
+        .fs-3.fw-bold= @total_tickets
+  .col-md-3
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Open
+        .fs-3.fw-bold.text-primary= @open_tickets
+  .col-md-3
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} In Progress
+        .fs-3.fw-bold.text-warning= @in_progress
+  .col-md-3
+    .card.border-0.shadow-sm
+      .card-body
+        .text-muted{:style => "font-size:13px;"} Unassigned
+        .fs-3.fw-bold.text-danger= @unassigned
+/ Recent Tickets Table
+.card.border-0.shadow-sm
+  .card-header.bg-white.d-flex.justify-content-between.align-items-center
+    %span.fw-bold Recent Tickets
+    = link_to "View All", tickets_path, class: "btn btn-sm btn-outline-primary"
+  .card-body.p-0
+    %table.table.table-hover.mb-0
+      %thead.table-light
+        %tr
+          %th #
+          %th Title
+          %th Type
+          %th Status
+          %th Customer
+          %th Assignee
+          %th Created
+      %tbody
+        - @recent_tickets.each do |ticket|
+          %tr
+            %td= ticket.id
+            %td= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
+            %td
+              %span.badge.bg-secondary= ticket.ticket_type.humanize
+            %td
+              - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+              %span{:class => "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
+            %td= ticket.customer&.fullname || "-"
+            %td= ticket.assignee&.fullname || "<span class='text-danger'>Unassigned</span>".html_safe
+            %td= ticket.created_at.strftime("%b %d, %Y")

@@ -1,0 +1,174 @@
+!!!
+%html
+  %head
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    %title Agent Portal | Ticketing
+    %meta{:content => "width=device-width, initial-scale=1", :name => "viewport"}/
+    = csrf_meta_tags
+    = csp_meta_tag
+    = stylesheet_link_tag "application", "data-turbo-track": "reload"
+    %link{:href => "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css", :rel => "stylesheet"}/
+    = javascript_importmap_tags
+    :css
+      * { box-sizing: border-box; }
+
+      body {
+        background-color: #f0f2f5;
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      /* ── Topbar ── */
+      .top-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 66px;
+        background-color: #1565c0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 1100;
+      }
+
+      .top-navbar .brand {
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 2.2px;
+      }
+
+      .top-navbar .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .top-navbar .nav-right a,
+      .top-navbar .nav-right span {
+        color: #ffffff;
+        font-size: 13px;
+        text-decoration: none;
+        opacity: 0.9;
+      }
+
+      .top-navbar .nav-right a:hover { opacity: 1; }
+
+      .top-navbar .bell-wrap {
+        position: relative;
+        font-size: 18px;
+        color: #fff;
+        text-decoration: none;
+        opacity: 0.9;
+      }
+
+      /* ── Sidebar ── */
+      .sidebar {
+        width: 280px;
+        min-height: 100vh;
+        background-color: #ffffff;
+        position: fixed;
+        top: 66px;
+        left: 0;
+        bottom: 0;
+        border-right: 1px solid #e5e7eb;
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .sidebar-logo-wrap {
+        padding: 28px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: center;
+      }
+
+      .sidebar-logo-wrap img {
+        max-width: 180px;
+        max-height: 72px;
+        object-fit: contain;
+      }
+
+      .sidebar-nav a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 24px;
+        color: #1a1a1a;
+        font-size: 15px;
+        font-weight: 500;
+        text-decoration: none;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.15s;
+      }
+
+      .sidebar-nav a:hover {
+        background-color: #f0f4ff;
+        color: #1565c0;
+      }
+
+      .sidebar-nav a i {
+        font-size: 19px;
+        width: 22px;
+        text-align: center;
+        color: #374151;
+        flex-shrink: 0;
+      }
+
+      .sidebar-nav a:hover i { color: #1565c0; }
+
+      /* ── Main content ── */
+      .main-content {
+        margin-left: 280px;
+        padding: 90px 32px 32px;
+        min-height: 100vh;
+      }
+  %body
+    / Topbar
+    %nav.top-navbar
+      .brand Agent Portal
+      .nav-right
+        %a.bell-wrap{:href => ticket_notifications_path}
+          %i.bi.bi-bell-fill
+          - unread = TicketNotification.for_user(current_user).unread.count
+          - if unread > 0
+            %span.badge.bg-danger.position-absolute{:style => "top:-6px; right:-8px; font-size:9px; padding:2px 5px;"}
+              = unread
+        %span
+          %i.bi.bi-person-fill.me-1
+          = current_user.fullname
+        = link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete }
+    / Sidebar
+    .sidebar
+      .sidebar-logo-wrap
+        = image_tag "akpc.png", alt: "AKPC Logo"
+      .sidebar-nav
+        = link_to agent_root_path do
+          %i.bi.bi-speedometer2
+          Dashboard
+        = link_to tickets_path do
+          %i.bi.bi-ticket-perforated-fill
+          Tickets
+        = link_to tickets_path(unassigned: true) do
+          %i.bi.bi-inbox-fill
+          Unassigned
+        = link_to tickets_path(assignee_id: current_user.id) do
+          %i.bi.bi-person-check-fill
+          Assigned to Me
+        = link_to tickets_path(status: "closed") do
+          %i.bi.bi-check-circle-fill
+          Closed Tickets
+        = link_to catalogue_tickets_path do
+          %i.bi.bi-person-plus-fill
+          On Behalf
+        = link_to ticket_notifications_path do
+          %i.bi.bi-bell-fill
+          Notifications
+        = link_to destroy_user_session_path, data: { turbo_method: :delete } do
+          %i.bi.bi-power
+          Logout
+    / Main Content
+    .main-content
+      = render "shared/flash"
+      = yield

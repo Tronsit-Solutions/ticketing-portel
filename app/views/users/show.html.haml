@@ -1,0 +1,50 @@
+.card.border-0.shadow-sm{:style => "max-width: 680px;"}
+  .card-header.bg-white.d-flex.justify-content-between.align-items-center
+    %span.fw-bold= @user.fullname
+    .d-flex.gap-2
+      = link_to "Edit", edit_user_path(@user), class: "btn btn-sm btn-outline-primary"
+      = link_to "Back", users_path, class: "btn btn-sm btn-outline-secondary"
+  .card-body
+    .row.mb-3
+      .col-md-4.text-muted Email
+      .col-md-8= @user.email
+    .row.mb-3
+      .col-md-4.text-muted Role
+      .col-md-8
+        - role_color = { "admin" => "danger", "agent" => "success", "manager" => "primary", "customer" => "secondary" }
+        %span{:class => "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
+    .row.mb-3
+      .col-md-4.text-muted Team
+      .col-md-8= @user.team&.name || "-"
+    .row.mb-3
+      .col-md-4.text-muted Contact
+      .col-md-8= @user.contact_no || "-"
+    .row.mb-3
+      .col-md-4.text-muted Address
+      .col-md-8= @user.address || "-"
+    .row.mb-3
+      .col-md-4.text-muted Status
+      .col-md-8
+        - if @user.is_active?
+          %span.badge.bg-success Active
+        - else
+          %span.badge.bg-secondary Inactive
+    .row.mb-3
+      .col-md-4.text-muted Joined
+      .col-md-8= @user.created_at.strftime("%B %d, %Y")
+    - if @user.agent? || @user.manager?
+      %hr/
+      .row.mb-3
+        .col-md-4.text-muted Assigned Tickets
+        .col-md-8= @user.assigned_tickets.count
+      .row.mb-3
+        .col-md-4.text-muted Closed Tickets
+        .col-md-8= @user.assigned_tickets.closed.count
+    - if @user.customer?
+      %hr/
+      .row.mb-3
+        .col-md-4.text-muted Tickets Submitted
+        .col-md-8= @user.customer_tickets.count
+      .row.mb-3
+        .col-md-4.text-muted Open Tickets
+        .col-md-8= @user.customer_tickets.open.count

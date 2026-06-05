@@ -1,0 +1,106 @@
+.d-flex.align-items-center.gap-2.mb-4
+  = link_to catalogue_tickets_path, class: "text-muted text-decoration-none" do
+    %i.bi.bi-arrow-left
+    Back to catalogue
+
+.card.border-0.shadow-sm
+  .card-header.bg-white
+    .fw-bold
+      - if current_user.agent? || current_user.admin?
+        Create Ticket On Behalf of a Customer
+      - else
+        Submit a New Ticket
+    - if @ticket_type
+      .text-muted.mt-1{style: "font-size: 13px;"}
+        %i{class: "bi #{@ticket_type[:icon]} me-1"}
+        = @ticket_type[:label]
+
+  .card-body
+    - if current_user.agent? || current_user.admin?
+      .alert.alert-info.py-2.mb-4{style: "font-size:13px;"}
+        This ticket will be auto-assigned to you and marked
+        %strong On Behalf
+
+    = form_with model: @ticket, local: true, multipart: true do |f|
+      = f.hidden_field :ticket_type, value: @ticket.ticket_type
+
+      .row.g-3
+        - if current_user.agent? || current_user.admin?
+          .col-md-6
+            = label_tag :customer_id, "Customer", class: "form-label fw-bold"
+            = select_tag "ticket[customer_id]", options_from_collection_for_select(@customers, :id, :fullname), class: "form-select", prompt: "Select a customer"
+            .form-text.text-muted Who is this ticket for?
+
+        %div{class: (current_user.agent? || current_user.admin? ? "col-md-6" : "col-12")}
+          = f.label :location_id, "Location", class: "form-label fw-bold"
+          = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select your location" }, class: "form-select"
+
+        .col-12
+          = f.label :title, "Title", class: "form-label fw-bold"
+          = f.text_field :title, class: "form-control", placeholder: "Short summary of the issue"
+
+        .col-12
+          = label_tag "ticket[metadata][description]", "Description", class: "form-label fw-bold"
+          = text_area_tag "ticket[metadata][description]", @ticket.description, rows: 5, class: "form-control", placeholder: "Describe the issue in detail..."
+
+        - partial = "tickets/forms/#{@ticket.ticket_type}"
+        - if lookup_context.template_exists?(partial, [], true)
+          = render partial, ticket: @ticket
+
+        .col-12
+          %label.form-label.fw-bold Attachments
+          #uploadArea.upload-area
+            %i.bi.bi-cloud-arrow-up{style: "font-size: 2rem; color: #9ca3af;"}
+            .mt-2.text-muted{style: "font-size: 14px;"}
+              Drag &amp; drop files here or
+              %label.text-primary{for: "ticket_attachments", style: "cursor:pointer;"} browse
+            .text-muted.mt-1{style: "font-size: 12px;"}
+              Images (JPG, PNG) and documents (PDF, DOC, XLSX) up to 10MB
+            = file_field_tag "ticket_attachments[]", multiple: true, accept: ".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip", class: "d-none", id: "ticket_attachments", onchange: "showFileNames(this)"
+          #fileList.mt-2
+
+      .d-flex.gap-2.mt-4
+        = f.submit (current_user.agent? || current_user.admin? ? "Submit On Behalf" : "Submit Ticket"), class: "btn btn-primary px-4"
+        = link_to "Cancel", tickets_path, class: "btn btn-outline-secondary"
+
+:css
+  .upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 28px;
+    text-align: center;
+    background: #fafafa;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .upload-area:hover { border-color: #3d8ef8; }
+  .file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0f4ff;
+    border: 1px solid #c7d7fd;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    margin: 3px;
+    color: #374151;
+  }
+
+:javascript
+  document.getElementById('uploadArea').addEventListener('click', function(e) {
+    if (e.target.tagName !== 'LABEL') {
+      document.getElementById('ticket_attachments').click();
+    }
+  });
+
+  function showFileNames(input) {
+    const list = document.getElementById('fileList');
+    list.innerHTML = '';
+    Array.from(input.files).forEach(function(file) {
+      const chip = document.createElement('span');
+      chip.className = 'file-chip';
+      chip.innerHTML = '<i class="bi bi-paperclip"></i>' + file.name;
+      list.appendChild(chip);
+    });
+  }
