@@ -9,7 +9,6 @@
       My Tickets
     - else
       All Tickets
-
 / Filters
 .card.border-0.shadow-sm.mb-4
   .card-body.py-2
@@ -50,7 +49,7 @@
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
-            %th #
+            %th 
             %th Title
             %th Type
             %th Status
@@ -66,11 +65,12 @@
               %td.text-muted{:style => "font-size:13px;"}
                 \##{ticket.id}
               %td
-                = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-bold"
+                = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none "
                 - if ticket.on_behalf?
                   %span.badge.bg-warning.text-dark.ms-1{:style => "font-size:10px;"} On Behalf
               %td
-                %span.badge.bg-secondary= ticket.ticket_type.humanize
+                %span
+                = ticket.ticket_type.humanize
               %td
                 - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
                 %span{:class => "badge bg-#{color[ticket.status]}"}
