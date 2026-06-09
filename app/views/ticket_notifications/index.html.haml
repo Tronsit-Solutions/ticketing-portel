@@ -1,35 +1,106 @@
-.d-flex.justify-content-between.align-items-center.mb-4
-  %h4.mb-0{:style => "font-family: Poppins;"} Notifications
+:css
+  .notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .notif-header h4 {
+    font-family: Poppins, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .notif-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .notif-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .notif-row:last-child { border-bottom: none; }
+  .notif-row.unread { background: #f5f9fd; }
+  .notif-avatar-link {
+    flex-shrink: 0;
+    display: block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: opacity 0.15s;
+  }
+  .notif-avatar-link:hover { opacity: 0.8; }
+  .notif-avatar-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #1b4f72;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notif-avatar-img i { font-size: 26px; color: #ffffff; }
+  .notif-body { flex: 1; min-width: 0; }
+  .notif-text {
+    font-size: 14px;
+    color: #1a1a1a;
+    margin-bottom: 2px;
+  }
+  .notif-text strong { font-weight: 700; }
+  .notif-meta {
+    font-size: 12px;
+    color: #6b7280;
+  }
+  .notif-meta .notif-date { color: #0077b6; font-weight: 500; }
+  .notif-badge {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #0077b6;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: #9ca3af;
+  }
+  .empty-state i { font-size: 2.5rem; }
+  .empty-state p { margin-top: 12px; font-size: 14px; }
+
+.notif-header
+  %h4 Notifications
   - if @notifications.any?(&:unread?)
-    = button_to "Mark All as Read",             |
-      mark_all_read_ticket_notifications_path,  |
-      method: :patch,                           |
-      class: "btn btn-sm btn-outline-secondary" |
-.card.border-0.shadow-sm
-  .card-body.p-0
-    - if @notifications.any?
-      - @notifications.each do |notification|
-        %div{:class => "d-flex justify-content-between align-items-start px-4 py-3 border-bottom
-          #{notification.unread? ? 'bg-light' : ''}"}
-          %div
-            .fw-bold{:style => "font-size:14px;"}
-              = link_to notification.ticket.title,      |
-                ticket_path(notification.ticket),       |
-                class: "text-dark text-decoration-none" |
-              - if notification.unread?
-                %span.badge.bg-primary.ms-1{:style => "font-size:10px;"} New
-            .text-muted{:style => "font-size:13px;"}
-              = notification.details
-            .text-muted.mt-1{:style => "font-size:12px;"}
-              = notification.created_at.strftime("%b %d, %Y %I:%M %p")
-              - if notification.responded_by.present?
-                · by #{notification.responded_by.fullname}
-          - if notification.unread?
-            = button_to "Mark Read",                              |
-              mark_read_ticket_notification_path(notification),   |
-              method: :patch,                                     |
-              class: "btn btn-sm btn-outline-secondary ms-3 mt-1" |
-    - else
-      .text-center.text-muted.py-5
-        %i.bi.bi-bell-slash{:style => "font-size:2rem;"}
-        %p.mt-2 No notifications yet.
+    = button_to "Mark All as Read",
+      mark_all_read_ticket_notifications_path,
+      method: :patch,
+      class: "btn btn-sm btn-outline-secondary"
+
+.notif-card
+  - if @notifications.any?
+    - @notifications.each do |notification|
+      .notif-row{class: notification.unread? ? "unread" : ""}
+        = button_to mark_read_ticket_notification_path(notification), method: :patch, class: "notif-avatar-link", style: "background:none;border:none;padding:0;" do
+          .notif-avatar-img
+            %i.bi.bi-person-fill
+        .notif-body
+          .notif-text
+            - if notification.responded_by.present?
+              %strong= notification.responded_by.email
+            - else
+              %strong System
+            = " — #{notification.details}"
+          .notif-meta
+            was sent on
+            %span.notif-date= notification.created_at.strftime("%d %B, %y")
+        - if notification.unread?
+          .notif-badge
+  - else
+    .empty-state
+      %i.bi.bi-bell-slash
+      %p No notifications yet.

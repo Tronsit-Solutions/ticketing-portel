@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  devise_scope :user do
+    root "devise/sessions#new"
+  end
+
   devise_for :users, controllers: {
     sessions: 'users/sessions'
   }
@@ -21,6 +25,7 @@ Rails.application.routes.draw do
 
   namespace :customer do
     root "dashboard#index"
+    get "wiki", to: "wiki#index", as: :wiki
   end
 
 
