@@ -1,4 +1,4 @@
-class TicketDetail < ApplicationRecord
+class TicketMessage < ApplicationRecord
 
   MESSAGE_TYPES = %w[customer_reply agent_reply internal_note].freeze
 

@@ -39,7 +39,7 @@ Rails.application.routes.draw do
       patch :self_assign
       patch :close
     end
-    resources :ticket_details, only: [:create]
+    resources :ticket_messages, only: [:create]
   end
 
   resources :ticket_notifications, only: [:index] do

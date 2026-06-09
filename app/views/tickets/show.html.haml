@@ -41,7 +41,7 @@
     .card.border-0.shadow-sm.mb-3
       .card-header.bg-white.fw-bold Conversation
       .card-body
-        - @ticket_details.each do |detail|
+        - @ticket_messages.each do |detail|
           - next if detail.message_type == "internal_note" && current_user.customer?
           %div{:class => "mb-3 p-3 rounded #{detail.message_type == 'internal_note' ? 'bg-warning bg-opacity-10' : 'bg-light'}"}
             .d-flex.justify-content-between.mb-1
@@ -56,14 +56,14 @@
       .card.border-0.shadow-sm
         .card-header.bg-white.fw-bold Add Reply
         .card-body
-          = form_with url: ticket_ticket_details_path(@ticket), method: :post, local: true do |f|
+          = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
             = f.text_area :details,                   |
               rows: 4,                                |
               class: "form-control mb-2",             |
               placeholder: "Write your reply here..." |
             - if current_user.admin? || current_user.agent?
               .form-check.mb-2
-                = check_box_tag "ticket_detail[message_type]", "internal_note", false, class: "form-check-input"
+                = check_box_tag "ticket_message[message_type]", "internal_note", false, class: "form-check-input"
                 = label_tag "internal_note_label", "Mark as internal note", class: "form-check-label text-muted"
             = f.submit "Send Reply", class: "btn btn-primary"
   / Ticket Info Sidebar

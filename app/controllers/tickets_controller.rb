@@ -19,7 +19,7 @@ class TicketsController < ApplicationController
   end
 
   def show
-    @ticket_details     = @ticket.ticket_details.recent
+    @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
   end
 
