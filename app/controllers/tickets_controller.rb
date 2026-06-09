@@ -5,6 +5,15 @@ class TicketsController < ApplicationController
     @catalogue = Ticket::CATALOGUE
   end
 
+  def my_tickets
+    all             = Ticket.where(customer: current_user).recent.includes(:customer)
+    @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
+    @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
+    @all_count      = all.count
+    @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
+    @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
+  end
+
   def index
     @tickets = if current_user.customer?
       Ticket.where(customer: current_user).recent
