@@ -91,6 +91,9 @@ manager = User.create!(
   first_time: false
 )
 
+# Assign managers to teams
+tech_team.update!(manager_id: manager.id)
+
 # Customers
 customer1 = User.create!(
   fullname:   "Dan Cruz",
