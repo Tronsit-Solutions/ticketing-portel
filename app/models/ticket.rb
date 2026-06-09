@@ -43,12 +43,12 @@ class Ticket < ApplicationRecord
   validates :status,      inclusion: { in: STATUSES }
 
   # Metadata accessor helpers
-  def description
-    metadata["description"]
+  def details
+    metadata["details"]
   end
 
-  def description=(val)
-    self.metadata = (metadata || {}).merge("description" => val)
+  def details=(val)
+    self.metadata = (metadata || {}).merge("details" => val)
   end
 
   # Scopes

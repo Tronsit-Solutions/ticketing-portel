@@ -21,6 +21,7 @@ class TicketsController < ApplicationController
   def show
     @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
+    @my_tickets_count   = Ticket.where(customer: current_user).count if current_user.customer?
   end
 
   def new

@@ -1,115 +1,258 @@
-.d-flex.justify-content-between.align-items-center.mb-4
-  %div
-    %h5.mb-0
-      = @ticket.title
-      - if @ticket.on_behalf?
-        %span.badge.bg-warning.text-dark.ms-2{:style => "font-size:11px;"}
-          On Behalf — created by #{@ticket.created_by.fullname}
-    %small.text-muted
-      \##{@ticket.id} ·
-      \#{@ticket.ticket_type.humanize} ·
-      \#{@ticket.location&.name || "No location"}
-  .d-flex.gap-2
-    - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
-    %span{:class => "badge bg-#{color[@ticket.status]} fs-6"}= @ticket.status.humanize
-    - if @ticket.status != "closed" && (current_user.admin? || current_user.agent? || @ticket.customer == current_user)
-      = button_to "Close Ticket", close_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-danger"
-    - if (current_user.admin? || current_user.manager?) && @ticket.status != "closed"
-      %button.btn.btn-sm.btn-outline-primary{"data-bs-target" => "#assignForm", "data-bs-toggle" => "collapse"}
-        Assign
-    - if current_user.agent? && @ticket.assignee_id.nil?
-      = button_to "Self Assign", self_assign_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-success"
-/ Assign Form — collapsible
-- if current_user.admin? || current_user.manager?
-  #assignForm.collapse.mb-3
-    .card.card-body.border-0.shadow-sm
-      = form_with url: assign_ticket_path(@ticket), method: :patch, local: true do |f|
-        .row.g-2.align-items-end
-          .col-md-5
-            = label_tag :assignee_id, "Assign to Agent", class: "form-label fw-bold"
-            = select_tag :assignee_id,                                                                     |
-              options_from_collection_for_select(User.agents.active, :id, :fullname, @ticket.assignee_id), |
-              class: "form-select", prompt: "Select agent"                                                 |
-          .col-md-5
-            = label_tag :reason, "Reason (optional)", class: "form-label fw-bold"
-            = text_field_tag :reason, nil, class: "form-control", placeholder: "Reason for assignment"
-          .col-md-2
-            = f.submit "Assign", class: "btn btn-primary w-100"
-.row.g-3
-  / Thread
-  .col-md-8
-    .card.border-0.shadow-sm.mb-3
-      .card-header.bg-white.fw-bold Conversation
-      .card-body
-        - @ticket_messages.each do |detail|
-          - next if detail.message_type == "internal_note" && current_user.customer?
-          %div{:class => "mb-3 p-3 rounded #{detail.message_type == 'internal_note' ? 'bg-warning bg-opacity-10' : 'bg-light'}"}
-            .d-flex.justify-content-between.mb-1
-              %strong= detail.sender&.fullname || "System"
-              %small.text-muted
-                = detail.created_at.strftime("%b %d, %Y %I:%M %p")
-                - if detail.message_type == "internal_note"
-                  %span.badge.bg-warning.text-dark.ms-1 Internal Note
-            %p.mb-0= detail.details
-    / Reply Form
-    - if @ticket.status != "closed"
-      .card.border-0.shadow-sm
-        .card-header.bg-white.fw-bold Add Reply
-        .card-body
-          = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
-            = f.text_area :details,                   |
-              rows: 4,                                |
-              class: "form-control mb-2",             |
-              placeholder: "Write your reply here..." |
-            - if current_user.admin? || current_user.agent?
-              .form-check.mb-2
-                = check_box_tag "ticket_message[message_type]", "internal_note", false, class: "form-check-input"
-                = label_tag "internal_note_label", "Mark as internal note", class: "form-check-label text-muted"
-            = f.submit "Send Reply", class: "btn btn-primary"
-  / Ticket Info Sidebar
-  .col-md-4
-    .card.border-0.shadow-sm.mb-3
-      .card-header.bg-white.fw-bold Ticket Info
-      .card-body
-        .mb-2
-          %small.text-muted Customer
-          %div= @ticket.customer&.fullname || "-"
-        .mb-2
-          %small.text-muted Assignee
-          %div= @ticket.assignee&.fullname || "<span class='text-danger'>Unassigned</span>".html_safe
-        .mb-2
-          %small.text-muted Assigned By
-          %div= @ticket.assigned_by&.fullname || "-"
-        .mb-2
-          %small.text-muted Assigned At
-          %div= @ticket.assigned_at&.strftime("%b %d, %Y") || "-"
-        .mb-2
-          %small.text-muted Resolved At
-          %div= @ticket.resolved_at&.strftime("%b %d, %Y") || "-"
-        .mb-2
-          %small.text-muted Location
-          %div= @ticket.location&.name || "-"
+- if current_user.customer?
+  :css
+    .show-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    .panel-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 14px;
+    }
+    .category-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .category-chip:hover { background: #e8f4fb; border-color: #0077b6; color: #0077b6; }
+    .category-chip .chip-count {
+      background: #e5e7eb;
+      color: #374151;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .ticket-detail-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .ticket-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .ticket-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .ticket-breadcrumb i { font-size: 16px; color: #374151; }
+    .ticket-breadcrumb .sep { color: #9ca3af; font-weight: 400; }
+    .ticket-breadcrumb .status-badge {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .ticket-detail-body {
+      padding: 24px 28px;
+    }
+    .ticket-date {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .ticket-field {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 12px;
+    }
+    .ticket-field .field-label {
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-right: 4px;
+    }
+    .ticket-field .field-value { color: #0077b6; }
+    .folder-btn {
+      background: none;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: #6b7280;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      text-decoration: none;
+    }
+    .folder-btn:hover { border-color: #0077b6; color: #0077b6; }
+
+  .show-layout
+    / Left — Categories
+    .left-panel
+      .panel-title Categories
+      = link_to tickets_path, class: "category-chip" do
+        %span My Tickets
+        %span.chip-count= @my_tickets_count
+
+    / Right — Ticket Detail
+    .right-panel
+      .ticket-detail-card
+        .ticket-detail-header
+          .ticket-breadcrumb
+            %i.bi.bi-envelope-fill
+            %span Tickets
+            %span.sep /
+            - cat = Ticket::CATALOGUE.find { |c| c[:type] == @ticket.ticket_type }
+            %span= cat ? cat[:label] : @ticket.ticket_type.humanize
+            %span.sep |
+            %span \##{@ticket.id}
+            %span.sep
+            %span.status-badge [ #{@ticket.status.humanize} ]
+          - if @ticket.ticket_files.any?
+            = link_to "#files", class: "folder-btn" do
+              %i.bi.bi-folder2-open
+
+        .ticket-detail-body
+          .ticket-date= @ticket.created_at.strftime("%B %-d, %Y at %I:%M %p")
+
+          .ticket-field
+            %span.field-label Title:
+            %span.field-value= @ticket.title
+
+          - if @ticket.metadata["details"].present?
+            .ticket-field
+              %span.field-label Details:
+              %span.field-value= @ticket.metadata["details"]
+
+          - (@ticket.metadata.except("details") || {}).each do |key, value|
+            - next if value.blank?
+            .ticket-field
+              %span.field-label= "#{key.humanize}:"
+              %span.field-value= value
+
+- else
+  .d-flex.justify-content-between.align-items-center.mb-4
+    %div
+      %h5.mb-0
+        = @ticket.title
         - if @ticket.on_behalf?
+          %span.badge.bg-warning.text-dark.ms-2{:style => "font-size:11px;"}
+            On Behalf — created by #{@ticket.created_by.fullname}
+      %small.text-muted
+        \##{@ticket.id} ·
+        \#{@ticket.ticket_type.humanize} ·
+        \#{@ticket.location&.name || "No location"}
+    .d-flex.gap-2
+      - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+      %span{:class => "badge bg-#{color[@ticket.status]} fs-6"}= @ticket.status.humanize
+      - if @ticket.status != "closed" && (current_user.admin? || current_user.agent? || @ticket.customer == current_user)
+        = button_to "Close Ticket", close_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-danger"
+      - if (current_user.admin? || current_user.manager?) && @ticket.status != "closed"
+        %button.btn.btn-sm.btn-outline-primary{"data-bs-target" => "#assignForm", "data-bs-toggle" => "collapse"}
+          Assign
+      - if current_user.agent? && @ticket.assignee_id.nil?
+        = button_to "Self Assign", self_assign_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-success"
+  / Assign Form — collapsible
+  - if current_user.admin? || current_user.manager?
+    #assignForm.collapse.mb-3
+      .card.card-body.border-0.shadow-sm
+        = form_with url: assign_ticket_path(@ticket), method: :patch, local: true do |f|
+          .row.g-2.align-items-end
+            .col-md-5
+              = label_tag :assignee_id, "Assign to Agent", class: "form-label fw-bold"
+              = select_tag :assignee_id,                                                                     |
+                options_from_collection_for_select(User.agents.active, :id, :fullname, @ticket.assignee_id), |
+                class: "form-select", prompt: "Select agent"                                                 |
+            .col-md-5
+              = label_tag :reason, "Reason (optional)", class: "form-label fw-bold"
+              = text_field_tag :reason, nil, class: "form-control", placeholder: "Reason for assignment"
+            .col-md-2
+              = f.submit "Assign", class: "btn btn-primary w-100"
+  .row.g-3
+    / Thread
+    .col-md-8
+      .card.border-0.shadow-sm.mb-3
+        .card-header.bg-white.fw-bold Conversation
+        .card-body
+          - @ticket_details.each do |detail|
+            - next if detail.message_type == "internal_note" && current_user.customer?
+            %div{:class => "mb-3 p-3 rounded #{detail.message_type == 'internal_note' ? 'bg-warning bg-opacity-10' : 'bg-light'}"}
+              .d-flex.justify-content-between.mb-1
+                %strong= detail.sender&.fullname || "System"
+                %small.text-muted
+                  = detail.created_at.strftime("%b %d, %Y %I:%M %p")
+                  - if detail.message_type == "internal_note"
+                    %span.badge.bg-warning.text-dark.ms-1 Internal Note
+              %p.mb-0= detail.details
+      / Reply Form
+      - if @ticket.status != "closed"
+        .card.border-0.shadow-sm
+          .card-header.bg-white.fw-bold Add Reply
+          .card-body
+            = form_with url: ticket_ticket_details_path(@ticket), method: :post, local: true do |f|
+              = f.text_area :details,                   |
+                rows: 4,                                |
+                class: "form-control mb-2",             |
+                placeholder: "Write your reply here..." |
+              - if current_user.admin? || current_user.agent?
+                .form-check.mb-2
+                  = check_box_tag "ticket_detail[message_type]", "internal_note", false, class: "form-check-input"
+                  = label_tag "internal_note_label", "Mark as internal note", class: "form-check-label text-muted"
+              = f.submit "Send Reply", class: "btn btn-primary"
+    / Ticket Info Sidebar
+    .col-md-4
+      .card.border-0.shadow-sm.mb-3
+        .card-header.bg-white.fw-bold Ticket Info
+        .card-body
           .mb-2
-            %small.text-muted Created By
-            %div
-              = @ticket.created_by.fullname
-              %span.badge.bg-warning.text-dark.ms-1{:style => "font-size:10px;"} On Behalf
-    / Assignment History
-    - if current_user.admin? || current_user.agent? || current_user.manager?
-      .card.border-0.shadow-sm
-        .card-header.bg-white.fw-bold Assignment History
-        .card-body.p-0
-          - @ticket_assignments.each do |a|
-            .px-3.py-2.border-bottom
-              %small.text-muted= a.created_at.strftime("%b %d, %Y")
-              %div{:style => "font-size:13px;"}
-                - if a.assigned_from.present?
-                  %span.text-danger= a.assigned_from.fullname
-                  →
-                  %span.text-success= a.assigned_to.fullname
-                - else
-                  Assigned to
-                  %span.text-success= a.assigned_to.fullname
-              - if a.reason.present?
-                %small.text-muted.fst-italic= a.reason
+            %small.text-muted Customer
+            %div= @ticket.customer&.fullname || "-"
+          .mb-2
+            %small.text-muted Assignee
+            %div= @ticket.assignee&.fullname || "<span class='text-danger'>Unassigned</span>".html_safe
+          .mb-2
+            %small.text-muted Assigned By
+            %div= @ticket.assigned_by&.fullname || "-"
+          .mb-2
+            %small.text-muted Assigned At
+            %div= @ticket.assigned_at&.strftime("%b %d, %Y") || "-"
+          .mb-2
+            %small.text-muted Resolved At
+            %div= @ticket.resolved_at&.strftime("%b %d, %Y") || "-"
+          .mb-2
+            %small.text-muted Location
+            %div= @ticket.location&.name || "-"
+          - if @ticket.on_behalf?
+            .mb-2
+              %small.text-muted Created By
+              %div
+                = @ticket.created_by.fullname
+                %span.badge.bg-warning.text-dark.ms-1{:style => "font-size:10px;"} On Behalf
+      / Assignment History
+      - if current_user.admin? || current_user.agent? || current_user.manager?
+        .card.border-0.shadow-sm
+          .card-header.bg-white.fw-bold Assignment History
+          .card-body.p-0
+            - @ticket_assignments.each do |a|
+              .px-3.py-2.border-bottom
+                %small.text-muted= a.created_at.strftime("%b %d, %Y")
+                %div{:style => "font-size:13px;"}
+                  - if a.assigned_from.present?
+                    %span.text-danger= a.assigned_from.fullname
+                    →
+                    %span.text-success= a.assigned_to.fullname
+                  - else
+                    Assigned to
+                    %span.text-success= a.assigned_to.fullname
+                - if a.reason.present?
+                  %small.text-muted.fst-italic= a.reason

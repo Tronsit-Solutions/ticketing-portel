@@ -1,18 +1,65 @@
-%h5.mb-4.fw-bold
-  - if current_user.agent? || current_user.admin?
-    Create Ticket On Behalf Of a Customer
-  - else
-    Submit a Support Ticket
-.card.border-0.shadow-sm
-  .card-body.p-0
-    .px-4.py-3.border-bottom.text-muted{:style => "font-size: 14px;"}
-      To create a new ticket, kindly select a suitable service catalogue
-    - @catalogue.each do |item|
-      = link_to new_ticket_path(ticket_type: item[:type]),                                                               |
-        class: "d-flex align-items-center gap-3 px-4 py-3 border-bottom text-dark text-decoration-none catalogue-row" do |
-        %i{:class => "bi #{item[:icon]}", :style => "font-size: 22px; width: 28px; text-align: center; color: #374151;"}
-        %span{:style => "font-size: 15px; font-weight: 500;"}= item[:label]
-        %i.bi.bi-chevron-right.ms-auto.text-muted{:style => "font-size: 13px;"}
 :css
-  .catalogue-row:hover { background-color: #f8f9ff; }
-  .catalogue-row:last-child { border-bottom: none !important; }
+  .catalogue-entry {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 28px;
+    background: #ffffff;
+    border: 1px solid #e8edf2;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1a1a1a;
+    transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
+    margin-bottom: 12px;
+  }
+  .catalogue-entry:hover {
+    box-shadow: 0 4px 18px rgba(0,119,182,0.10);
+    border-color: #0077b6;
+    transform: translateY(-1px);
+    color: #0077b6;
+  }
+  .catalogue-entry:hover .cat-icon-wrap { background: #0077b6; }
+  .catalogue-entry:hover .cat-icon-wrap i { color: #fff; }
+  .catalogue-entry:hover .cat-chevron { color: #0077b6; }
+  .cat-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #e8f4fb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.18s;
+  }
+  .cat-icon-wrap i { font-size: 22px; color: #0077b6; transition: color 0.18s; }
+  .cat-body { flex: 1; }
+  .cat-title { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+  .cat-desc  { font-size: 13px; color: #6b7280; }
+  .cat-chevron { font-size: 20px; color: #9ca3af; flex-shrink: 0; transition: color 0.18s; }
+  .section-header {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 16px;
+    padding-left: 4px;
+  }
+
+- descriptions = { "technical_support" => "Get help with software, hardware, or system issues", "carecloud" => "CareCloud platform support and configuration requests", "ehr_change" => "Request changes to electronic health record settings", "bright_ideas" => "Share a suggestion or improvement idea with the team", "great_work" => "Recognize a colleague for outstanding performance", "hr" => "Human resources inquiries, policies, and requests", "hiring" => "Submit a request to open a new position or hire", "termination" => "Initiate an employee offboarding or termination process" }
+
+.mb-4
+  %h4.fw-bold{style: "font-size: 22px;"} How can we help you?
+  %p.text-muted{style: "font-size: 14px;"} Select a category below to create a new support ticket.
+
+.section-header Service Categories
+
+- @catalogue.each do |item|
+  = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-entry" do
+    .cat-icon-wrap
+      %i{class: "bi #{item[:icon]}"}
+    .cat-body
+      .cat-title= item[:label]
+      .cat-desc= descriptions[item[:type]]
+    %i.bi.bi-chevron-right.cat-chevron
