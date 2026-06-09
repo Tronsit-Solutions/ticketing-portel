@@ -64,14 +64,23 @@
       color: #1a1a1a;
     }
     .ticket-detail-body {
-      padding: 24px 28px;
+      padding: 0;
     }
-    .ticket-date {
+    .ticket-message-block {
+      padding: 20px 28px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .ticket-message-block:last-child { border-bottom: none; }
+    .ticket-msg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .ticket-msg-date {
       font-size: 13px;
       color: #6b7280;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #f0f0f0;
+      font-weight: 700;
     }
     .ticket-field {
       font-size: 14px;
@@ -84,6 +93,10 @@
       margin-right: 4px;
     }
     .ticket-field .field-value { color: #0077b6; }
+    .ticket-msg-text {
+      font-size: 14px;
+      color: #0077b6;
+    }
     .folder-btn {
       background: none;
       border: 1px solid #e5e7eb;
@@ -95,12 +108,101 @@
       text-decoration: none;
     }
     .folder-btn:hover { border-color: #0077b6; color: #0077b6; }
+    .ticket-reply-form {
+      padding: 20px 28px;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    .msg-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    .msg-modal-overlay.open { display: flex; }
+    .msg-modal {
+      background: #fff;
+      border-radius: 14px;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .msg-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .msg-modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6b7280;
+    }
+    .msg-modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #9ca3af;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    .msg-modal-close:hover { color: #1a1a1a; }
+    .msg-modal-body {
+      padding: 20px 24px 24px;
+    }
+    .msg-modal-body .ticket-field { margin-bottom: 14px; }
+    .msg-modal-body .ticket-field .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .msg-modal-body .ticket-field .field-value {
+      font-size: 14px;
+      color: #0077b6;
+    }
+
+  :javascript
+    function openMsgModal(data) {
+      var body = document.getElementById('msgModalBody');
+      body.innerHTML = '';
+      data.forEach(function(row) {
+        var div = document.createElement('div');
+        div.className = 'ticket-field';
+        div.innerHTML = '<span class="field-label">' + row.label + '</span><span class="field-value">' + row.value + '</span>';
+        body.appendChild(div);
+      });
+      document.getElementById('msgModalOverlay').classList.add('open');
+    }
+    function closeMsgModal() {
+      document.getElementById('msgModalOverlay').classList.remove('open');
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMsgModal();
+    });
+
+  #msgModalOverlay.msg-modal-overlay{"onclick" => "if(event.target===this)closeMsgModal()"}
+    .msg-modal
+      .msg-modal-header
+        %span.msg-modal-title Details
+        %button.msg-modal-close{"onclick" => "closeMsgModal()", "aria-label" => "Close"} &times;
+      .msg-modal-body#msgModalBody
 
   .show-layout
     / Left — Categories
     .left-panel
       .panel-title Categories
-      = link_to tickets_path, class: "category-chip" do
+      = link_to my_tickets_tickets_path, class: "category-chip" do
         %span My Tickets
         %span.chip-count= @my_tickets_count
 
@@ -118,27 +220,50 @@
             %span \##{@ticket.id}
             %span.sep
             %span.status-badge [ #{@ticket.status.humanize} ]
-          - if @ticket.ticket_files.any?
-            = link_to "#files", class: "folder-btn" do
-              %i.bi.bi-folder2-open
 
         .ticket-detail-body
-          .ticket-date= @ticket.created_at.strftime("%B %-d, %Y at %I:%M %p")
+          / Original ticket submission
+          - ticket_modal_data = [{ label: "Subject", value: @ticket.title }]
+          - ticket_modal_data << { label: "Issue", value: @ticket.metadata["details"] } if @ticket.metadata["details"].present?
+          - (@ticket.metadata.except("details") || {}).each { |k,v| ticket_modal_data << { label: k.humanize, value: v } if v.present? }
+          - ticket_modal_json = ticket_modal_data.map { |r| "{label:#{r[:label].to_json},value:#{r[:value].to_json}}" }.join(",")
+          .ticket-message-block
+            .ticket-msg-header
+              .ticket-msg-date= @ticket.created_at.strftime("%B %-d, %Y at %-I:%M %p")
+              %button.folder-btn{"onclick" => "openMsgModal([#{ticket_modal_json}])", "type" => "button", "aria-label" => "View details"}
+                %i.bi.bi-folder2-open
 
-          .ticket-field
-            %span.field-label Title:
-            %span.field-value= @ticket.title
-
-          - if @ticket.metadata["details"].present?
             .ticket-field
-              %span.field-label Details:
-              %span.field-value= @ticket.metadata["details"]
+              %span.field-label Subject:
+              %span.field-value= @ticket.title
 
-          - (@ticket.metadata.except("details") || {}).each do |key, value|
-            - next if value.blank?
-            .ticket-field
-              %span.field-label= "#{key.humanize}:"
-              %span.field-value= value
+            - if @ticket.metadata["details"].present?
+              .ticket-field
+                %span.field-label Issue:
+                %span.field-value= @ticket.metadata["details"]
+
+            - (@ticket.metadata.except("details") || {}).each do |key, value|
+              - next if value.blank?
+              .ticket-field
+                %span.field-label= "#{key.humanize}:"
+                %span.field-value= value
+
+          / Message thread
+          - @ticket_messages.each do |message|
+            - msg_modal_json = "[{label:\"Date\",value:#{message.created_at.strftime('%B %-d, %Y at %-I:%M %p').to_json}},{label:\"Message\",value:#{message.details.to_json}}]"
+            .ticket-message-block
+              .ticket-msg-header
+                .ticket-msg-date= message.created_at.strftime("%B %-d, %Y at %-I:%M %p")
+                %button.folder-btn{"onclick" => "openMsgModal(#{msg_modal_json})", "type" => "button", "aria-label" => "View message"}
+                  %i.bi.bi-folder2-open
+              .ticket-msg-text= message.details
+
+          / Reply form
+          - if @ticket.status != "closed"
+            .ticket-reply-form
+              = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
+                = f.text_area :details, rows: 3, class: "form-control mb-2", placeholder: "Write your reply here..."
+                = f.submit "Send Reply", class: "btn btn-primary btn-sm"
 
 - else
   / ── Header ──────────────────────────────────────────────────────

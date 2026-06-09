@@ -41,7 +41,10 @@ Rails.application.routes.draw do
 
 
   resources :tickets, only: [:index, :show, :new, :create] do
-    collection { get :catalogue }
+    collection do
+      get :catalogue
+      get :my_tickets
+    end
     member do
       patch :assign
       patch :self_assign
