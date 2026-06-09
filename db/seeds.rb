@@ -12,7 +12,7 @@
 puts "Cleaning database..."
 TicketNotification.destroy_all
 # TicketFile.destroy_all
-TicketDetail.destroy_all
+TicketMessage.destroy_all
 TicketAssignment.destroy_all
 Ticket.destroy_all
 User.destroy_all
@@ -261,7 +261,7 @@ thread_data = [
 
 thread_data.each do |thread|
   thread[:messages].each_with_index do |msg, i|
-    TicketDetail.create!(
+    TicketMessage.create!(
       ticket:       thread[:ticket],
       sender:       msg[:sender],
       details:      msg[:body],

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_04_161837) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_08_214517) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -45,7 +45,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_161837) do
     t.index ["ticket_id"], name: "index_ticket_assignments_on_ticket_id"
   end
 
-  create_table "ticket_details", force: :cascade do |t|
+  create_table "ticket_files", force: :cascade do |t|
+    t.bigint "ticket_id", null: false
+    t.string "image"
+    t.string "file"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ticket_id"], name: "index_ticket_files_on_ticket_id"
+  end
+
+  create_table "ticket_messages", force: :cascade do |t|
     t.bigint "ticket_id", null: false
     t.bigint "sender_id"
     t.text "details", null: false
@@ -57,18 +66,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_161837) do
     t.boolean "is_html", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["message_type"], name: "index_ticket_details_on_message_type"
-    t.index ["sender_id"], name: "index_ticket_details_on_sender_id"
-    t.index ["ticket_id"], name: "index_ticket_details_on_ticket_id"
-  end
-
-  create_table "ticket_files", force: :cascade do |t|
-    t.bigint "ticket_id", null: false
-    t.string "image"
-    t.string "file"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["ticket_id"], name: "index_ticket_files_on_ticket_id"
+    t.index ["message_type"], name: "index_ticket_messages_on_message_type"
+    t.index ["sender_id"], name: "index_ticket_messages_on_sender_id"
+    t.index ["ticket_id"], name: "index_ticket_messages_on_ticket_id"
   end
 
   create_table "ticket_notifications", force: :cascade do |t|
@@ -140,9 +140,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_04_161837) do
   add_foreign_key "ticket_assignments", "users", column: "assigned_by_id"
   add_foreign_key "ticket_assignments", "users", column: "assigned_from_id"
   add_foreign_key "ticket_assignments", "users", column: "assigned_to_id"
-  add_foreign_key "ticket_details", "tickets"
-  add_foreign_key "ticket_details", "users", column: "sender_id"
   add_foreign_key "ticket_files", "tickets"
+  add_foreign_key "ticket_messages", "tickets"
+  add_foreign_key "ticket_messages", "users", column: "sender_id"
   add_foreign_key "ticket_notifications", "tickets"
   add_foreign_key "ticket_notifications", "users", column: "receiver_id"
   add_foreign_key "ticket_notifications", "users", column: "responded_by_id"

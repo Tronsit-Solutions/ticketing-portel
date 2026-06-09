@@ -153,7 +153,7 @@
         = link_to tickets_path(status: "open") do
           %i.bi.bi-bookmark-fill
           Open
-        = link_to tickets_path(assignee_id: current_user.id) do
+        -# = link_to tickets_path(assignee_id: current_user.id) do
           %i.bi.bi-person-check-fill
           Assigned to Me
         = link_to catalogue_tickets_path do
