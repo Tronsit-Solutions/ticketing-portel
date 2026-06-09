@@ -214,7 +214,7 @@
             %i.bi.bi-envelope-fill
             %span Tickets
             %span.sep /
-            - cat = Ticket::CATALOGUE.find { |c| c[:type] == @ticket.ticket_type }
+            - cat = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == @ticket.ticket_type }
             %span= cat ? cat[:label] : @ticket.ticket_type.humanize
             %span.sep |
             %span \##{@ticket.id}
