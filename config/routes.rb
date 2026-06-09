@@ -10,6 +10,7 @@ Rails.application.routes.draw do
 
   namespace :manager do
     root "dashboard#index"
+    resources :users, only: [:new, :create]
   end
 
   namespace :agent do
