@@ -47,7 +47,17 @@
     padding-left: 4px;
   }
 
-- descriptions = { "technical_support" => "Get help with software, hardware, or system issues", "carecloud" => "CareCloud platform support and configuration requests", "ehr_change" => "Request changes to electronic health record settings", "bright_ideas" => "Share a suggestion or improvement idea with the team", "great_work" => "Recognize a colleague for outstanding performance", "hr" => "Human resources inquiries, policies, and requests", "hiring" => "Submit a request to open a new position or hire", "termination" => "Initiate an employee offboarding or termination process" }
+- descriptions = {
+-   "technical_support" => "Get help with software, hardware, or system issues",
+-   "tronshealth"       => "TronsHealth platform support and requests",
+-   "carecloud"         => "CareCloud platform support and configuration requests",
+-   "curemd"            => "CureMD platform support and configuration requests",
+-   "bright_ideas"      => "Share a suggestion or improvement idea with the team",
+-   "great_work"        => "Recognize a colleague for outstanding performance",
+-   "hr"                => "Human resources inquiries, policies, and requests",
+-   "hiring_departure"  => "Submit a request for a new hire or team member departure",
+-   "lms"               => "Learning management system support and access requests",
+- }
 
 .mb-4
   %h4.fw-bold{style: "font-size: 22px;"} How can we help you?
@@ -56,10 +66,23 @@
 .section-header Service Categories
 
 - @catalogue.each do |item|
-  = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-entry" do
-    .cat-icon-wrap
-      %i{class: "bi #{item[:icon]}"}
-    .cat-body
-      .cat-title= item[:label]
-      .cat-desc= descriptions[item[:type]]
-    %i.bi.bi-chevron-right.cat-chevron
+  - if item[:children]
+    .catalogue-entry{style: "cursor:default; flex-direction:column; align-items:flex-start; gap:12px;"}
+      .d-flex.align-items-center.gap-3{style: "width:100%;"}
+        .cat-icon-wrap
+          %i{class: "bi #{item[:icon]}"}
+        .cat-body
+          .cat-title= item[:label]
+        %i.bi.bi-chevron-right.cat-chevron
+      .d-flex.flex-column.gap-1{style: "padding-left: 72px; width:100%;"}
+        - item[:children].each do |child|
+          = link_to new_ticket_path(ticket_type: child[:type]), style: "font-size:13px; color:#0077b6; text-decoration:none;" do
+            = child[:label]
+  - else
+    = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-entry" do
+      .cat-icon-wrap
+        %i{class: "bi #{item[:icon]}"}
+      .cat-body
+        .cat-title= item[:label]
+        .cat-desc= descriptions[item[:type]]
+      %i.bi.bi-chevron-right.cat-chevron

@@ -4,24 +4,33 @@ class Ticket < ApplicationRecord
 
   TICKET_TYPES = %w[
     technical_support
+    tronshealth
     carecloud
-    ehr_change
+    curemd
     bright_ideas
     great_work
     hr
-    hiring
-    termination
+    hiring_departure
+    lms
   ].freeze
 
   CATALOGUE = [
-    { type: "technical_support", label: "Technical Support", icon: "bi-headset"     },
-    { type: "carecloud",         label: "CareCloud",         icon: "bi-cloud"        },
-    { type: "ehr_change",        label: "EHR Change",        icon: "bi-file-medical" },
-    { type: "bright_ideas",      label: "Bright Ideas",      icon: "bi-lightbulb"    },
-    { type: "great_work",        label: "Great Work",        icon: "bi-trophy"       },
-    { type: "hr",                label: "Human Resources",   icon: "bi-people"       },
-    { type: "hiring",            label: "Hiring",            icon: "bi-person-plus"  },
-    { type: "termination",       label: "Termination",       icon: "bi-person-dash"  },
+    { type: "technical_support", label: "Technical Support", icon: "bi-headset",      desc: "Report any IT related issues here"         },
+    { type: "tronshealth",       label: "TronsHealth",       icon: "bi-activity",     desc: "Report any issues related to Tronshealth here"                  },
+    { type: "carecloud",         label: "CareCloud",         icon: "bi-cloud",        desc: "Report any issues related to CareCloud here(Phoenix, AZ Users only)"      },
+    { type: "curemd",            label: "CureMD",            icon: "bi-arrow-repeat", desc: "Report any issues related to CureMD here"         },
+    { type: "bright_ideas",      label: "Bright Ideas",      icon: "bi-lightbulb",    desc: "Share To Aware"       },
+    { type: "great_work",        label: "Great Work",        icon: "bi-briefcase",    desc: "Your Appreciation Is Appreciated"          },
+    {
+      label: "Human Resources",
+      icon:  "bi-people",
+      desc:  "HR inquiries, new hires, departures, and policy requests",
+      children: [
+        { type: "hr",               label: "General HR",                   desc: "Human resources inquiries, policies, and requests"            },
+        { type: "hiring_departure", label: "New Team Member or Departure", desc: "Submit a request for a new hire or team member departure"     },
+      ]
+    },
+    { type: "lms",               label: "LMS",               icon: "bi-mortarboard",  desc: "Reset password request for LMS"     },
   ].freeze
 
   # Associations
