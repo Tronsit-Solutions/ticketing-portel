@@ -9,5 +9,5 @@ class TicketMessage < ApplicationRecord
 
   scope :visible,        -> { where.not(message_type: "internal_note") }
   scope :internal_notes, -> { where(message_type: "internal_note") }
-  scope :recent,         -> { order(created_at: :asc) }
+  scope :recent,         -> { order(created_at: :desc) }
 end

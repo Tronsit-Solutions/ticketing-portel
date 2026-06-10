@@ -162,15 +162,11 @@
               = f.text_field :title, class: "cust-form-control", placeholder: "Title"
 
           .cust-field
-            %label.cust-form-label Contact
-            = text_field_tag "ticket[metadata][mobile]", @ticket.metadata["mobile"], class: "cust-form-control", placeholder: "Enter Contact No"
+            %label.cust-form-label Which Location ?
+            = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select Option" }, class: "cust-form-select"
 
           - if @ticket.ticket_type == "tronshealth"
             = render "tickets/forms/tronshealth", ticket: @ticket
-
-          .cust-field
-            %label.cust-form-label Which Location ?
-            = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select Option" }, class: "cust-form-select"
 
         - partial = "tickets/forms/#{@ticket.ticket_type}"
         - if lookup_context.template_exists?(partial, [], true) && @ticket.ticket_type != "tronshealth"
@@ -181,6 +177,11 @@
           .cust-field
             %label.cust-form-label= details_label
             = text_area_tag "ticket[metadata][details]", @ticket.metadata["details"], class: "cust-form-control", placeholder: "Kindly enter the details"
+
+        - unless hide_title_contact
+          .cust-field
+            %label.cust-form-label Mobile
+            = text_field_tag "ticket[metadata][mobile]", @ticket.metadata["mobile"], class: "cust-form-control", placeholder: "Enter Contact No"
 
         - if show_location_only
           .cust-field
