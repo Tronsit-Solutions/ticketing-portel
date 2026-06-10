@@ -141,39 +141,59 @@
         = link_to tickets_path, class: "form-header-back", "aria-label" => "Back" do
           %i.bi.bi-arrow-left
         - if @ticket_type
-          = @ticket_type[:label]
+          - form_header_labels = { "lms" => "Password Reset for LMS" }
+          = form_header_labels[@ticket.ticket_type] || @ticket_type[:label]
         - else
           New Ticket
 
       = form_with model: @ticket, local: true, multipart: true do |f|
         = f.hidden_field :ticket_type, value: @ticket.ticket_type
 
-        .cust-field
-          %label.cust-form-label Title
-          = f.text_field :title, class: "cust-form-control", placeholder: "Title"
+        - hide_title_contact = %w[bright_ideas great_work hr hiring_departure].include?(@ticket.ticket_type)
+        - hide_title_only    = @ticket.ticket_type == "lms"
+        - show_location_only = @ticket.ticket_type == "great_work"
+        - hide_details       = %w[hr hiring_departure lms].include?(@ticket.ticket_type)
+        - hide_attachments   = %w[hiring_departure lms].include?(@ticket.ticket_type)
 
-        .cust-field
-          %label.cust-form-label Contact
-          = text_field_tag "ticket[metadata][mobile]", @ticket.metadata["mobile"], class: "cust-form-control", placeholder: "Enter Contact No"
+        - unless hide_title_contact
+          - unless hide_title_only
+            .cust-field
+              %label.cust-form-label Title
+              = f.text_field :title, class: "cust-form-control", placeholder: "Title"
 
-        .cust-field
-          %label.cust-form-label Which Location ?
-          = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select Option" }, class: "cust-form-select"
+          .cust-field
+            %label.cust-form-label Contact
+            = text_field_tag "ticket[metadata][mobile]", @ticket.metadata["mobile"], class: "cust-form-control", placeholder: "Enter Contact No"
 
-        .cust-field
-          %label.cust-form-label Description
-          = text_area_tag "ticket[metadata][details]", @ticket.metadata["details"], class: "cust-form-control", placeholder: "Kindly enter the details"
+          - if @ticket.ticket_type == "tronshealth"
+            = render "tickets/forms/tronshealth", ticket: @ticket
+
+          .cust-field
+            %label.cust-form-label Which Location ?
+            = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select Option" }, class: "cust-form-select"
 
         - partial = "tickets/forms/#{@ticket.ticket_type}"
-        - if lookup_context.template_exists?(partial, [], true)
+        - if lookup_context.template_exists?(partial, [], true) && @ticket.ticket_type != "tronshealth"
           = render partial, ticket: @ticket
 
-        .cust-field
-          .upload-zone{"onclick" => "document.getElementById('ticket_attachments').click()"}
-            | Drag &amp; Drop your files or
-            %a{"onclick" => "event.stopPropagation(); document.getElementById('ticket_attachments').click();"} Browse
-          = file_field_tag "ticket_attachments[]", multiple: true, accept: ".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip", class: "d-none", id: "ticket_attachments", onchange: "showFileNames(this)"
-          #fileList.mt-2
+        - unless hide_details
+          - details_label = %w[technical_support tronshealth carecloud].include?(@ticket.ticket_type) ? "Description" : "Please add details here"
+          .cust-field
+            %label.cust-form-label= details_label
+            = text_area_tag "ticket[metadata][details]", @ticket.metadata["details"], class: "cust-form-control", placeholder: "Kindly enter the details"
+
+        - if show_location_only
+          .cust-field
+            %label.cust-form-label Which Location ?
+            = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select Option" }, class: "cust-form-select"
+
+        - unless hide_attachments
+          .cust-field
+            .upload-zone{"onclick" => "document.getElementById('ticket_attachments').click()"}
+              | Drag &amp; Drop your files or
+              %a{"onclick" => "event.stopPropagation(); document.getElementById('ticket_attachments').click();"} Browse
+            = file_field_tag "ticket_attachments[]", multiple: true, accept: ".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip", class: "d-none", id: "ticket_attachments", onchange: "showFileNames(this)"
+            #fileList.mt-2
 
         .cust-submit-row
           = f.submit "Submit", class: "btn-cust-submit"

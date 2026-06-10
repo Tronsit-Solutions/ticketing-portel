@@ -1,0 +1,3 @@
+.cust-field
+  %label.cust-form-label Reason
+  = text_area_tag "ticket[metadata][details]", ticket.metadata&.dig("details"), class: "cust-form-control", placeholder: "State Reason"

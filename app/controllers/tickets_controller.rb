@@ -150,7 +150,7 @@ class TicketsController < ApplicationController
   end
 
   def ticket_params
-    params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: {})
+    params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: [:mobile, :details, :issue, :request_type, :full_name, { idea_types: [] }, { work_types: [] }, { hr_types: [] }])
   end
 
   def save_attachments(ticket)
