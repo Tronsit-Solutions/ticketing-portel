@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   end
 
   devise_for :users, controllers: {
-    sessions: 'users/sessions'
+    sessions: "users/sessions"
   }
   namespace :admin do
     root "dashboard#index"
@@ -12,7 +12,7 @@ Rails.application.routes.draw do
 
   namespace :manager do
     root "dashboard#index"
-    resources :users, only: [:new, :create]
+    resources :users, only: [ :new, :create ]
   end
 
   namespace :agent do
@@ -36,7 +36,7 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
 
-  resources :tickets, only: [:index, :show, :new, :create] do
+  resources :tickets, only: [ :index, :show, :new, :create ] do
     collection do
       get :catalogue
       get :my_tickets
@@ -46,14 +46,14 @@ Rails.application.routes.draw do
       patch :self_assign
       patch :close
     end
-    resources :ticket_messages, only: [:create]
+    resources :ticket_messages, only: [ :create ]
   end
 
-  resources :ticket_notifications, only: [:index] do
+  resources :ticket_notifications, only: [ :index ] do
     member    { patch :mark_read }
     collection { patch :mark_all_read }
   end
-  resources :users, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+  resources :users, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
     member { patch :deactivate }
   end
 end

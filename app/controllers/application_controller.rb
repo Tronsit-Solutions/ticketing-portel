@@ -55,5 +55,4 @@ class ApplicationController < ActionController::Base
       customer_root_path
     end
   end
-
 end

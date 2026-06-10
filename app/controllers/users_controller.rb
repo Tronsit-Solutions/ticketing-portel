@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_action :require_admin!
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :deactivate]
+  before_action :set_user, only: [ :show, :edit, :update, :destroy, :deactivate ]
 
   def index
     @users = User.includes(:team).order(:fullname)

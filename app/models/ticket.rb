@@ -1,5 +1,4 @@
 class Ticket < ApplicationRecord
-
   STATUSES = %w[open in_progress closed cancelled].freeze
 
   TICKET_TYPES = %w[
@@ -27,10 +26,10 @@ class Ticket < ApplicationRecord
       desc:  "HR inquiries, new hires, departures, and policy requests",
       children: [
         { type: "hr",               label: "General HR",                   desc: "Human resources inquiries, policies, and requests"            },
-        { type: "hiring_departure", label: "New Team Member or Departure", desc: "Submit a request for a new hire or team member departure"     },
+        { type: "hiring_departure", label: "New Team Member or Departure", desc: "Submit a request for a new hire or team member departure"     }
       ]
     },
-    { type: "lms",               label: "LMS",               icon: "bi-mortarboard",  desc: "Reset password request for LMS"     },
+    { type: "lms",               label: "LMS",               icon: "bi-mortarboard",  desc: "Reset password request for LMS"     }
   ].freeze
 
   # Associations
@@ -106,5 +105,4 @@ class Ticket < ApplicationRecord
   def set_resolved_at
     self.resolved_at = Time.current
   end
-
 end

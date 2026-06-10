@@ -1,5 +1,5 @@
 class TicketsController < ApplicationController
-  before_action :set_ticket, only: [:show, :assign, :self_assign, :close]
+  before_action :set_ticket, only: [ :show, :assign, :self_assign, :close ]
 
   def catalogue
     @catalogue = Ticket::CATALOGUE
@@ -35,7 +35,7 @@ class TicketsController < ApplicationController
 
   def new
     @ticket           = Ticket.new(ticket_type: params[:ticket_type])
-    @ticket_type      = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket_type] }
+    @ticket_type      = Ticket::CATALOGUE.flat_map { |c| c[:children] || [ c ] }.find { |c| c[:type] == params[:ticket_type] }
     @customers        = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
     @my_tickets_count = Ticket.where(customer: current_user).count if current_user.customer?
   end
@@ -75,7 +75,7 @@ class TicketsController < ApplicationController
       end
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
-      @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
+      @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [ c ] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
       @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
       render :new, status: :unprocessable_entity
     end
@@ -127,7 +127,7 @@ class TicketsController < ApplicationController
   end
 
   def ticket_params
-    params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: [:mobile, :details, :issue, :request_type, :full_name, { idea_types: [] }, { work_types: [] }, { hr_types: [] }])
+    params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: [ :mobile, :details, :issue, :request_type, :full_name, { idea_types: [] }, { work_types: [] }, { hr_types: [] } ])
   end
 
   def save_attachments(ticket)

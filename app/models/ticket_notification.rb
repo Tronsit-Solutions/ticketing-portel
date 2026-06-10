@@ -1,5 +1,4 @@
 class TicketNotification < ApplicationRecord
-
   STATUSES = %w[unread read].freeze
 
   belongs_to :ticket
