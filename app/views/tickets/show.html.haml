@@ -1,25 +1,28 @@
+/ ── Header ──────────────────────────────────────────────────────
 .d-flex.justify-content-between.align-items-center.mb-4
   %div
     %h5.mb-0
       = @ticket.title
       - if @ticket.on_behalf?
-        %span.badge.bg-warning.text-dark.ms-2{:style => "font-size:11px;"}
+        %span.badge.bg-warning.text-dark.ms-2{style: "font-size:11px;"}
           On Behalf — created by #{@ticket.created_by.fullname}
     %small.text-muted
-      \##{@ticket.id} ·
-      \#{@ticket.ticket_type.humanize} ·
-      \#{@ticket.location&.name || "No location"}
-  .d-flex.gap-2
-    - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
-    %span{:class => "badge bg-#{color[@ticket.status]} fs-6"}= @ticket.status.humanize
-    - if @ticket.status != "closed" && (current_user.admin? || current_user.agent? || @ticket.customer == current_user)
-      = button_to "Close Ticket", close_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-danger"
+      \##{@ticket.id} &middot;
+      = @ticket.ticket_type.humanize
+      &middot;
+      = @ticket.location&.name || "No location"
+      &middot; Submitted #{@ticket.created_at.strftime("%b %d, %Y")}
+  .d-flex.gap-2.align-items-center
+    - if @ticket.status != "closed" && (current_user.admin? || @ticket.assignee == current_user || @ticket.customer == current_user)
+      %button.btn.btn-sm.btn-outline-danger{"data-bs-toggle" => "modal", "data-bs-target" => "#closeTicketModal"}
+        Close Ticket
     - if (current_user.admin? || current_user.manager?) && @ticket.status != "closed"
-      %button.btn.btn-sm.btn-outline-primary{"data-bs-target" => "#assignForm", "data-bs-toggle" => "collapse"}
+      %button.btn.btn-sm.btn-outline-primary{"data-bs-toggle" => "collapse", "data-bs-target" => "#assignForm"}
         Assign
     - if current_user.agent? && @ticket.assignee_id.nil?
       = button_to "Self Assign", self_assign_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-success"
-/ Assign Form — collapsible
+
+/ ── Assign Form ─────────────────────────────────────────────────
 - if current_user.admin? || current_user.manager?
   #assignForm.collapse.mb-3
     .card.card-body.border-0.shadow-sm
@@ -27,89 +30,159 @@
         .row.g-2.align-items-end
           .col-md-5
             = label_tag :assignee_id, "Assign to Agent", class: "form-label fw-bold"
-            = select_tag :assignee_id,                                                                     |
-              options_from_collection_for_select(User.agents.active, :id, :fullname, @ticket.assignee_id), |
-              class: "form-select", prompt: "Select agent"                                                 |
+            = select_tag :assignee_id, options_from_collection_for_select(User.agents.active, :id, :fullname, @ticket.assignee_id), class: "form-select", prompt: "Select agent"
           .col-md-5
             = label_tag :reason, "Reason (optional)", class: "form-label fw-bold"
             = text_field_tag :reason, nil, class: "form-control", placeholder: "Reason for assignment"
           .col-md-2
             = f.submit "Assign", class: "btn btn-primary w-100"
+
+/ ── Two-column layout ───────────────────────────────────────────
 .row.g-3
-  / Thread
+
+  / ── Left: Description + Conversation + Reply ──────────────────
   .col-md-8
+
+    / Description card
+    - if @ticket.description.present? || @ticket.metadata.except("description").any?
+      .card.border-0.shadow-sm.mb-3
+        .card-header.bg-white.fw-bold Details
+        .card-body
+          - if @ticket.description.present?
+            .mb-3
+              %small.text-muted.fw-semibold Description
+              %p.mt-1.mb-0= @ticket.description
+          - if @ticket.metadata["issue"].present?
+            .mb-0
+              %small.text-muted.fw-semibold Issue Category
+              %p.mt-1.mb-0= @ticket.metadata["issue"]
+
+    / Conversation
     .card.border-0.shadow-sm.mb-3
       .card-header.bg-white.fw-bold Conversation
       .card-body
-        - @ticket_messages.each do |detail|
-          - next if detail.message_type == "internal_note" && current_user.customer?
-          %div{:class => "mb-3 p-3 rounded #{detail.message_type == 'internal_note' ? 'bg-warning bg-opacity-10' : 'bg-light'}"}
-            .d-flex.justify-content-between.mb-1
-              %strong= detail.sender&.fullname || "System"
-              %small.text-muted
-                = detail.created_at.strftime("%b %d, %Y %I:%M %p")
-                - if detail.message_type == "internal_note"
-                  %span.badge.bg-warning.text-dark.ms-1 Internal Note
-            %p.mb-0= detail.details
-    / Reply Form
+        - if @ticket_messages.any?
+          - @ticket_messages.each do |msg|
+            - next if msg.message_type == "internal_note" && current_user.customer?
+            %div{class: "mb-3 p-3 rounded #{msg.message_type == 'internal_note' ? 'bg-warning bg-opacity-10' : 'bg-light'}"}
+              .d-flex.justify-content-between.mb-1
+                %strong= msg.sender&.fullname || "System"
+                %small.text-muted
+                  = msg.created_at.strftime("%b %d, %Y %I:%M %p")
+                  - if msg.message_type == "internal_note"
+                    %span.badge.bg-warning.text-dark.ms-1 Internal Note
+              %p.mb-0= msg.details
+        - else
+          %p.text-muted.mb-0 No messages yet.
+
+    / Reply form
     - if @ticket.status != "closed"
-      .card.border-0.shadow-sm
-        .card-header.bg-white.fw-bold Add Reply
-        .card-body
-          = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
-            = f.text_area :details,                   |
-              rows: 4,                                |
-              class: "form-control mb-2",             |
-              placeholder: "Write your reply here..." |
-            - if current_user.admin? || current_user.agent?
-              .form-check.mb-2
-                = check_box_tag "ticket_message[message_type]", "internal_note", false, class: "form-check-input"
-                = label_tag "internal_note_label", "Mark as internal note", class: "form-check-label text-muted"
-            = f.submit "Send Reply", class: "btn btn-primary"
-  / Ticket Info Sidebar
+      - if current_user.admin? || @ticket.assignee == current_user || @ticket.customer == current_user
+        .card.border-0.shadow-sm
+          .card-header.bg-white.fw-bold Add Reply
+          .card-body
+            = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
+              = f.text_area :details, rows: 4, class: "form-control mb-2", placeholder: "Write your reply here..."
+              - if current_user.admin? || current_user.agent?
+                .form-check.mb-2
+                  = f.check_box :message_type, { class: "form-check-input" }, "internal_note"
+                  = label_tag "internal_note_label", "Mark as internal note", class: "form-check-label text-muted"
+              = f.submit "Send Reply", class: "btn btn-primary"
+
+  / ── Right: Info + Attachments + History ───────────────────────
   .col-md-4
+
+    / Ticket Info
     .card.border-0.shadow-sm.mb-3
-      .card-header.bg-white.fw-bold Ticket Info
+      .card-header.bg-white.d-flex.justify-content-between.align-items-center
+        %span.fw-bold Ticket Info
+        - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+        %span{class: "badge bg-#{color[@ticket.status]}"}= @ticket.status.humanize
       .card-body
         .mb-2
           %small.text-muted Customer
           %div= @ticket.customer&.fullname || "-"
         .mb-2
           %small.text-muted Assignee
-          %div= @ticket.assignee&.fullname || "<span class='text-danger'>Unassigned</span>".html_safe
+          - if @ticket.assignee.present?
+            %div= @ticket.assignee.fullname
+          - else
+            %div
+              %span.text-danger Unassigned
         .mb-2
           %small.text-muted Assigned By
           %div= @ticket.assigned_by&.fullname || "-"
         .mb-2
           %small.text-muted Assigned At
-          %div= @ticket.assigned_at&.strftime("%b %d, %Y") || "-"
-        .mb-2
-          %small.text-muted Resolved At
-          %div= @ticket.resolved_at&.strftime("%b %d, %Y") || "-"
+          %div= @ticket.assigned_at&.strftime("%b %d, %Y %I:%M %p") || "-"
         .mb-2
           %small.text-muted Location
           %div= @ticket.location&.name || "-"
+        .mb-2
+          %small.text-muted Submitted
+          %div= @ticket.created_at.strftime("%b %d, %Y %I:%M %p")
+        - if @ticket.resolved_at.present?
+          .mb-2
+            %small.text-muted Resolved At
+            %div= @ticket.resolved_at.strftime("%b %d, %Y %I:%M %p")
         - if @ticket.on_behalf?
           .mb-2
             %small.text-muted Created By
             %div
               = @ticket.created_by.fullname
-              %span.badge.bg-warning.text-dark.ms-1{:style => "font-size:10px;"} On Behalf
+              %span.badge.bg-warning.text-dark.ms-1{style: "font-size:10px;"} On Behalf
+
+    / Attachments
+    - if @ticket_files.any?
+      .card.border-0.shadow-sm.mb-3
+        .card-header.bg-white.fw-bold Attachments
+        .card-body.p-0
+          - @ticket_files.each do |tf|
+            .d-flex.align-items-center.gap-2.px-3.py-2.border-bottom
+              - if tf.image.present?
+                %i.bi.bi-file-image.text-primary{style: "font-size:16px;"}
+                = link_to File.basename(tf.image.path.to_s), tf.image.url, target: "_blank", class: "text-decoration-none text-dark", style: "font-size:13px;"
+              - elsif tf.file.present?
+                %i.bi.bi-file-earmark.text-secondary{style: "font-size:16px;"}
+                = link_to File.basename(tf.file.path.to_s), tf.file.url, target: "_blank", class: "text-decoration-none text-dark", style: "font-size:13px;"
+
     / Assignment History
     - if current_user.admin? || current_user.agent? || current_user.manager?
       .card.border-0.shadow-sm
         .card-header.bg-white.fw-bold Assignment History
         .card-body.p-0
-          - @ticket_assignments.each do |a|
-            .px-3.py-2.border-bottom
-              %small.text-muted= a.created_at.strftime("%b %d, %Y")
-              %div{:style => "font-size:13px;"}
-                - if a.assigned_from.present?
-                  %span.text-danger= a.assigned_from.fullname
-                  →
-                  %span.text-success= a.assigned_to.fullname
-                - else
-                  Assigned to
-                  %span.text-success= a.assigned_to.fullname
-              - if a.reason.present?
-                %small.text-muted.fst-italic= a.reason
+          - if @ticket_assignments.any?
+            - @ticket_assignments.each do |a|
+              .px-3.py-2.border-bottom
+                %small.text-muted= a.created_at.strftime("%b %d, %Y")
+                %div{style: "font-size:13px;"}
+                  - if a.assigned_from.present?
+                    %span.text-danger= a.assigned_from.fullname
+                    →
+                    %span.text-success= a.assigned_to.fullname
+                  - else
+                    Assigned to
+                    %span.text-success= a.assigned_to.fullname
+                - if a.reason.present?
+                  %small.text-muted.fst-italic= a.reason
+          - else
+            .px-3.py-2.text-muted{style: "font-size:13px;"} No assignments yet.
+
+/ ── Close Ticket Modal ──────────────────────────────────────────
+- if @ticket.status != "closed"
+  #closeTicketModal.modal.fade{"aria-labelledby" => "closeTicketModalLabel", "aria-hidden" => "true", tabindex: "-1"}
+    .modal-dialog.modal-dialog-centered
+      .modal-content
+        .modal-header.border-0.pb-0
+          %h5#closeTicketModalLabel.modal-title.fw-bold Close Ticket
+          %button.btn-close{"aria-label" => "Close", "data-bs-dismiss" => "modal", type: "button"}
+        .modal-body
+          .text-center.py-2
+            %i.bi.bi-exclamation-circle.text-danger{style: "font-size: 2.5rem;"}
+            %p.mt-3.mb-1.fw-semibold Are you sure you want to close this ticket?
+            %p.text-muted{style: "font-size: 13px;"}
+              = "\"#{@ticket.title}\""
+            %p.text-muted{style: "font-size: 13px;"} This action cannot be undone.
+        .modal-footer.border-0.pt-0.justify-content-center.gap-2
+          %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal"} Cancel
+          = button_to "Close Ticket", close_ticket_path(@ticket), method: :patch, class: "btn btn-danger px-4"

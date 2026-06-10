@@ -25,7 +25,7 @@
       = f.hidden_field :ticket_type, value: @ticket.ticket_type
 
       .row.g-3
-        - if current_user.agent? || current_user.admin?
+        - if current_user.agent? || current_user.admin? || current_user.manager?
           .col-md-6
             = label_tag :customer_id, "Customer", class: "form-label fw-bold"
             = select_tag "ticket[customer_id]", options_from_collection_for_select(@customers, :id, :fullname), class: "form-select", prompt: "Select a customer"

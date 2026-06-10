@@ -1,5 +1,9 @@
 class TicketsController < ApplicationController
-  before_action :set_ticket, only: [:show, :assign, :self_assign, :close]
+  before_action :set_ticket,            only: [:show, :assign, :self_assign, :close]
+  before_action :authorize_show!,        only: [:show]
+  before_action :authorize_assign!,      only: [:assign]
+  before_action :authorize_self_assign!, only: [:self_assign]
+  before_action :authorize_close!,       only: [:close]
 
   def catalogue
     @catalogue = Ticket::CATALOGUE
@@ -21,23 +25,24 @@ class TicketsController < ApplicationController
   def show
     @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
+    @ticket_files       = @ticket.ticket_files
   end
 
   def new
     @ticket      = Ticket.new(ticket_type: params[:ticket_type])
     @ticket_type = Ticket::CATALOGUE.find { |c| c[:type] == params[:ticket_type] }
-    @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
+    @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.manager?
   end
 
   def create
     @ticket = Ticket.new(ticket_params)
 
-    if current_user.agent? || current_user.admin?
+    if current_user.agent? || current_user.manager?
       @ticket.customer    = User.find(params[:ticket][:customer_id])
       @ticket.created_by  = current_user
-      @ticket.assignee    = current_user
-      @ticket.assigned_by = current_user
-      @ticket.assigned_at = Time.current
+      # @ticket.assignee    = current_user
+      # @ticket.assigned_by = current_user
+      # @ticket.assigned_at = Time.current
       @ticket.status      = "in_progress"
     else
       @ticket.customer = current_user
@@ -45,27 +50,10 @@ class TicketsController < ApplicationController
 
     if @ticket.save
       save_attachments(@ticket)
-
-      if @ticket.on_behalf?
-        TicketAssignment.create!(
-          ticket:        @ticket,
-          assigned_to:   current_user,
-          assigned_from: nil,
-          assigned_by:   current_user,
-          reason:        "Created on behalf of #{@ticket.customer.fullname}"
-        )
-        TicketNotification.create!(
-          ticket:       @ticket,
-          responded_by: current_user,
-          receiver:     @ticket.customer,
-          details:      "A ticket has been submitted on your behalf: #{@ticket.title}",
-          status:       "unread"
-        )
-      end
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
       @ticket_type = Ticket::CATALOGUE.find { |c| c[:type] == params[:ticket][:ticket_type] }
-      @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
+      @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.manager?
       render :new, status: :unprocessable_entity
     end
   end
@@ -113,6 +101,27 @@ class TicketsController < ApplicationController
 
   def set_ticket
     @ticket = Ticket.find(params[:id])
+  end
+
+  def authorize_show!
+    return if current_user.admin? || current_user.manager? || current_user.agent?
+    unauthorized! unless @ticket.customer == current_user
+  end
+
+  def authorize_assign!
+    unauthorized! unless current_user.admin? || current_user.manager?
+  end
+
+  def authorize_self_assign!
+    unauthorized! unless current_user.admin? || current_user.agent?
+  end
+
+  def authorize_close!
+    unless current_user.admin? ||
+           @ticket.assignee == current_user ||
+           @ticket.customer == current_user
+      unauthorized!
+    end
   end
 
   def ticket_params

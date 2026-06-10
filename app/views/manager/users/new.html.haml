@@ -25,12 +25,12 @@
     .card.border-0.shadow-sm
       .card-body.p-4
         - if @role.blank? || @role == "agent"
-          %h6.mb-4{:style => "font-family: Poppins; color: #1565c0;"}
-            %i.bi.bi-person-badge.me-2
+          %h5.mb-4{:style => "font-family: Poppins; color: #1565c0;"}
+            %i.bi.bi-person-badge
             Create Agent
         - else
-          %h6.mb-4{:style => "font-family: Poppins; color: #28a745;"}
-            %i.bi.bi-person.me-2
+          %h5.mb-4{:style => "font-family: Poppins; color: #28a745;"}
+            %i.bi.bi-person
             Create Customer
 
         - @user = User.new(role: @role.presence || "agent", team_id: (current_user.team_id if @role.blank? || @role == "agent"))
