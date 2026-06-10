@@ -1,0 +1,3 @@
+.cust-field
+  %label.cust-form-label Issue
+  = select_tag "ticket[metadata][issue]", options_for_select([["Select an issue category", ""], "Patient", "Clinical", "Reports", "Document", "Radiology", "Ad-hoc reporting/IZENDA", "Billing Tasks", "Settings", "Scheduler", "Provider Notes", "KIOSK", "Bugs/Glitches", "Other"], ticket.metadata&.dig("issue")), class: "cust-form-select"

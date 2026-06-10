@@ -46,6 +46,8 @@ class Ticket < ApplicationRecord
   has_many :ticket_files,         dependent: :destroy
   has_many :ticket_notifications, dependent: :destroy
 
+  before_validation :auto_title_for_bright_ideas
+
   # Validations
   validates :title,       presence: true
   validates :ticket_type, inclusion: { in: TICKET_TYPES }
@@ -77,6 +79,25 @@ class Ticket < ApplicationRecord
   before_update :set_resolved_at, if: :status_changed_to_closed?
 
   private
+
+  def auto_title_for_bright_ideas
+    if ticket_type == "bright_ideas" && title.blank?
+      idea_types = Array(metadata&.dig("idea_types")).reject(&:blank?)
+      self.title = idea_types.any? ? "Bright Idea: #{idea_types.join(', ')}" : "Bright Idea"
+    elsif ticket_type == "great_work" && title.blank?
+      work_types = Array(metadata&.dig("work_types")).reject(&:blank?)
+      self.title = work_types.any? ? "Great Work: #{work_types.join(', ')}" : "Great Work"
+    elsif ticket_type == "hr" && title.blank?
+      hr_types = Array(metadata&.dig("hr_types")).reject(&:blank?)
+      self.title = hr_types.any? ? "General HR: #{hr_types.first}" : "General HR"
+    elsif ticket_type == "lms" && title.blank?
+      self.title = "Password Reset for LMS"
+    elsif ticket_type == "hiring_departure" && title.blank?
+      request_type = metadata&.dig("request_type").presence || "Request"
+      full_name    = metadata&.dig("full_name").presence
+      self.title   = full_name ? "#{request_type}: #{full_name}" : request_type
+    end
+  end
 
   def status_changed_to_closed?
     status_changed? && status.in?(%w[closed cancelled])
