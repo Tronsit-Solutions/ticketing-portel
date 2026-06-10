@@ -223,8 +223,9 @@
 
         .ticket-detail-body
           / Original ticket submission
-          - ticket_modal_data = [{ label: "Subject", value: @ticket.title }]
-          - ticket_modal_data << { label: "Issue", value: @ticket.metadata["details"] } if @ticket.metadata["details"].present?
+          - ticket_modal_data = [{ label: "Title", value: @ticket.title }]
+          - ticket_modal_data << { label: "Location", value: @ticket.location&.name } if @ticket.location.present?
+          - ticket_modal_data << { label: "Description", value: @ticket.metadata["details"] } if @ticket.metadata["details"].present?
           - (@ticket.metadata.except("details") || {}).each { |k,v| ticket_modal_data << { label: k.humanize, value: v } if v.present? }
           - ticket_modal_json = ticket_modal_data.map { |r| "{label:#{r[:label].to_json},value:#{r[:value].to_json}}" }.join(",")
           .ticket-message-block
@@ -234,12 +235,17 @@
                 %i.bi.bi-folder2-open
 
             .ticket-field
-              %span.field-label Subject:
+              %span.field-label Title:
               %span.field-value= @ticket.title
+
+            - if @ticket.location.present?
+              .ticket-field
+                %span.field-label Location:
+                %span.field-value= @ticket.location.name
 
             - if @ticket.metadata["details"].present?
               .ticket-field
-                %span.field-label Issue:
+                %span.field-label Description:
                 %span.field-value= @ticket.metadata["details"]
 
             - (@ticket.metadata.except("details") || {}).each do |key, value|
