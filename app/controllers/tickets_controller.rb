@@ -1,8 +1,17 @@
 class TicketsController < ApplicationController
-  before_action :set_ticket, only: [:show, :assign, :self_assign, :close]
+  before_action :set_ticket, only: [ :show, :assign, :self_assign, :close ]
 
   def catalogue
     @catalogue = Ticket::CATALOGUE
+  end
+
+  def my_tickets
+    all             = Ticket.where(customer: current_user).recent.includes(:customer)
+    @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
+    @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
+    @all_count      = all.count
+    @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
+    @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
   end
 
   def index
@@ -21,12 +30,14 @@ class TicketsController < ApplicationController
   def show
     @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
+    @my_tickets_count   = Ticket.where(customer: current_user).count if current_user.customer?
   end
 
   def new
-    @ticket      = Ticket.new(ticket_type: params[:ticket_type])
-    @ticket_type = Ticket::CATALOGUE.find { |c| c[:type] == params[:ticket_type] }
-    @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
+    @ticket           = Ticket.new(ticket_type: params[:ticket_type])
+    @ticket_type      = Ticket::CATALOGUE.flat_map { |c| c[:children] || [ c ] }.find { |c| c[:type] == params[:ticket_type] }
+    @customers        = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
+    @my_tickets_count = Ticket.where(customer: current_user).count if current_user.customer?
   end
 
   def create
@@ -64,7 +75,7 @@ class TicketsController < ApplicationController
       end
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
-      @ticket_type = Ticket::CATALOGUE.find { |c| c[:type] == params[:ticket][:ticket_type] }
+      @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [ c ] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
       @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
       render :new, status: :unprocessable_entity
     end
@@ -116,7 +127,7 @@ class TicketsController < ApplicationController
   end
 
   def ticket_params
-    params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: {})
+    params.require(:ticket).permit(:ticket_type, :title, :location_id, metadata: [ :mobile, :details, :issue, :request_type, :full_name, { idea_types: [] }, { work_types: [] }, { hr_types: [] } ])
   end
 
   def save_attachments(ticket)

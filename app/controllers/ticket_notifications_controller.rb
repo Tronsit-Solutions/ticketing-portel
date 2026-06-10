@@ -6,7 +6,7 @@ class TicketNotificationsController < ApplicationController
   def mark_read
     notification = TicketNotification.for_user(current_user).find(params[:id])
     notification.update!(status: "read")
-    redirect_to ticket_notifications_path, notice: "Marked as read."
+    redirect_to ticket_path(notification.ticket)
   end
 
   def mark_all_read

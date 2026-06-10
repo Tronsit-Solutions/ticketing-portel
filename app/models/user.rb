@@ -25,5 +25,4 @@ class User < ApplicationRecord
   def agent?;    role == "agent"    end
   def manager?;  role == "manager"  end
   def customer?; role == "customer" end
-
 end

@@ -1,55 +1,42 @@
-%h4.mb-4{:style => "font-family: Poppins;"} My Support Tickets
-/ Stat Cards
-.row.g-3.mb-4
-  .col-md-4
-    .card.border-0.shadow-sm
-      .card-body
-        .text-muted{:style => "font-size:13px;"} Total Submitted
-        .fs-3.fw-bold= @my_tickets.count
-  .col-md-4
-    .card.border-0.shadow-sm
-      .card-body
-        .text-muted{:style => "font-size:13px;"} Open
-        .fs-3.fw-bold.text-primary= @open_tickets
-  .col-md-4
-    .card.border-0.shadow-sm
-      .card-body
-        .text-muted{:style => "font-size:13px;"} Closed
-        .fs-3.fw-bold.text-success= @closed_tickets
-/ Unread Notifications Banner
-- if @notifications.any?
-  .alert.alert-info.d-flex.justify-content-between.align-items-center
-    %span
-      You have
-      %strong= @notifications.count
-      unread notification(s).
-    = link_to "View", ticket_notifications_path, class: "btn btn-sm btn-info"
-/ Tickets Table
-.card.border-0.shadow-sm
-  .card-header.bg-white.d-flex.justify-content-between.align-items-center
-    %span.fw-bold My Tickets
-    = link_to "+ New Ticket", new_ticket_path, class: "btn btn-sm btn-primary"
-  .card-body.p-0
-    %table.table.table-hover.mb-0
-      %thead.table-light
-        %tr
-          %th #
-          %th Title
-          %th Type
-          %th Status
-          %th Assigned To
-          %th Created
-          %th
-      %tbody
-        - @my_tickets.each do |ticket|
-          %tr
-            %td= ticket.id
-            %td= ticket.title
-            %td
-              %span.badge.bg-secondary= ticket.ticket_type.humanize
-            %td
-              - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
-              %span{:class => "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
-            %td= ticket.assignee&.fullname || "<span class='text-muted'>Pending</span>".html_safe
-            %td= ticket.created_at.strftime("%b %d, %Y")
-            %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
+:css
+  .new-ticket-btn {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 28px;
+    background: #ffffff;
+    border: 1px solid #e0e4ea;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1a1a1a;
+    max-width: 860px;
+    transition: box-shadow 0.18s, border-color 0.18s;
+  }
+  .new-ticket-btn:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border-color: #0077b6;
+    color: #1a1a1a;
+  }
+  .ntb-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #deeaf5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .ntb-icon i { font-size: 26px; color: #1b4f72; }
+  .ntb-body { flex: 1; }
+  .ntb-title { font-size: 17px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+  .ntb-desc  { font-size: 14px; color: #555; line-height: 1.5; }
+  .ntb-chevron { font-size: 26px; color: #1a1a1a; flex-shrink: 0; }
+
+= link_to tickets_path, class: "new-ticket-btn" do
+  .ntb-icon
+    %i.bi.bi-ticket-perforated-fill
+  .ntb-body
+    .ntb-title Create A New Ticket
+    .ntb-desc Fill out a form for something specific or give us a brief description of your issue
+  %i.bi.bi-chevron-right.ntb-chevron

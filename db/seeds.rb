@@ -24,7 +24,7 @@ locations = [
   { name: "Main Office",    abbreviation: "MO", state: "California" },
   { name: "North Branch",   abbreviation: "NB", state: "New York"   },
   { name: "South Branch",   abbreviation: "SB", state: "Texas"      },
-  { name: "West Branch",    abbreviation: "WB", state: "Washington" },
+  { name: "West Branch",    abbreviation: "WB", state: "Washington" }
 ]
 locations.each { |l| Location.create!(l) }
 
@@ -32,7 +32,7 @@ puts "Seeding teams..."
 teams = [
   { name: "Technical Support" },
   { name: "HR Support"        },
-  { name: "CareCloud Support" },
+  { name: "CareCloud Support" }
 ]
 teams.each { |t| Team.create!(t) }
 
@@ -206,7 +206,7 @@ tickets_data = [
     assignee:    agent2,
     assigned_by: manager,
     assigned_at: 1.day.ago
-  },
+  }
 ]
 
 tickets_data.each { |t| Ticket.create!(t) }
@@ -242,7 +242,7 @@ thread_data = [
       { sender: customer1, type: "customer_reply", body: "I cannot log into the EHR system since this morning. Error says Invalid credentials." },
       { sender: agent1,    type: "agent_reply",    body: "We have reset your credentials. Please try logging in again." },
       { sender: customer1, type: "customer_reply", body: "Still getting the same error." },
-      { sender: agent1,    type: "internal_note",  body: "Escalating to IT admin. Possible account lock." },
+      { sender: agent1,    type: "internal_note",  body: "Escalating to IT admin. Possible account lock." }
     ]
   },
   {
@@ -250,16 +250,16 @@ thread_data = [
     messages: [
       { sender: customer1, type: "customer_reply", body: "CareCloud is not accepting my password even after reset." },
       { sender: agent1,    type: "agent_reply",    body: "Issue resolved after clearing browser cache. Please try again." },
-      { sender: customer1, type: "customer_reply", body: "Working now, thank you!" },
+      { sender: customer1, type: "customer_reply", body: "Working now, thank you!" }
     ]
   },
   {
     ticket:   Ticket.find_by(title: "Update employee address"),
     messages: [
       { sender: customer3, type: "customer_reply", body: "I recently moved and need to update my address in employee records." },
-      { sender: agent2,    type: "agent_reply",    body: "Address has been updated. Please verify at your next login." },
+      { sender: agent2,    type: "agent_reply",    body: "Address has been updated. Please verify at your next login." }
     ]
-  },
+  }
 ]
 
 thread_data.each do |thread|
