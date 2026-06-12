@@ -43,7 +43,7 @@ class TicketsController < ApplicationController
       # @ticket.assignee    = current_user
       # @ticket.assigned_by = current_user
       # @ticket.assigned_at = Time.current
-      @ticket.status      = "in_progress"
+      @ticket.status      = "open"
     else
       @ticket.customer = current_user
     end

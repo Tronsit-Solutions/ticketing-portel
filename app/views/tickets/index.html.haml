@@ -63,7 +63,7 @@
           - @tickets.each do |ticket|
             %tr
               %td.text-muted{:style => "font-size:13px;"}
-                \##{ticket.id}
+                \#{ticket.id}
               %td
                 = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none "
                 - if ticket.on_behalf?
