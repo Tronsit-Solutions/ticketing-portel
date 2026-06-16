@@ -59,20 +59,23 @@ class TicketsController < ApplicationController
   end
 
   def assign
-    before_assignee = @ticket.assignee
+    before_assignee  = @ticket.assignee
+    new_assignee     = User.find(params[:assignee_id])
+
     @ticket.update!(
-      assignee_id: params[:assignee_id],
+      assignee_id: new_assignee.id,
       assigned_by: current_user,
       assigned_at: Time.current,
       status:      "in_progress"
     )
     TicketAssignment.create!(
       ticket:        @ticket,
-      assigned_to:   User.find(params[:assignee_id]),
+      assigned_to:   new_assignee,
       assigned_from: before_assignee,
       assigned_by:   current_user,
       reason:        params[:reason]
     )
+    notify_assignee(new_assignee, assigned_by: current_user)
     redirect_to @ticket, notice: "Ticket assigned."
   end
 
@@ -89,6 +92,7 @@ class TicketsController < ApplicationController
       assigned_by: current_user,
       reason:      "Self-assigned"
     )
+    notify_assignee(current_user, assigned_by: current_user)
     redirect_to @ticket, notice: "Ticket self-assigned."
   end
 
@@ -101,6 +105,16 @@ class TicketsController < ApplicationController
 
   def set_ticket
     @ticket = Ticket.find(params[:id])
+  end
+
+  def notify_assignee(assignee, assigned_by:)
+    TicketNotification.create!(
+      ticket:       @ticket,
+      responded_by: assigned_by,
+      receiver:     assignee,
+      details:      "You have been assigned ticket ##{@ticket.id}: \"#{@ticket.title}\"",
+      status:       "unread"
+    )
   end
 
   def authorize_show!
