@@ -26,7 +26,7 @@ gem "pagy"
 gem "bcrypt", "~> 3.1.7"
 
 # File uploads
-gem "carrierwave", "~> 1.3"
+gem "carrierwave", "~> 3.1"
 gem "mini_magick"
 
 # UI
