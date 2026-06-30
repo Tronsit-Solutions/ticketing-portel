@@ -272,7 +272,7 @@
       %h5.mb-0
         = @ticket.title
         - if @ticket.on_behalf?
-          %span.badge.bg-warning.text-dark.ms-2{style: "font-size:11px;"}
+          %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} 
             On Behalf — created by #{@ticket.created_by.fullname}
       %small.text-muted
         \##{@ticket.id} &middot;
@@ -281,8 +281,6 @@
         = @ticket.location&.name || "No location"
         &middot; Submitted #{@ticket.created_at.strftime("%b %d, %Y")}
     .d-flex.gap-2.align-items-center
-      - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
-      %span{class: "badge bg-#{color[@ticket.status]} fs-6"}= @ticket.status.humanize
       - if @ticket.status != "closed" && (current_user.admin? || @ticket.assignee == current_user || @ticket.customer == current_user)
         %button.btn.btn-sm.btn-outline-danger{"data-bs-toggle" => "modal", "data-bs-target" => "#closeTicketModal", type: "button"}
           Close Ticket
@@ -327,6 +325,20 @@
                 %small.text-muted.fw-semibold Issue Category
                 %p.mt-1.mb-0= @ticket.metadata["issue"]
 
+      / Resolution card — shown only when closed and resolution exists
+      - if @ticket.status == "closed" && @ticket.resolution.present?
+        .card.border-0.mb-3{style: "border-left: 4px solid #198754 !important; background: #f0fdf4;"}
+          .card-body
+            .d-flex.align-items-center.gap-2.mb-2
+              %i.bi.bi-check-circle-fill.text-success
+              %span.fw-bold.text-success Resolution
+            %p.mb-1{style: "font-size:14px; color:#1a1a1a;"}= @ticket.resolution
+            - if @ticket.resolved_by.present?
+              %small.text-muted
+                Resolved by
+                %strong= @ticket.resolved_by.fullname
+                = " · #{@ticket.resolved_at.strftime('%b %d, %Y')}" if @ticket.resolved_at.present?
+
       / Conversation
       .card.border-0.shadow-sm.mb-3
         .card-header.bg-white.fw-bold Conversation
@@ -364,7 +376,10 @@
 
       / Ticket Info
       .card.border-0.shadow-sm.mb-3
-        .card-header.bg-white.fw-bold Ticket Info
+        .card-header.bg-white.d-flex.justify-content-between.align-items-center
+          %span.fw-bold Ticket Info
+          - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+          %span{class: "badge bg-#{color[@ticket.status]}"}= @ticket.status.humanize
         .card-body
           .mb-2
             %small.text-muted Customer
@@ -388,17 +403,12 @@
             .mb-2
               %small.text-muted Resolved At
               %div= @ticket.resolved_at.strftime("%b %d, %Y %I:%M %p")
-          - if @ticket.metadata["how_resolved"].present?
-            %hr.my-2/
-            .mb-2
-              %small.text-muted Resolution
-              %div{style: "font-size:13px;"}= @ticket.metadata["how_resolved"]
           - if @ticket.on_behalf?
             .mb-2
               %small.text-muted Created By
               %div
                 = @ticket.created_by.fullname
-                %span.badge.bg-warning.text-dark.ms-1{style: "font-size:10px;"} On Behalf
+                %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"}  On Behalf
 
       / Attachments
       - if @ticket_files.any?
@@ -442,8 +452,6 @@
       .modal-dialog.modal-dialog-centered
         .modal-content
           .modal-header.border-0.pb-0
-            %h5#closeTicketModalLabel.modal-title.fw-bold Close Ticket
-            %button.btn-close{"aria-label" => "Close", "data-bs-dismiss" => "modal", type: "button"}
           = form_with url: close_ticket_path(@ticket), method: :patch, local: true do |f|
             .modal-body
               .text-center.mb-3

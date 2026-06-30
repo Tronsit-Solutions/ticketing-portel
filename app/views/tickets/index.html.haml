@@ -163,7 +163,6 @@
         Tickets
       - else
         All Tickets
-    = link_to "+ New Ticket", new_ticket_path, class: "btn btn-primary btn-sm"
 
   / Filters
   .card.border-0.shadow-sm.mb-4
@@ -209,7 +208,7 @@
                 %td
                   = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
                   - if ticket.on_behalf?
-                    %span.badge.bg-warning.text-dark.ms-1{style: "font-size:10px;"} On Behalf
+                    %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
                 %td
                   %span
                     = ticket.ticket_type.humanize
