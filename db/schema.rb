@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_09_134912) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_30_153012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -102,6 +102,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_09_134912) do
     t.datetime "updated_at", null: false
     t.bigint "created_by_id"
     t.jsonb "metadata", default: {}, null: false
+    t.text "resolution"
     t.index ["assigned_by_id"], name: "index_tickets_on_assigned_by_id"
     t.index ["assignee_id"], name: "index_tickets_on_assignee_id"
     t.index ["created_by_id"], name: "index_tickets_on_created_by_id"

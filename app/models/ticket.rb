@@ -2,36 +2,27 @@ class Ticket < ApplicationRecord
 
   STATUSES = %w[open in_progress closed cancelled].freeze
 
-  TICKET_TYPES = %w[
-    technical_support
-    tronshealth
-    carecloud
-    curemd
-    bright_ideas
-    great_work
-    hr
-    hiring_departure
-    lms
-  ].freeze
-
   CATALOGUE = [
-    { type: "technical_support", label: "Technical Support", icon: "bi-headset",      desc: "Report any IT related issues here"         },
-    { type: "tronshealth",       label: "TronsHealth",       icon: "bi-activity",     desc: "Report any issues related to Tronshealth here"                  },
-    { type: "carecloud",         label: "CareCloud",         icon: "bi-cloud",        desc: "Report any issues related to CareCloud here(Phoenix, AZ Users only)"      },
-    { type: "curemd",            label: "CureMD",            icon: "bi-arrow-repeat", desc: "Report any issues related to CureMD here"         },
-    { type: "bright_ideas",      label: "Bright Ideas",      icon: "bi-lightbulb",    desc: "Share To Aware"       },
-    { type: "great_work",        label: "Great Work",        icon: "bi-briefcase",    desc: "Your Appreciation Is Appreciated"          },
+    { type: "technical_support", label: "Technical Support", icon: "bi-headset",      desc: "Report any IT related issues here"                                    },
+    { type: "tronshealth",       label: "TronsHealth",       icon: "bi-activity",     desc: "Report any issues related to Tronshealth here"                        },
+    { type: "carecloud",         label: "CareCloud",         icon: "bi-cloud",        desc: "Report any issues related to CareCloud here (Phoenix, AZ Users only)" },
+    { type: "curemd",            label: "CureMD",            icon: "bi-arrow-repeat", desc: "Report any issues related to CureMD here"                             },
+    { type: "bright_ideas",      label: "Bright Ideas",      icon: "bi-lightbulb",    desc: "Share To Aware"                                                       },
+    { type: "great_work",        label: "Great Work",        icon: "bi-briefcase",    desc: "Your Appreciation Is Appreciated"                                     },
     {
       label: "Human Resources",
       icon:  "bi-people",
       desc:  "HR inquiries, new hires, departures, and policy requests",
       children: [
-        { type: "hr",               label: "General HR",                   desc: "Human resources inquiries, policies, and requests"            },
-        { type: "hiring_departure", label: "New Team Member or Departure", desc: "Submit a request for a new hire or team member departure"     },
+        { type: "hr",               label: "General HR",                   icon: "bi-people",      desc: "Human resources inquiries, policies, and requests"        },
+        { type: "hiring_departure", label: "New Team Member or Departure", icon: "bi-person-plus", desc: "Submit a request for a new hire or team member departure" },
       ]
     },
-    { type: "lms",               label: "LMS",               icon: "bi-mortarboard",  desc: "Reset password request for LMS"     },
+    { type: "lms",               label: "LMS",               icon: "bi-mortarboard",  desc: "Reset password request for LMS"                                       },
   ].freeze
+
+  # Single source of truth — derived from CATALOGUE, never out of sync
+  TICKET_TYPES = CATALOGUE.flat_map { |c| c[:children] || [c] }.map { |c| c[:type] }.freeze
 
   # Associations
   belongs_to :location,    optional: true

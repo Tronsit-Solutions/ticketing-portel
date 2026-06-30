@@ -163,7 +163,6 @@
         Tickets
       - else
         All Tickets
-    = link_to "+ New Ticket", new_ticket_path, class: "btn btn-primary btn-sm"
 
   / Filters
   .card.border-0.shadow-sm.mb-4
@@ -174,7 +173,7 @@
           = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
         .col-md-3
           = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
-          = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }, params[:ticket_type]), class: "form-select form-select-sm"
+          -# = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }, params[:ticket_type]), class: "form-select form-select-sm"
         - unless current_user.customer?
           .col-md-3
             = label_tag :unassigned, "Assignment", class: "form-label mb-1 fw-bold"
@@ -205,13 +204,14 @@
             - @tickets.each do |ticket|
               %tr
                 %td.text-muted{style: "font-size:13px;"}
-                  \##{ticket.id}
+                  \#{ticket.id}
                 %td
-                  = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-bold"
+                  = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
                   - if ticket.on_behalf?
-                    %span.badge.bg-warning.text-dark.ms-1{style: "font-size:10px;"} On Behalf
+                    %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
                 %td
-                  %span.badge.bg-secondary= ticket.ticket_type.humanize
+                  %span
+                    = ticket.ticket_type.humanize
                 %td
                   - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
                   %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize

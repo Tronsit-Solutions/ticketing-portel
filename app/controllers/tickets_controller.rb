@@ -108,7 +108,12 @@ class TicketsController < ApplicationController
   end
 
   def close
-    @ticket.update!(status: "closed", resolved_by: current_user, resolved_at: Time.current)
+    @ticket.update!(
+      status:      "closed",
+      resolved_by: current_user,
+      resolved_at: Time.current,
+      resolution:  params.dig(:resolution, :how_resolved).presence
+    )
     redirect_to @ticket, notice: "Ticket closed."
   end
 
