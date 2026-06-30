@@ -41,7 +41,7 @@ class TicketsController < ApplicationController
   def new
     @ticket           = Ticket.new(ticket_type: params[:ticket_type])
     @ticket_type      = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket_type] }
-    @customers        = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
+    @customers        = User.customers.active.order(:fullname) unless current_user.customer?
     @my_tickets_count = Ticket.where(customer: current_user).count if current_user.customer?
   end
 
@@ -64,7 +64,7 @@ class TicketsController < ApplicationController
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
       @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
-      @customers   = User.customers.active.order(:fullname) if current_user.agent? || current_user.admin?
+      @customers   = User.customers.active.order(:fullname) unless current_user.customer?
       render :new, status: :unprocessable_entity
     end
   end

@@ -313,14 +313,14 @@
     .col-md-8
 
       / Description card
-      - if @ticket.description.present? || @ticket.metadata.except("description").any?
+      - if @ticket.metadata["details"].present? || @ticket.metadata["issue"].present?
         .card.border-0.shadow-sm.mb-3
           .card-header.bg-white.fw-bold Details
           .card-body
-            - if @ticket.description.present?
+            - if @ticket.metadata["details"].present?
               .mb-3
                 %small.text-muted.fw-semibold Description
-                %p.mt-1.mb-0= @ticket.description
+                %p.mt-1.mb-0= @ticket.metadata["details"]
             - if @ticket.metadata["issue"].present?
               .mb-0
                 %small.text-muted.fw-semibold Issue Category
