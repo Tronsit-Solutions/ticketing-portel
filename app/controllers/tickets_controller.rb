@@ -108,7 +108,17 @@ class TicketsController < ApplicationController
   end
 
   def close
-    @ticket.update!(status: "closed", resolved_by: current_user, resolved_at: Time.current)
+    resolution = params[:resolution] || {}
+    updated_metadata = @ticket.metadata.merge(
+      "how_resolved" => resolution[:how_resolved].presence
+    ).compact
+
+    @ticket.update!(
+      status:      "closed",
+      resolved_by: current_user,
+      resolved_at: Time.current,
+      metadata:    updated_metadata
+    )
     redirect_to @ticket, notice: "Ticket closed."
   end
 

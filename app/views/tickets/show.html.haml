@@ -283,8 +283,9 @@
     .d-flex.gap-2.align-items-center
       - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
       %span{class: "badge bg-#{color[@ticket.status]} fs-6"}= @ticket.status.humanize
-      - if @ticket.status != "closed" && (current_user.admin? || current_user.agent? || @ticket.customer == current_user)
-        = button_to "Close Ticket", close_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-danger"
+      - if @ticket.status != "closed" && (current_user.admin? || @ticket.assignee == current_user || @ticket.customer == current_user)
+        %button.btn.btn-sm.btn-outline-danger{"data-bs-toggle" => "modal", "data-bs-target" => "#closeTicketModal", type: "button"}
+          Close Ticket
       - if (current_user.admin? || current_user.manager?) && @ticket.status != "closed"
         %button.btn.btn-sm.btn-outline-primary{"data-bs-toggle" => "collapse", "data-bs-target" => "#assignForm"}
           Assign
@@ -387,6 +388,11 @@
             .mb-2
               %small.text-muted Resolved At
               %div= @ticket.resolved_at.strftime("%b %d, %Y %I:%M %p")
+          - if @ticket.metadata["how_resolved"].present?
+            %hr.my-2/
+            .mb-2
+              %small.text-muted Resolution
+              %div{style: "font-size:13px;"}= @ticket.metadata["how_resolved"]
           - if @ticket.on_behalf?
             .mb-2
               %small.text-muted Created By
@@ -438,13 +444,18 @@
           .modal-header.border-0.pb-0
             %h5#closeTicketModalLabel.modal-title.fw-bold Close Ticket
             %button.btn-close{"aria-label" => "Close", "data-bs-dismiss" => "modal", type: "button"}
-          .modal-body
-            .text-center.py-2
-              %i.bi.bi-exclamation-circle.text-danger{style: "font-size: 2.5rem;"}
-              %p.mt-3.mb-1.fw-semibold Are you sure you want to close this ticket?
-              %p.text-muted{style: "font-size: 13px;"}
-                = "\"#{@ticket.title}\""
-              %p.text-muted{style: "font-size: 13px;"} This action cannot be undone.
-          .modal-footer.border-0.pt-0.justify-content-center.gap-2
-            %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal"} Cancel
-            = button_to "Close Ticket", close_ticket_path(@ticket), method: :patch, class: "btn btn-danger px-4"
+          = form_with url: close_ticket_path(@ticket), method: :patch, local: true do |f|
+            .modal-body
+              .text-center.mb-3
+                %i.bi.bi-check-circle.text-success{style: "font-size: 2.5rem;"}
+                %p.mt-3.mb-1.fw-semibold Are you sure you want to close this ticket?
+                %p.text-muted{style: "font-size: 13px;"}= "\"#{@ticket.title}\""
+              - if current_user.admin? || current_user.agent?
+                .mb-3
+                  %label.form-label.fw-bold.text-start.d-block Resolution
+                  = text_area_tag "resolution[how_resolved]", nil, rows: 3, class: "form-control", placeholder: "How was this resolved?"
+              - else
+                %p.text-muted.text-center{style: "font-size: 13px;"} This action cannot be undone.
+            .modal-footer.border-0.pt-0.justify-content-center.gap-2
+              %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal", type: "button"} Cancel
+              = f.submit "Close Ticket", class: "btn btn-danger px-4"
