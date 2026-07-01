@@ -42,6 +42,19 @@
 
   / ── Left: Description + Conversation + Reply ──────────────────
   .col-md-8
+    / Resolution card — shown only when closed and resolution exists
+    - if @ticket.status == "closed" && @ticket.resolution.present?
+      .card.border-0.mb-3{style: "border-left: 4px solid #198754 !important; background: #f0fdf4;"}
+        .card-body
+          .d-flex.align-items-center.gap-2.mb-2
+            %i.bi.bi-check-circle-fill.text-success
+            %span.fw-bold.text-success Resolution
+          %p.mb-1{style: "font-size:14px; color:#1a1a1a;"}= @ticket.resolution
+          - if @ticket.resolved_by.present?
+            %small.text-muted
+              Resolved by
+              %strong= @ticket.resolved_by.fullname
+              = " · #{@ticket.resolved_at.strftime('%b %d, %Y')}" if @ticket.resolved_at.present?
 
     / Description card
     - if @ticket.metadata["details"].present? || @ticket.metadata["issue"].present?
@@ -57,19 +70,6 @@
               %small.text-muted.fw-semibold Issue Category
               %p.mt-1.mb-0= @ticket.metadata["issue"]
 
-    / Resolution card — shown only when closed and resolution exists
-    - if @ticket.status == "closed" && @ticket.resolution.present?
-      .card.border-0.mb-3{style: "border-left: 4px solid #198754 !important; background: #f0fdf4;"}
-        .card-body
-          .d-flex.align-items-center.gap-2.mb-2
-            %i.bi.bi-check-circle-fill.text-success
-            %span.fw-bold.text-success Resolution
-          %p.mb-1{style: "font-size:14px; color:#1a1a1a;"}= @ticket.resolution
-          - if @ticket.resolved_by.present?
-            %small.text-muted
-              Resolved by
-              %strong= @ticket.resolved_by.fullname
-              = " · #{@ticket.resolved_at.strftime('%b %d, %Y')}" if @ticket.resolved_at.present?
 
     / Conversation
     .card.border-0.shadow-sm.mb-3

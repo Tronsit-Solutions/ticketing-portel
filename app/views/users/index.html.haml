@@ -41,13 +41,14 @@
       %tbody
         - @users.each do |user|
           %tr
-            %td.fw-bold= user.fullname
-            %td.text-muted{:style => "font-size:13px;"}= user.email
             %td
-              - role_color = { "admin" => "danger", "agent" => "success", "manager" => "primary", "customer" => "secondary" }
-              %span{:class => "badge bg-#{role_color[user.role]}"}
-                = user.role.humanize
-            %td= user.team&.name || "-"
+              = user.fullname
+            %td.text-muted{:style => "font-size:13px;"}
+              = user.email
+            %td.text-muted{:style => "font-size:13px;"}
+              = user.role.humanize
+            %td.text-muted{:style => "font-size:13px;"}
+              = user.team&.name || "-"
             %td
               - if user.is_active?
                 %span.badge.bg-success Active

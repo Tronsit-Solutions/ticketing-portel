@@ -62,6 +62,7 @@ class TicketsController < ApplicationController
 
     if @ticket.save
       save_attachments(@ticket)
+      notify_staff_of_new_ticket if current_user.customer?
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
       @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
@@ -122,6 +123,18 @@ class TicketsController < ApplicationController
 
   def set_ticket
     @ticket = Ticket.find(params[:id])
+  end
+
+  def notify_staff_of_new_ticket
+    User.where(role: %w[agent manager]).active.find_each do |staff|
+      TicketNotification.create!(
+        ticket:       @ticket,
+        responded_by: current_user,
+        receiver:     staff,
+        details:      "New ticket ##{@ticket.id} submitted by #{current_user.fullname}: \"#{@ticket.title}\"",
+        status:       "unread"
+      )
+    end
   end
 
   def notify_assignee(assignee, assigned_by:)
