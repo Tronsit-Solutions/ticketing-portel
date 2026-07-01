@@ -1,78 +1,181 @@
 :css
-  .catalogue-entry {
+  .tickets-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 14px;
+  }
+  .category-chip {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 22px 28px;
-    background: #ffffff;
-    border: 1px solid #e8edf2;
-    border-radius: 12px;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
     text-decoration: none;
     color: #1a1a1a;
-    transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
-    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s, border-color 0.15s;
   }
-  .catalogue-entry:hover {
-    box-shadow: 0 4px 18px rgba(0,119,182,0.10);
-    border-color: #0077b6;
-    transform: translateY(-1px);
-    color: #0077b6;
+  .category-chip:hover { background: #e8f4fb; border-color: #0077b6; color: #0077b6; }
+  .category-chip.active { background: #e8f4fb; border-color: #0077b6; color: #0077b6; font-weight: 600; }
+  .category-chip .chip-count {
+    background: #e5e7eb;
+    color: #374151;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 13px;
+    font-weight: 600;
   }
-  .catalogue-entry:hover .cat-icon-wrap { background: #0077b6; }
-  .catalogue-entry:hover .cat-icon-wrap i { color: #fff; }
-  .catalogue-entry:hover .cat-chevron { color: #0077b6; }
-  .cat-icon-wrap {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: #e8f4fb;
+  .catalogue-panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .catalogue-panel-header {
+    padding: 16px 22px;
+    font-size: 13px;
+    color: #6b7280;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .catalogue-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 22px;
+    border-bottom: 1px solid #f3f4f6;
+    text-decoration: none;
+    color: #1a1a1a;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s, padding 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .catalogue-row:last-child { border-bottom: none; }
+  .catalogue-row:hover { background: #f0f8ff; color: #0077b6; }
+  .catalogue-row i.cat-icon { font-size: 18px; color: #374151; width: 22px; text-align: center; flex-shrink: 0; transition: color 0.2s; }
+  .catalogue-row:hover i.cat-icon { color: #0077b6; }
+  .cat-row-body { display: flex; align-items: center; flex: 1; min-width: 0; }
+  .cat-row-label { font-size: 14px; font-weight: 500; transition: color 0.2s; }
+  .cat-row-desc {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.18s;
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
   }
-  .cat-icon-wrap i { font-size: 22px; color: #0077b6; transition: color 0.18s; }
-  .cat-body { flex: 1; }
-  .cat-title { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
-  .cat-desc  { font-size: 13px; color: #6b7280; }
-  .cat-chevron { font-size: 20px; color: #9ca3af; flex-shrink: 0; transition: color 0.18s; }
-  .section-header {
+  .catalogue-row:hover .cat-row-desc { opacity: 1; }
+  .cat-toggle { margin-left: auto; font-size: 12px; color: #6b7280; transition: transform 0.2s; flex-shrink: 0; }
+  .catalogue-group.open .cat-toggle { transform: rotate(180deg); }
+  .catalogue-children {
+    display: none;
+    background: #f9fafb;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .catalogue-group.open .catalogue-children { display: block; }
+  .catalogue-child-row {
+    display: flex;
+    align-items: center;
+    padding: 11px 22px 11px 58px;
     font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: #9ca3af;
-    margin-bottom: 16px;
-    padding-left: 4px;
+    color: #374151;
+    text-decoration: none;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s, color 0.2s, padding 0.2s;
+    position: relative;
   }
+  .catalogue-child-row:last-child { border-bottom: none; }
+  .catalogue-child-row:hover { background: #e8f4fb; color: #0077b6; }
+  .cat-child-label { font-weight: 500; }
+  .cat-child-desc {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .catalogue-child-row:hover .cat-child-desc { opacity: 1; }
 
-- descriptions = { "technical_support" => "Get help with software, hardware, or system issues", "tronshealth" => "TronsHealth platform support and requests", "carecloud" => "CareCloud platform support and configuration requests", "curemd" => "CureMD platform support and configuration requests", "bright_ideas" => "Share a suggestion or improvement idea with the team", "great_work" => "Recognize a colleague for outstanding performance", "hr" => "Human resources inquiries, policies, and requests", "hiring_departure" => "Submit a request for a new hire or team member departure", "lms" => "Learning management system support and access requests" }
+- if current_user.customer?
+  .tickets-layout
+    / Left — Navigation
+    .left-panel
+      .panel-title Navigation
+      = link_to tickets_path, class: "category-chip" do
+        %span My Tickets
+        %span.chip-count= Ticket.where(customer: current_user).count
+      = link_to catalogue_tickets_path, class: "category-chip active mt-2" do
+        %span Create Ticket
+        %i.bi.bi-plus-lg
 
-.mb-4
-  %h4.fw-bold{style: "font-size: 22px;"} How can we help you?
-  %p.text-muted{style: "font-size: 14px;"} Select a category below to create a new support ticket.
-
-.section-header Service Categories
-
-- @catalogue.each do |item|
-  - if item[:children]
-    .catalogue-entry{style: "cursor:default; flex-direction:column; align-items:flex-start; gap:12px;"}
-      .d-flex.align-items-center.gap-3{style: "width:100%;"}
-        .cat-icon-wrap
-          %i{class: "bi #{item[:icon]}"}
-        .cat-body
-          .cat-title= item[:label]
-        %i.bi.bi-chevron-right.cat-chevron
-      .d-flex.flex-column.gap-1{style: "padding-left: 72px; width:100%;"}
-        - item[:children].each do |child|
-          = link_to new_ticket_path(ticket_type: child[:type]), style: "font-size:13px; color:#0077b6; text-decoration:none;" do
-            = child[:label]
-  - else
-    = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-entry" do
-      .cat-icon-wrap
-        %i{class: "bi #{item[:icon]}"}
-      .cat-body
-        .cat-title= item[:label]
-        .cat-desc= descriptions[item[:type]]
-      %i.bi.bi-chevron-right.cat-chevron
+    / Right — Service Catalogue
+    .right-panel
+      .catalogue-panel
+        .catalogue-panel-header
+          To create a new ticket, kindly select a suitable service catalogue
+        - @catalogue.each do |item|
+          - if item[:children]
+            .catalogue-group{"onclick" => "this.classList.toggle('open')"}
+              .catalogue-row
+                %i{class: "bi #{item[:icon]} cat-icon"}
+                .cat-row-body
+                  .cat-row-label= item[:label]
+                  .cat-row-desc= item[:desc]
+                %i.bi.bi-caret-down-fill.cat-toggle
+              .catalogue-children
+                - item[:children].each do |child|
+                  = link_to new_ticket_path(ticket_type: child[:type]), class: "catalogue-child-row" do
+                    .cat-child-label= child[:label]
+                    .cat-child-desc= child[:desc]
+          - else
+            = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-row" do
+              %i{class: "bi #{item[:icon]} cat-icon"}
+              .cat-row-body
+                .cat-row-label= item[:label]
+                .cat-row-desc= item[:desc]
+- else
+  .catalogue-panel
+    .catalogue-panel-header
+      To create a new ticket, kindly select a suitable service catalogue
+    - @catalogue.each do |item|
+      - if item[:children]
+        .catalogue-group{"onclick" => "this.classList.toggle('open')"}
+          .catalogue-row
+            %i{class: "bi #{item[:icon]} cat-icon"}
+            .cat-row-body
+              .cat-row-label= item[:label]
+              .cat-row-desc= item[:desc]
+            %i.bi.bi-caret-down-fill.cat-toggle
+          .catalogue-children
+            - item[:children].each do |child|
+              = link_to new_ticket_path(ticket_type: child[:type]), class: "catalogue-child-row" do
+                .cat-child-label= child[:label]
+                .cat-child-desc= child[:desc]
+      - else
+        = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-row" do
+          %i{class: "bi #{item[:icon]} cat-icon"}
+          .cat-row-body
+            .cat-row-label= item[:label]
+            .cat-row-desc= item[:desc]

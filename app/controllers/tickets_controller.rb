@@ -9,33 +9,34 @@ class TicketsController < ApplicationController
     @catalogue = Ticket::CATALOGUE
   end
 
-  def my_tickets
-    all             = Ticket.where(customer: current_user).recent.includes(:customer)
-    @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
-    @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
-    @all_count      = all.count
-    @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
-    @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
-  end
-
   def index
-    @tickets = if current_user.customer?
-      Ticket.where(customer: current_user).recent
+    if current_user.customer?
+      all             = Ticket.where(customer: current_user).recent.includes(:customer)
+      @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
+      @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
+      @all_count      = all.count
+      @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
+      @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
+      render :my_tickets
     else
-      Ticket.all.recent
-    end.includes(:customer, :assignee, :location)
-
-    @tickets = @tickets.where(status: params[:status])           if params[:status].present?
-    @tickets = @tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
-    @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present?
-    @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
+      @tickets = Ticket.all.recent.includes(:customer, :assignee, :location)
+      @tickets = @tickets.where(status: params[:status])           if params[:status].present?
+      @tickets = @tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
+      @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present?
+      @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
+    end
   end
 
   def show
     @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
     @ticket_files       = @ticket.ticket_files
-    @my_tickets_count   = Ticket.where(customer: current_user).count if current_user.customer?
+    if current_user.customer?
+      @my_tickets_count = Ticket.where(customer: current_user).count
+      render :show_customer
+    else
+      render :show_agent
+    end
   end
 
   def new

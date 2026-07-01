@@ -8,7 +8,7 @@ class TicketMessage < ApplicationRecord
   validates :details,      presence: true
   validates :message_type, inclusion: { in: MESSAGE_TYPES }
 
-  scope :visible,        -> { where.not(message_type: "internal_note") }
-  scope :internal_notes, -> { where(message_type: "internal_note") }
+  scope :visible,        -> { where(internal_note: false) }
+  scope :internal_notes, -> { where(internal_note: true) }
   scope :recent,         -> { order(created_at: :asc) }
 end

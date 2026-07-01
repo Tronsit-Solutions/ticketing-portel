@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_30_153012) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_01_114538) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,6 +67,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_30_153012) do
     t.boolean "is_html", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "internal_note", default: false, null: false
     t.index ["message_type"], name: "index_ticket_messages_on_message_type"
     t.index ["sender_id"], name: "index_ticket_messages_on_sender_id"
     t.index ["ticket_id"], name: "index_ticket_messages_on_ticket_id"

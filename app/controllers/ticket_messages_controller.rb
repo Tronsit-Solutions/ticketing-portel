@@ -3,9 +3,7 @@ class TicketMessagesController < ApplicationController
   before_action :authorize_message!
 
   def create
-    message_type = if (current_user.admin? || current_user.agent?) && params[:message_type] == "internal_note"
-      "internal_note"
-    elsif current_user.admin? || current_user.agent?
+    message_type = if current_user.admin? || current_user.agent?
       "agent_reply"
     else
       "customer_reply"
@@ -14,7 +12,8 @@ class TicketMessagesController < ApplicationController
     @message = @ticket.ticket_messages.build(
       details:      params[:details],
       message_type: message_type,
-      sender:       current_user
+      sender:       current_user,
+      internal_note: params[:internal_note] == "true"
     )
 
     if @message.save

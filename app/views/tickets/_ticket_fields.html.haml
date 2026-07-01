@@ -1,0 +1,64 @@
+/ Shared ticket form fields — used by both customer and staff forms.
+/ Locals: f (form builder), ticket, show_customer_selector (bool), css_class ("cust" or "std")
+
+- is_cust = local_assigns.fetch(:css_class, "std") == "cust"
+- ctrl    = is_cust ? "cust-form-control" : "form-control"
+- sel     = is_cust ? "cust-form-select"  : "form-select"
+- lbl     = is_cust ? "cust-form-label"   : "form-label"
+- fld     = is_cust ? "cust-field"        : "mb-3"
+
+- hide_title_contact = %w[bright_ideas great_work hr hiring_departure].include?(ticket.ticket_type)
+- hide_title_only    = ticket.ticket_type == "lms"
+- show_location_only = ticket.ticket_type == "great_work"
+- hide_details       = %w[hr hiring_departure lms].include?(ticket.ticket_type)
+- hide_attachments   = %w[hiring_departure lms].include?(ticket.ticket_type)
+
+/ Customer selector — staff only
+- if local_assigns.fetch(:show_customer_selector, false)
+  %div{class: fld}
+    %label{class: lbl} Customer
+    = select_tag "ticket[customer_id]",
+        options_from_collection_for_select(local_assigns[:customers] || [], :id, :fullname),
+        class: sel, prompt: "Select a customer"
+
+- unless hide_title_contact
+  - unless hide_title_only
+    %div{class: fld}
+      %label{class: lbl} Title
+      = f.text_field :title, class: ctrl, placeholder: "Title"
+
+  %div{class: fld}
+    %label{class: lbl} Contact
+    = text_field_tag "ticket[metadata][mobile]", ticket.metadata["mobile"], class: ctrl, placeholder: "Enter Contact No"
+
+  - if ticket.ticket_type == "tronshealth"
+    = render "tickets/forms/tronshealth", ticket: ticket
+
+  %div{class: fld}
+    %label{class: lbl} Which Location?
+    = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select Option" }, class: sel
+
+- partial = "tickets/forms/#{ticket.ticket_type}"
+- if lookup_context.template_exists?(partial, [], true) && ticket.ticket_type != "tronshealth"
+  = render partial, ticket: ticket
+
+- unless hide_details
+  - details_label = %w[technical_support tronshealth carecloud curemd].include?(ticket.ticket_type) ? "Description" : "Please add details here"
+  %div{class: fld}
+    %label{class: lbl}= details_label
+    = text_area_tag "ticket[metadata][details]", ticket.metadata["details"], class: ctrl, placeholder: "Kindly enter the details"
+
+- if show_location_only
+  %div{class: fld}
+    %label{class: lbl} Which Location?
+    = f.collection_select :location_id, Location.active.ordered, :id, :name, { prompt: "Select Option" }, class: sel
+
+- unless hide_attachments
+  %div{class: fld}
+    .upload-zone{"onclick" => "document.getElementById('ticket_attachments').click()"}
+      | Drag &amp; Drop your files or
+      %a{"onclick" => "event.stopPropagation(); document.getElementById('ticket_attachments').click();"} Browse
+    = file_field_tag "ticket_attachments[]", multiple: true,
+        accept: ".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip",
+        class: "d-none", id: "ticket_attachments", onchange: "showFileNames(this)"
+    #fileList.mt-2

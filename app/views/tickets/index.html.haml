@@ -1,233 +1,77 @@
-- if current_user.customer?
-  :css
-    .tickets-layout {
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 28px;
-      align-items: start;
-    }
-    .panel-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1a1a1a;
-      margin-bottom: 14px;
-    }
-    .category-chip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      background: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      text-decoration: none;
-      color: #1a1a1a;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .category-chip:hover { background: #e8f4fb; border-color: #0077b6; color: #0077b6; }
-    .category-chip .chip-count {
-      background: #e5e7eb;
-      color: #374151;
-      border-radius: 20px;
-      padding: 2px 10px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .catalogue-panel {
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .catalogue-panel-header {
-      padding: 16px 22px;
-      font-size: 13px;
-      color: #6b7280;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .catalogue-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 15px 22px;
-      border-bottom: 1px solid #f3f4f6;
-      text-decoration: none;
-      color: #1a1a1a;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background 0.2s, padding 0.2s;
-      cursor: pointer;
-      position: relative;
-    }
-    .catalogue-row:last-child { border-bottom: none; }
-    .catalogue-row:hover { background: #f0f8ff; color: #0077b6; }
-    .catalogue-row i.cat-icon { font-size: 18px; color: #374151; width: 22px; text-align: center; flex-shrink: 0; transition: color 0.2s; }
-    .catalogue-row:hover i.cat-icon { color: #0077b6; }
-    .cat-row-body { display: flex; align-items: center; flex: 1; min-width: 0; }
-    .cat-row-label { font-size: 14px; font-weight: 500; transition: color 0.2s; }
-    .cat-row-desc {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 12px;
-      color: #6b7280;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-    .catalogue-row:hover .cat-row-desc { opacity: 1; }
-    .cat-toggle { margin-left: auto; font-size: 12px; color: #6b7280; transition: transform 0.2s; flex-shrink: 0; }
-    .catalogue-group.open .cat-toggle { transform: rotate(180deg); }
-    .catalogue-children {
-      display: none;
-      background: #f9fafb;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    .catalogue-group.open .catalogue-children { display: block; }
-    .catalogue-child-row {
-      display: flex;
-      align-items: center;
-      padding: 11px 22px 11px 58px;
-      font-size: 13px;
-      color: #374151;
-      text-decoration: none;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background 0.2s, color 0.2s, padding 0.2s;
-      position: relative;
-    }
-    .catalogue-child-row:last-child { border-bottom: none; }
-    .catalogue-child-row:hover { background: #e8f4fb; color: #0077b6; }
-    .cat-child-label { font-weight: 500; }
-    .cat-child-desc {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 11px;
-      color: #9ca3af;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-    .catalogue-child-row:hover .cat-child-desc { opacity: 1; }
+.d-flex.justify-content-between.align-items-center.mb-4
+  %h4.mb-0{style: "font-family: Poppins;"}
+    - if params[:unassigned].present?
+      Unassigned Tickets
+    - elsif params[:status].present?
+      = params[:status].humanize
+      Tickets
+    - else
+      All Tickets
 
-  .tickets-layout
-    / Left — Categories
-    .left-panel
-      .panel-title Categories
-      = link_to my_tickets_tickets_path, class: "category-chip" do
-        %span My Tickets
-        %span.chip-count= Ticket.where(customer: current_user).count
-
-    / Right — Create Tickets
-    .right-panel
-      .panel-title Create Tickets
-      .catalogue-panel
-        .catalogue-panel-header
-          To create a new ticket, kindly select a suitable service catalogue
-        - Ticket::CATALOGUE.each do |item|
-          - if item[:children]
-            .catalogue-group{"onclick" => "this.classList.toggle('open')"}
-              .catalogue-row
-                %i{class: "bi #{item[:icon]} cat-icon"}
-                .cat-row-body
-                  .cat-row-label= item[:label]
-                  .cat-row-desc= item[:desc]
-                %i.bi.bi-caret-down-fill.cat-toggle
-              .catalogue-children
-                - item[:children].each do |child|
-                  = link_to new_ticket_path(ticket_type: child[:type]), class: "catalogue-child-row" do
-                    .cat-child-label= child[:label]
-                    .cat-child-desc= child[:desc]
-          - else
-            = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-row" do
-              %i{class: "bi #{item[:icon]} cat-icon"}
-              .cat-row-body
-                .cat-row-label= item[:label]
-                .cat-row-desc= item[:desc]
-
-- else
-  .d-flex.justify-content-between.align-items-center.mb-4
-    %h4.mb-0{style: "font-family: Poppins;"}
-      - if params[:unassigned].present?
-        Unassigned Tickets
-      - elsif params[:status].present?
-        = params[:status].humanize
-        Tickets
-      - else
-        All Tickets
-
-  / Filters
-  .card.border-0.shadow-sm.mb-4
-    .card-body.py-2
-      = form_with url: tickets_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
+/ Filters
+.card.border-0.shadow-sm.mb-4
+  .card-body.py-2
+    = form_with url: tickets_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
+      .col-md-3
+        = label_tag :status, "Status", class: "form-label mb-1 fw-bold"
+        = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
+      .col-md-3
+        = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
+        = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }, params[:ticket_type]), class: "form-select form-select-sm"
+      - unless current_user.customer?
         .col-md-3
-          = label_tag :status, "Status", class: "form-label mb-1 fw-bold"
-          = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
-        .col-md-3
-          = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
-          -# = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }, params[:ticket_type]), class: "form-select form-select-sm"
-        - unless current_user.customer?
-          .col-md-3
-            = label_tag :unassigned, "Assignment", class: "form-label mb-1 fw-bold"
-            = select_tag :unassigned, options_for_select([["All", ""], ["Unassigned only", "true"]], params[:unassigned]), class: "form-select form-select-sm"
-        .col-md-2
-          = f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100"
-        .col-md-1
-          = link_to "Clear", tickets_path, class: "btn btn-outline-secondary btn-sm w-100"
+          = label_tag :unassigned, "Assignment", class: "form-label mb-1 fw-bold"
+          = select_tag :unassigned, options_for_select([["All", ""], ["Unassigned only", "true"]], params[:unassigned]), class: "form-select form-select-sm"
+      .col-md-2
+        = f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100"
+      .col-md-1
+        = link_to "Clear", tickets_path, class: "btn btn-outline-secondary btn-sm w-100"
 
-  / Tickets Table
-  .card.border-0.shadow-sm
-    .card-body.p-0
-      - if @tickets.any?
-        %table.table.table-hover.mb-0
-          %thead.table-light
+/ Tickets Table
+.card.border-0.shadow-sm
+  .card-body.p-0
+    - if @tickets.any?
+      %table.table.table-hover.mb-0
+        %thead.table-light
+          %tr
+            %th #
+            %th Title
+            %th Type
+            %th Status
+            %th Location
+            - unless current_user.customer?
+              %th Customer
+              %th Assignee
+            %th Created
+            %th
+        %tbody
+          - @tickets.each do |ticket|
             %tr
-              %th #
-              %th Title
-              %th Type
-              %th Status
-              %th Location
+              %td.text-muted{style: "font-size:13px;"}
+                \#{ticket.id}
+              %td
+                = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
+                - if ticket.on_behalf?
+                  %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
+              %td
+                %span
+                  = ticket.ticket_type.humanize
+              %td
+                - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+                %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
+              %td= ticket.location&.name || "-"
               - unless current_user.customer?
-                %th Customer
-                %th Assignee
-              %th Created
-              %th
-          %tbody
-            - @tickets.each do |ticket|
-              %tr
-                %td.text-muted{style: "font-size:13px;"}
-                  \#{ticket.id}
+                %td= ticket.customer&.fullname || "-"
                 %td
-                  = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
-                  - if ticket.on_behalf?
-                    %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
-                %td
-                  %span
-                    = ticket.ticket_type.humanize
-                %td
-                  - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
-                  %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
-                %td= ticket.location&.name || "-"
-                - unless current_user.customer?
-                  %td= ticket.customer&.fullname || "-"
-                  %td
-                    - if ticket.assignee.present?
-                      = ticket.assignee.fullname
-                    - else
-                      %span.text-danger Unassigned
-                      - if current_user.agent?
-                        = button_to "Grab", self_assign_ticket_path(ticket), method: :patch, class: "btn btn-xs btn-outline-success ms-1", style: "font-size:11px; padding: 1px 6px;"
-                %td{style: "font-size:13px;"}= ticket.created_at.strftime("%b %d, %Y")
-                %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
-      - else
-        .text-center.text-muted.py-5
-          %i.bi.bi-ticket-perforated{style: "font-size: 2rem;"}
-          %p.mt-2 No tickets found.
+                  - if ticket.assignee.present?
+                    = ticket.assignee.fullname
+                  - else
+                    %span.text-danger Unassigned
+                    - if current_user.agent?
+                      = button_to "Grab", self_assign_ticket_path(ticket), method: :patch, class: "btn btn-xs btn-outline-success ms-1", style: "font-size:11px; padding: 1px 6px;"
+              %td{style: "font-size:13px;"}= ticket.created_at.strftime("%b %d, %Y")
+              %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
+    - else
+      .text-center.text-muted.py-5
+        %i.bi.bi-ticket-perforated{style: "font-size: 2rem;"}
+        %p.mt-2 No tickets found.
