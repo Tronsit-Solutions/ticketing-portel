@@ -30,7 +30,6 @@ class TicketsController < ApplicationController
   def show
     @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
-    @ticket_files       = @ticket.ticket_files
     if current_user.customer?
       @my_tickets_count = Ticket.where(customer: current_user).count
       render :show_customer
@@ -174,14 +173,6 @@ class TicketsController < ApplicationController
 
   def save_attachments(ticket)
     return unless params[:ticket_attachments].present?
-    image_exts = %w[jpg jpeg png gif webp]
-    params[:ticket_attachments].each do |file|
-      ext = File.extname(file.original_filename).delete(".").downcase
-      if image_exts.include?(ext)
-        ticket.ticket_files.create!(image: file)
-      else
-        ticket.ticket_files.create!(file: file)
-      end
-    end
+    ticket.attachments.attach(params[:ticket_attachments])
   end
 end

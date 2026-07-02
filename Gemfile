@@ -25,9 +25,6 @@ gem "pagy"
 # Password hashing
 gem "bcrypt", "~> 3.1.7"
 
-# File uploads
-gem "carrierwave", "~> 1.3"
-gem "mini_magick"
 
 # UI
 gem "bootstrap", "~> 5.3"

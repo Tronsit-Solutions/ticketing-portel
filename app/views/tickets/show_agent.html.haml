@@ -142,18 +142,17 @@
               %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"}  On Behalf
 
     / Attachments
-    - if @ticket_files.any?
+    - if @ticket.attachments.any?
       .card.border-0.shadow-sm.mb-3
         .card-header.bg-white.fw-bold Attachments
         .card-body.p-0
-          - @ticket_files.each do |tf|
+          - @ticket.attachments.each do |attachment|
             .d-flex.align-items-center.gap-2.px-3.py-2.border-bottom
-              - if tf.image.present?
+              - if attachment.image?
                 %i.bi.bi-file-image.text-primary{style: "font-size:16px;"}
-                = link_to File.basename(tf.image.path.to_s), tf.image.url, target: "_blank", class: "text-decoration-none text-dark", style: "font-size:13px;"
-              - elsif tf.file.present?
+              - else
                 %i.bi.bi-file-earmark.text-secondary{style: "font-size:16px;"}
-                = link_to File.basename(tf.file.path.to_s), tf.file.url, target: "_blank", class: "text-decoration-none text-dark", style: "font-size:13px;"
+              = link_to attachment.filename.to_s, "#", class: "text-decoration-none text-dark", style: "font-size:13px;", "data-bs-toggle" => "modal", "data-bs-target" => "#attachmentPreviewModal", "data-attachment-url" => url_for(attachment), "data-attachment-name" => attachment.filename.to_s, "data-attachment-image" => attachment.blob.content_type.start_with?("image/").to_s
 
     / Assignment History
     .card.border-0.shadow-sm
@@ -175,6 +174,55 @@
                 %small.text-muted.fst-italic= a.reason
         - else
           .px-3.py-2.text-muted{style: "font-size:13px;"} No assignments yet.
+
+/ ── Attachment Preview Modal ─────────────────────────────────────
+#attachmentPreviewModal.modal.fade{"aria-labelledby" => "attachmentPreviewLabel", "aria-hidden" => "true", tabindex: "-1"}
+  .modal-dialog.modal-dialog-centered.modal-lg
+    .modal-content
+      .modal-header.border-0.pb-0
+        %h6.modal-title#attachmentPreviewLabel.fw-bold{"id" => "attachmentPreviewLabel"} Attachment
+        %button.btn-close{"data-bs-dismiss" => "modal", "aria-label" => "Close", type: "button"}
+      .modal-body.text-center.p-3
+        #attachmentImageContainer{style: "display:none;"}
+          %img#attachmentImage.img-fluid.rounded{src: "", alt: "attachment", style: "max-height:70vh;"}
+        #attachmentFileContainer{style: "display:none;"}
+          %iframe#attachmentIframe{src: "", style: "width:100%; height:70vh; border:none;"}
+      .modal-footer.border-0.pt-0.justify-content-end
+        = link_to "Download", "#", class: "btn btn-outline-primary btn-sm", id: "attachmentDownloadLink", download: true
+        %button.btn.btn-secondary.btn-sm{"data-bs-dismiss" => "modal", type: "button"} Close
+
+:javascript
+  document.getElementById('attachmentPreviewModal').addEventListener('show.bs.modal', function(event) {
+    var trigger = event.relatedTarget;
+    var url = trigger.getAttribute('data-attachment-url');
+    var name = trigger.getAttribute('data-attachment-name');
+    var isImage = trigger.getAttribute('data-attachment-image') === 'true';
+
+    document.getElementById('attachmentPreviewLabel').textContent = name;
+    document.getElementById('attachmentDownloadLink').href = url;
+
+    var imageContainer = document.getElementById('attachmentImageContainer');
+    var fileContainer = document.getElementById('attachmentFileContainer');
+    var img = document.getElementById('attachmentImage');
+    var iframe = document.getElementById('attachmentIframe');
+
+    if (isImage) {
+      img.src = url;
+      imageContainer.style.display = 'block';
+      fileContainer.style.display = 'none';
+      iframe.src = '';
+    } else {
+      iframe.src = url;
+      fileContainer.style.display = 'block';
+      imageContainer.style.display = 'none';
+      img.src = '';
+    }
+  });
+
+  document.getElementById('attachmentPreviewModal').addEventListener('hide.bs.modal', function() {
+    document.getElementById('attachmentImage').src = '';
+    document.getElementById('attachmentIframe').src = '';
+  });
 
 / ── Close Ticket Modal ──────────────────────────────────────────
 - if @ticket.status != "closed"

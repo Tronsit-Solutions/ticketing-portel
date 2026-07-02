@@ -34,8 +34,9 @@ class Ticket < ApplicationRecord
 
   has_many :ticket_assignments,   dependent: :destroy
   has_many :ticket_messages,      dependent: :destroy
-  has_many :ticket_files,         dependent: :destroy
   has_many :ticket_notifications, dependent: :destroy
+
+  has_many_attached :attachments
 
   before_validation :auto_title_for_bright_ideas
 
