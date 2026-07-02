@@ -198,14 +198,12 @@
     var name = trigger.getAttribute('data-attachment-name');
     var isImage = trigger.getAttribute('data-attachment-image') === 'true';
 
-    document.getElementById('attachmentPreviewLabel').textContent = name;
     document.getElementById('attachmentDownloadLink').href = url;
 
     var imageContainer = document.getElementById('attachmentImageContainer');
     var fileContainer = document.getElementById('attachmentFileContainer');
     var img = document.getElementById('attachmentImage');
     var iframe = document.getElementById('attachmentIframe');
-
     if (isImage) {
       img.src = url;
       imageContainer.style.display = 'block';
