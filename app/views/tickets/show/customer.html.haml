@@ -198,15 +198,12 @@
     .msg-modal-body#msgModalBody
 
 .show-layout
-  / Left — Navigation
+  / Left — Categories
   .left-panel
-    .panel-title Navigation
+    .panel-title Categories
     = link_to tickets_path, class: "category-chip" do
       %span My Tickets
       %span.chip-count= @my_tickets_count
-    = link_to catalogue_tickets_path, class: "category-chip mt-2" do
-      %span Create Ticket
-      %i.bi.bi-plus-lg
 
   / Right — Ticket Detail
   .right-panel
@@ -261,9 +258,3 @@
                 %i.bi.bi-folder2-open
             .ticket-msg-text= message.details
 
-        / Reply form
-        - if @ticket.status != "closed"
-          .ticket-reply-form
-            = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
-              = f.text_area :details, rows: 3, class: "form-control mb-2", placeholder: "Write your reply here..."
-              = f.submit "Send Reply", class: "btn btn-primary btn-sm"

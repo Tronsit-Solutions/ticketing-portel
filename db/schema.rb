@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_02_122429) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_02_151351) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,28 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_02_122429) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "hiring_details", force: :cascade do |t|
+    t.bigint "ticket_id", null: false
+    t.date "start_date"
+    t.date "date_of_birth"
+    t.string "title_position"
+    t.boolean "is_provider", default: false, null: false
+    t.string "department"
+    t.string "gender"
+    t.string "cell_phone"
+    t.string "badge_number"
+    t.string "credentials_send_to"
+    t.string "existing_pc_user"
+    t.text "additional_info"
+    t.string "pc_requirement"
+    t.string "microsoft_teams_department"
+    t.string "access_systems", default: [], array: true
+    t.string "distribution_groups", default: [], array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ticket_id"], name: "index_hiring_details_on_ticket_id"
+  end
+
   create_table "locations", force: :cascade do |t|
     t.string "name", null: false
     t.string "abbreviation", null: false
@@ -58,6 +80,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_02_122429) do
     t.datetime "updated_at", null: false
     t.bigint "manager_id"
     t.index ["name"], name: "index_teams_on_name", unique: true
+  end
+
+  create_table "termination_details", force: :cascade do |t|
+    t.bigint "ticket_id", null: false
+    t.string "termination_reason"
+    t.date "termination_date"
+    t.string "termination_time"
+    t.string "email_address"
+    t.string "key_card"
+    t.boolean "email_forward_needed", default: false, null: false
+    t.string "email_forwarded_to"
+    t.boolean "historical_email_access", default: false, null: false
+    t.text "additional_instructions"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ticket_id"], name: "index_termination_details_on_ticket_id"
   end
 
   create_table "ticket_assignments", force: :cascade do |t|
@@ -160,6 +198,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_02_122429) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "hiring_details", "tickets"
+  add_foreign_key "termination_details", "tickets"
   add_foreign_key "ticket_assignments", "tickets"
   add_foreign_key "ticket_assignments", "users", column: "assigned_by_id"
   add_foreign_key "ticket_assignments", "users", column: "assigned_from_id"

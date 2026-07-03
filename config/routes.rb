@@ -46,6 +46,8 @@ Rails.application.routes.draw do
       patch :close
     end
     resources :ticket_messages, only: [:create]
+    resource  :hiring_detail,      only: [:new, :create]
+    resource  :termination_detail, only: [:new, :create]
   end
 
   resources :ticket_notifications, only: [:index] do

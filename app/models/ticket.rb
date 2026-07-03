@@ -32,9 +32,11 @@ class Ticket < ApplicationRecord
   belongs_to :resolved_by,  class_name: "User", optional: true
   belongs_to :created_by,   class_name: "User", optional: true
 
-  has_many :ticket_assignments,   dependent: :destroy
-  has_many :ticket_messages,      dependent: :destroy
-  has_many :ticket_notifications, dependent: :destroy
+  has_many  :ticket_assignments,   dependent: :destroy
+  has_many  :ticket_messages,      dependent: :destroy
+  has_many  :ticket_notifications, dependent: :destroy
+  has_one   :hiring_detail,        dependent: :destroy
+  has_one   :termination_detail,   dependent: :destroy
 
   has_many_attached :attachments
 

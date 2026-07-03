@@ -1,4 +1,8 @@
 :css
+  .ntb-wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+  }
   .new-ticket-btn {
     display: flex;
     align-items: center;
@@ -9,7 +13,6 @@
     border-radius: 12px;
     text-decoration: none;
     color: #1a1a1a;
-    max-width: 860px;
     transition: box-shadow 0.18s, border-color 0.18s;
   }
   .new-ticket-btn:hover {
@@ -33,10 +36,11 @@
   .ntb-desc  { font-size: 14px; color: #555; line-height: 1.5; }
   .ntb-chevron { font-size: 26px; color: #1a1a1a; flex-shrink: 0; }
 
-= link_to catalogue_tickets_path, class: "new-ticket-btn" do
-  .ntb-icon
-    %i.bi.bi-ticket-perforated-fill
-  .ntb-body
-    .ntb-title Create A New Ticket
-    .ntb-desc Fill out a form for something specific or give us a brief description of your issue
-  %i.bi.bi-chevron-right.ntb-chevron
+.ntb-wrapper
+  = link_to catalogue_tickets_path, class: "new-ticket-btn" do
+    .ntb-icon
+      %i.bi.bi-ticket-perforated-fill
+    .ntb-body
+      .ntb-title Create A New Ticket
+      .ntb-desc Fill out a form for something specific or give us a brief description of your issue
+    %i.bi.bi-chevron-right.ntb-chevron
