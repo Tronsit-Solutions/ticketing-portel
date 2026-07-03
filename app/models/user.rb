@@ -14,7 +14,7 @@ class User < ApplicationRecord
   has_many :customer_tickets,  class_name: "Ticket", foreign_key: :customer_id,  dependent: :nullify
 
   ROLES = %w[admin agent manager customer].freeze
-  validates :fullname,  presence: true
+  # validates :fullname,  presence: true
   validates :role,      inclusion: { in: ROLES }
 
   scope :agents,    -> { where(role: "agent") }
