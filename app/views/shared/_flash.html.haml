@@ -6,3 +6,13 @@
   .alert.alert-danger.alert-dismissible.fade.show.mx-3.mt-2{:role => "alert"}
     = alert
     %button.btn-close{"data-bs-dismiss" => "alert", :type => "button"}
+
+:javascript
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      document.querySelectorAll('.alert.alert-dismissible').forEach(function(el) {
+        var bsAlert = bootstrap.Alert.getOrCreateInstance(el);
+        bsAlert.close();
+      });
+    }, 5000);
+  });

@@ -1,4 +1,8 @@
 :css
+  .notif-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
   .notif-header {
     display: flex;
     align-items: center;
@@ -73,34 +77,35 @@
   .empty-state i { font-size: 2.5rem; }
   .empty-state p { margin-top: 12px; font-size: 14px; }
 
-.notif-header
-  %h4 Notifications
-  - if @notifications.any?(&:unread?)
-    = button_to "Mark All as Read",
-      mark_all_read_ticket_notifications_path,
-      method: :patch,
-      class: "btn btn-sm btn-outline-secondary"
+.notif-wrap
+  .notif-header
+    %h4 Notifications
+    - if @notifications.any?(&:unread?)
+      = button_to "Mark All as Read",
+        mark_all_read_ticket_notifications_path,
+        method: :patch,
+        class: "btn btn-sm btn-outline-secondary"
 
-.notif-card
-  - if @notifications.any?
-    - @notifications.each do |notification|
-      .notif-row{class: notification.unread? ? "unread" : ""}
-        = button_to mark_read_ticket_notification_path(notification), method: :patch, class: "notif-avatar-link", style: "background:none;border:none;padding:0;" do
-          .notif-avatar-img
-            %i.bi.bi-person-fill
-        .notif-body
-          .notif-text
-            - if notification.responded_by.present?
-              %strong= notification.responded_by.email
-            - else
-              %strong System
-            = " — #{notification.details}"
-          .notif-meta
-            was sent on
-            %span.notif-date= notification.created_at.strftime("%d %B, %y")
-        - if notification.unread?
-          .notif-badge
-  - else
-    .empty-state
-      %i.bi.bi-bell-slash
-      %p No notifications yet.
+  .notif-card
+    - if @notifications.any?
+      - @notifications.each do |notification|
+        .notif-row{class: notification.unread? ? "unread" : ""}
+          = button_to mark_read_ticket_notification_path(notification), method: :patch, class: "notif-avatar-link", style: "background:none;border:none;padding:0;" do
+            .notif-avatar-img
+              %i.bi.bi-person-fill
+          .notif-body
+            .notif-text
+              - if notification.responded_by.present?
+                %strong= notification.responded_by.email
+              - else
+                %strong System
+              = " — #{notification.details}"
+            .notif-meta
+              was sent on
+              %span.notif-date= notification.created_at.strftime("%d %B, %y")
+          - if notification.unread?
+            .notif-badge
+    - else
+      .empty-state
+        %i.bi.bi-bell-slash
+        %p No notifications yet.

@@ -120,9 +120,9 @@
 
 - if current_user.customer?
   .tickets-layout
-    / Left — Navigation
+    / Left — Categories
     .left-panel
-      .panel-title Navigation
+      .panel-title Categories
       = link_to tickets_path, class: "category-chip" do
         %span My Tickets
         %span.chip-count= Ticket.where(customer: current_user).count
