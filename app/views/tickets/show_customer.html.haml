@@ -204,9 +204,6 @@
     = link_to tickets_path, class: "category-chip" do
       %span My Tickets
       %span.chip-count= @my_tickets_count
-    = link_to catalogue_tickets_path, class: "category-chip mt-2" do
-      %span Create Ticket
-      %i.bi.bi-plus-lg
 
   / Right — Ticket Detail
   .right-panel
@@ -228,6 +225,34 @@
         - ticket_modal_data = [{ label: "Subject", value: @ticket.title }]
         - ticket_modal_data << { label: "Issue", value: @ticket.metadata["details"] } if @ticket.metadata["details"].present?
         - (@ticket.metadata.except("details") || {}).each { |k,v| ticket_modal_data << { label: k.humanize, value: v } if v.present? }
+        - if @ticket.ticket_type == "hiring_departure"
+          - if @ticket.metadata["request_type"] == "Termination" && (td = @ticket.termination_detail).present?
+            - ticket_modal_data << { label: "Termination Reason", value: td.termination_reason }
+            - ticket_modal_data << { label: "Termination Date", value: td.termination_date&.strftime("%b %d, %Y") }
+            - ticket_modal_data << { label: "Time to Process", value: td.termination_time }
+            - ticket_modal_data << { label: "Email Address", value: td.email_address }
+            - ticket_modal_data << { label: "Key Card", value: td.key_card }
+            - ticket_modal_data << { label: "Email Forward Needed", value: td.email_forward_needed? ? "Yes" : "No" }
+            - ticket_modal_data << { label: "Forward Email To", value: td.email_forwarded_to }
+            - ticket_modal_data << { label: "Historical Email Access", value: td.historical_email_access? ? "Yes" : "No" }
+            - ticket_modal_data << { label: "Additional Instructions", value: td.additional_instructions }
+          - elsif (hd = @ticket.hiring_detail).present?
+            - ticket_modal_data << { label: "Start Date", value: hd.start_date&.strftime("%b %d, %Y") }
+            - ticket_modal_data << { label: "Date of Birth", value: hd.date_of_birth&.strftime("%b %d, %Y") }
+            - ticket_modal_data << { label: "Title/Position", value: hd.title_position }
+            - ticket_modal_data << { label: "Is Provider", value: hd.is_provider? ? "Yes" : "No" }
+            - ticket_modal_data << { label: "Department", value: hd.department }
+            - ticket_modal_data << { label: "Gender", value: hd.gender }
+            - ticket_modal_data << { label: "Cell Phone", value: hd.cell_phone }
+            - ticket_modal_data << { label: "Badge Number", value: hd.badge_number }
+            - ticket_modal_data << { label: "Access/Systems", value: Array(hd.access_systems).reject(&:blank?).join(", ") }
+            - ticket_modal_data << { label: "Distribution Groups", value: Array(hd.distribution_groups).reject(&:blank?).join(", ") }
+            - ticket_modal_data << { label: "Microsoft Teams", value: hd.microsoft_teams_department }
+            - ticket_modal_data << { label: "Credentials Send To", value: hd.credentials_send_to }
+            - ticket_modal_data << { label: "PC Requirement", value: hd.pc_requirement }
+            - ticket_modal_data << { label: "Existing PC User", value: hd.existing_pc_user }
+            - ticket_modal_data << { label: "Additional Info", value: hd.additional_info }
+        - ticket_modal_data.reject! { |r| r[:value].blank? }
         - ticket_modal_json = ticket_modal_data.map { |r| "{label:#{r[:label].to_json},value:#{r[:value].to_json}}" }.join(",")
         .ticket-message-block
           .ticket-msg-header
@@ -249,6 +274,33 @@
             .ticket-field
               %span.field-label= "#{key.humanize}:"
               %span.field-value= value
+
+          / Hiring/Termination details inline display for customer
+          - if @ticket.ticket_type == "hiring_departure"
+            - if @ticket.metadata["request_type"] == "Termination"
+              - td = @ticket.termination_detail
+              - if td.present?
+                - [["Termination Reason", td.termination_reason], ["Termination Date", td.termination_date&.strftime("%b %d, %Y")], ["Time to Process", td.termination_time], ["Email Address", td.email_address], ["Key Card", td.key_card], ["Email Forward Needed", td.email_forward_needed? ? "Yes" : "No"], ["Forward Email To", td.email_forwarded_to], ["Historical Email Access", td.historical_email_access? ? "Yes" : "No"], ["Additional Instructions", td.additional_instructions]].each do |label, value|
+                  - next if value.blank?
+                  .ticket-field
+                    %span.field-label= "#{label}:"
+                    %span.field-value= value
+              - else
+                .ticket-field
+                  %span.field-label Termination Details:
+                  %span.field-value.text-muted Not yet submitted.
+            - else
+              - hd = @ticket.hiring_detail
+              - if hd.present?
+                - [["Start Date", hd.start_date&.strftime("%b %d, %Y")], ["Date of Birth", hd.date_of_birth&.strftime("%b %d, %Y")], ["Title/Position", hd.title_position], ["Is Provider", hd.is_provider? ? "Yes" : "No"], ["Department", hd.department], ["Gender", hd.gender], ["Cell Phone", hd.cell_phone], ["Badge Number", hd.badge_number], ["Access/Systems", Array(hd.access_systems).reject(&:blank?).join(", ")], ["Distribution Groups", Array(hd.distribution_groups).reject(&:blank?).join(", ")], ["Microsoft Teams", hd.microsoft_teams_department], ["Credentials Send To", hd.credentials_send_to], ["PC Requirement", hd.pc_requirement], ["Existing PC User", hd.existing_pc_user], ["Additional Info", hd.additional_info]].each do |label, value|
+                  - next if value.blank?
+                  .ticket-field
+                    %span.field-label= "#{label}:"
+                    %span.field-value= value
+              - else
+                .ticket-field
+                  %span.field-label Hiring Details:
+                  %span.field-value.text-muted Not yet submitted.
 
         / Message thread
         - @ticket_messages.each do |message|

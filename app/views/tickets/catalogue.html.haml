@@ -126,9 +126,6 @@
       = link_to tickets_path, class: "category-chip" do
         %span My Tickets
         %span.chip-count= Ticket.where(customer: current_user).count
-      = link_to catalogue_tickets_path, class: "category-chip active mt-2" do
-        %span Create Ticket
-        %i.bi.bi-plus-lg
 
     / Right — Service Catalogue
     .right-panel

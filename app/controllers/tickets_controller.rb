@@ -62,7 +62,15 @@ class TicketsController < ApplicationController
     if @ticket.save
       save_attachments(@ticket)
       notify_staff_of_new_ticket if current_user.customer?
-      redirect_to @ticket, notice: "Ticket submitted successfully."
+      if @ticket.ticket_type == "hiring_departure"
+        if @ticket.metadata["request_type"] == "Termination"
+          redirect_to new_ticket_termination_detail_path(@ticket)
+        else
+          redirect_to new_ticket_hiring_detail_path(@ticket)
+        end
+      else
+        redirect_to @ticket, notice: "Ticket submitted successfully."
+      end
     else
       @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
       @customers   = User.customers.active.order(:fullname) unless current_user.customer?

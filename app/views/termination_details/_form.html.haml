@@ -1,0 +1,36 @@
+- label_class  = css_class == "cust" ? "cust-form-label"  : "form-label"
+- input_class  = css_class == "cust" ? "cust-form-control" : "form-control"
+- select_class = css_class == "cust" ? "cust-form-select"  : "form-select"
+- field_wrap   = css_class == "cust" ? "cust-field"        : "mb-3"
+
+%div{class: field_wrap}
+  = f.label :termination_reason, "Termination Reason", class: label_class
+  = f.select :termination_reason, options_for_select(TerminationDetail::TERMINATION_REASONS, termination_detail.termination_reason), {}, class: select_class
+
+%div{class: field_wrap}
+  = f.label :termination_date, "Termination Date", class: label_class
+  = f.date_field :termination_date, class: input_class
+
+%div{class: field_wrap}
+  = f.label :termination_time, "Time to process termination ? ie. 5:00PM, 3:30PM, etc", class: label_class
+  = f.text_field :termination_time, class: input_class, placeholder: "Your Answer"
+
+%div{class: field_wrap}
+  = f.label :email_address, "What Is their Email Address ?", class: label_class
+  = f.text_field :email_address, class: input_class, placeholder: "Your Answer"
+
+%div{class: field_wrap}
+  = f.label :key_card, "What is the their key card?", class: label_class
+  = f.text_field :key_card, class: input_class, placeholder: "Enter Keycard"
+
+%div{class: field_wrap}
+  = f.label :email_forward_needed, "Do You need their email forwarded to someone else?", class: label_class
+  = f.select :email_forward_needed, options_for_select(TerminationDetail::YES_NO_OPTIONS, termination_detail.email_forward_needed.to_s), {}, class: select_class
+
+%div{class: field_wrap}
+  = f.label :historical_email_access, "Do You require access to historical email(old emails) information for the person leaving?", class: label_class
+  = f.select :historical_email_access, options_for_select(TerminationDetail::YES_NO_OPTIONS, termination_detail.historical_email_access.to_s), {}, class: select_class
+
+%div{class: field_wrap}
+  = f.label :additional_instructions, "Have we missed something? Use this field for any additional instructions:", class: label_class
+  = f.text_area :additional_instructions, class: input_class, placeholder: "Your Answer", rows: 5

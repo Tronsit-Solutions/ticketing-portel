@@ -1,0 +1,96 @@
+- label_class  = css_class == "cust" ? "cust-form-label"  : "form-label"
+- input_class  = css_class == "cust" ? "cust-form-control" : "form-control"
+- select_class = css_class == "cust" ? "cust-form-select"  : "form-select"
+- field_wrap   = css_class == "cust" ? "cust-field"        : "mb-3"
+
+%div{class: field_wrap}
+  = f.label :start_date, "Start Date", class: label_class
+  = f.date_field :start_date, class: input_class
+
+%div{class: field_wrap}
+  = f.label :date_of_birth, "Date of Birth", class: label_class
+  = f.date_field :date_of_birth, class: input_class
+
+%div{class: field_wrap}
+  = f.label :title_position, "Title/Position :", class: label_class
+  = f.select :title_position, options_for_select(HiringDetail::TITLE_OPTIONS, hiring_detail.title_position), {}, class: select_class
+
+%div{class: field_wrap}
+  = f.label :is_provider, "Is this user a provider ?", class: label_class
+  = f.select :is_provider, options_for_select([["No", false], ["Yes", true]], hiring_detail.is_provider), {}, class: select_class
+
+%div{class: field_wrap}
+  = f.label :department, "Please select their Department :", class: label_class
+  = f.select :department, options_for_select(HiringDetail::DEPARTMENT_OPTIONS, hiring_detail.department), {}, class: select_class
+
+%div{class: field_wrap}
+  %label{class: label_class} What Access/Systems Are Needed ?
+  - HiringDetail::ACCESS_SYSTEMS.each do |system|
+    .form-check
+      = check_box_tag "hiring_detail[access_systems][]", system, Array(hiring_detail.access_systems).include?(system), id: "access_#{system.parameterize}", class: "form-check-input"
+      = label_tag "access_#{system.parameterize}", system, class: "form-check-label"
+
+%div{class: field_wrap}
+  %label{class: label_class} Gender:
+  .form-check
+    = radio_button_tag "hiring_detail[gender]", "Male", hiring_detail.gender == "Male", id: "gender_male", class: "form-check-input"
+    = label_tag "gender_male", "Male", class: "form-check-label"
+  .form-check
+    = radio_button_tag "hiring_detail[gender]", "Female", hiring_detail.gender == "Female", id: "gender_female", class: "form-check-input"
+    = label_tag "gender_female", "Female", class: "form-check-label"
+
+%div{class: field_wrap}
+  = f.label :cell_phone, "Cell Phone Number", class: label_class
+  = f.text_field :cell_phone, class: input_class, placeholder: "Your Answer"
+
+%div{class: field_wrap}
+  = f.label :badge_number, "What is the badge Number?", class: label_class
+  = f.text_field :badge_number, class: input_class, placeholder: "Your Answer"
+
+%div{class: field_wrap}
+  %label{class: label_class} What Distribution Groups should the new team mate be added to if any?
+  - HiringDetail::DISTRIBUTION_GROUPS.each do |group|
+    .form-check
+      = check_box_tag "hiring_detail[distribution_groups][]", group, Array(hiring_detail.distribution_groups).include?(group), id: "dist_#{group.parameterize}", class: "form-check-input"
+      = label_tag "dist_#{group.parameterize}", group, class: "form-check-label"
+
+%div{class: field_wrap}
+  = f.label :microsoft_teams_department, "What Microsoft Teams should the member be a part of ?", class: label_class
+  = f.text_field :microsoft_teams_department, class: input_class, placeholder: "Select Department"
+
+%div{class: field_wrap}
+  = f.label :credentials_send_to, "Who should we send their credentials to if anyone ?", class: label_class
+  = f.text_field :credentials_send_to, class: input_class, placeholder: "Your Answer"
+
+%div{class: field_wrap}
+  %label{class: label_class} PC Requirements:
+  - HiringDetail::PC_REQUIREMENTS.each do |req|
+    .form-check
+      = radio_button_tag "hiring_detail[pc_requirement]", req, hiring_detail.pc_requirement == req, id: "pc_#{req.parameterize}", class: "form-check-input"
+      = label_tag "pc_#{req.parameterize}", req, class: "form-check-label"
+
+%div{class: field_wrap}
+  = f.label :existing_pc_user, "If existing PC, who was using before ?", class: label_class
+  = f.text_field :existing_pc_user, class: input_class, placeholder: "Your Answer"
+
+%div{class: field_wrap}
+  = f.label :additional_info, "Any other information that would be useful to know:(Application/FOB) ? Number/Special Setup/Requirement)", class: label_class
+  = f.text_area :additional_info, class: input_class, placeholder: "Your Answer", rows: 5
+
+%div{class: field_wrap}
+  %p.fw-bold.mb-1{style: "font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em;"} NOTIFICATION REQUIREMENTS:
+  %p.mb-1{style: "font-size: 13px;"}
+    ENSURE THE FOLLOWING GETS A TICKET UPDATE NOTIFYING OF HIRE:
+    = mail_to "kpalladino@arthritiskneepain.com", "kpalladino@arthritiskneepain.com", style: "color:#0077b6;"
+    ;
+    = mail_to "ascatena@hcmediallc.com", "ascatena@hcmediallc.com", style: "color:#0077b6;"
+  %p.mb-0{style: "font-size: 13px;"}
+    If user is being assigned CureMD, send to these instead:
+    %br
+    = mail_to "michaela.martino@curemd.com", "michaela.martino@curemd.com", style: "color:#0077b6;"
+    ;
+    = mail_to "evan.hughes@curemd.com", "evan.hughes@curemd.com", style: "color:#0077b6;"
+    ;
+    = mail_to "kpalladino@arthritiskneepain.com", "kpalladino@arthritiskneepain.com", style: "color:#0077b6;"
+    ;
+    = mail_to "ascatena@hcmediallc.com", "ascatena@hcmediallc.com", style: "color:#0077b6;"

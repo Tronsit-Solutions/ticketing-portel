@@ -70,6 +70,106 @@
               %small.text-muted.fw-semibold Issue Category
               %p.mt-1.mb-0= @ticket.metadata["issue"]
 
+    / Hiring / Termination Detail card — only for hiring_departure tickets
+    - if @ticket.ticket_type == "hiring_departure"
+      - request_type = @ticket.metadata["request_type"]
+      - if request_type == "Termination"
+        - td = @ticket.termination_detail
+        .card.border-0.shadow-sm.mb-3
+          .card-header.bg-white.d-flex.justify-content-between.align-items-center
+            %span.fw-bold Termination Details
+            - unless td.present?
+              = link_to "Fill Details", new_ticket_termination_detail_path(@ticket), class: "btn btn-sm btn-outline-primary"
+          .card-body
+            - if td.present?
+              .row.g-3
+                .col-md-6
+                  %small.text-muted Termination Reason
+                  %div= td.termination_reason || "-"
+                .col-md-6
+                  %small.text-muted Termination Date
+                  %div= td.termination_date&.strftime("%b %d, %Y") || "-"
+                .col-md-6
+                  %small.text-muted Time to Process
+                  %div= td.termination_time || "-"
+                .col-md-6
+                  %small.text-muted Email Address
+                  %div= td.email_address || "-"
+                .col-md-6
+                  %small.text-muted Key Card
+                  %div= td.key_card || "-"
+                .col-md-6
+                  %small.text-muted Email Forward Needed?
+                  %div= td.email_forward_needed? ? "Yes" : "No"
+                .col-md-6
+                  %small.text-muted Forward Email To
+                  %div= td.email_forwarded_to.presence || "-"
+                .col-md-6
+                  %small.text-muted Historical Email Access?
+                  %div= td.historical_email_access? ? "Yes" : "No"
+                .col-md-12
+                  %small.text-muted Additional Instructions
+                  %div= td.additional_instructions || "-"
+            - else
+              %p.text-muted.mb-0 Termination details not yet submitted.
+      - else
+        - hd = @ticket.hiring_detail
+        .card.border-0.shadow-sm.mb-3
+          .card-header.bg-white.d-flex.justify-content-between.align-items-center
+            %span.fw-bold New Team Member Details
+            - unless hd.present?
+              = link_to "Fill Details", new_ticket_hiring_detail_path(@ticket), class: "btn btn-sm btn-outline-primary"
+          .card-body
+            - if hd.present?
+              .row.g-3
+                .col-md-6
+                  %small.text-muted Start Date
+                  %div= hd.start_date&.strftime("%b %d, %Y") || "-"
+                .col-md-6
+                  %small.text-muted Date of Birth
+                  %div= hd.date_of_birth&.strftime("%b %d, %Y") || "-"
+                .col-md-6
+                  %small.text-muted Title / Position
+                  %div= hd.title_position || "-"
+                .col-md-6
+                  %small.text-muted Is Provider?
+                  %div= hd.is_provider? ? "Yes" : "No"
+                .col-md-6
+                  %small.text-muted Department
+                  %div= hd.department || "-"
+                .col-md-6
+                  %small.text-muted Gender
+                  %div= hd.gender || "-"
+                .col-md-6
+                  %small.text-muted Cell Phone
+                  %div= hd.cell_phone || "-"
+                .col-md-6
+                  %small.text-muted Badge Number
+                  %div= hd.badge_number || "-"
+                .col-md-12
+                  %small.text-muted Access / Systems Needed
+                  %div= Array(hd.access_systems).reject(&:blank?).join(", ").presence || "-"
+                .col-md-12
+                  %small.text-muted Distribution Groups
+                  %div= Array(hd.distribution_groups).reject(&:blank?).join(", ").presence || "-"
+                .col-md-6
+                  %small.text-muted Microsoft Teams Department
+                  %div= hd.microsoft_teams_department || "-"
+                .col-md-6
+                  %small.text-muted Credentials Send To
+                  %div= hd.credentials_send_to || "-"
+                .col-md-6
+                  %small.text-muted PC Requirement
+                  %div= hd.pc_requirement || "-"
+                .col-md-6
+                  %small.text-muted Existing PC User
+                  %div= hd.existing_pc_user || "-"
+                .col-md-12
+                  %small.text-muted Additional Info
+                  %div= hd.additional_info || "-"
+            - else
+              %p.text-muted.mb-0 Hiring details not yet submitted.
+
 
     / Conversation
     .card.border-0.shadow-sm.mb-3
