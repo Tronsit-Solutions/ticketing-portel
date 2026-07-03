@@ -313,9 +313,3 @@
                 %i.bi.bi-folder2-open
             .ticket-msg-text= message.details
 
-        / Reply form
-        - if @ticket.status != "closed"
-          .ticket-reply-form
-            = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
-              = f.text_area :details, rows: 3, class: "form-control mb-2", placeholder: "Write your reply here..."
-              = f.submit "Send Reply", class: "btn btn-primary btn-sm"
