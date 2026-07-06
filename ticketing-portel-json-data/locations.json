@@ -1,0 +1,282 @@
+[
+{
+  "model": "superadmin.location",
+  "pk": 1,
+  "fields": {
+    "name": "Phoenix, AZ",
+    "abbreviation": "AZPHX",
+    "state": "Arizona",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 2,
+  "fields": {
+    "name": "Sun City, AZ",
+    "abbreviation": "SUNV",
+    "state": "Arizona",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 3,
+  "fields": {
+    "name": "Charlotte, NC",
+    "abbreviation": "NCCHA",
+    "state": "North Carolina",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 4,
+  "fields": {
+    "name": "Louisville, KY",
+    "abbreviation": "KYLOU",
+    "state": "Kentucky",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 5,
+  "fields": {
+    "name": "Pineville, NC",
+    "abbreviation": "NCPIN",
+    "state": "North Carolina",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 6,
+  "fields": {
+    "name": "Lexington, KY",
+    "abbreviation": "KYLEX",
+    "state": "Kentucky",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 7,
+  "fields": {
+    "name": "Wall, NJ",
+    "abbreviation": "NJWALL",
+    "state": "New Jersey",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 8,
+  "fields": {
+    "name": "Garden City, NY",
+    "abbreviation": "NYGC",
+    "state": "New York",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 9,
+  "fields": {
+    "name": "Manhattan, NY",
+    "abbreviation": "NYMAN",
+    "state": "New York",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 10,
+  "fields": {
+    "name": "Smithtown, NY",
+    "abbreviation": "NYSMI",
+    "state": "New York",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 11,
+  "fields": {
+    "name": "White Plains, NY",
+    "abbreviation": "NYWP",
+    "state": "New York",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 12,
+  "fields": {
+    "name": "Cincinnati, OH",
+    "abbreviation": "OHCIN",
+    "state": "Ohio",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 13,
+  "fields": {
+    "name": "Dublin, OH",
+    "abbreviation": "OHDUB",
+    "state": "Ohio",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 14,
+  "fields": {
+    "name": "Columbia, SC",
+    "abbreviation": "SCCOL",
+    "state": "South Carolina",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 15,
+  "fields": {
+    "name": "Dallas, TX",
+    "abbreviation": "TXDAL",
+    "state": "Texas",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 16,
+  "fields": {
+    "name": "Woodlands, TX",
+    "abbreviation": "TXWOO",
+    "state": "Texas",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 17,
+  "fields": {
+    "name": "Remote",
+    "abbreviation": "RE",
+    "state": "Remote",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 18,
+  "fields": {
+    "name": "Other Location",
+    "abbreviation": "NA",
+    "state": "NA",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 19,
+  "fields": {
+    "name": "Alpharetta, GA",
+    "abbreviation": "GAALP",
+    "state": "Georgia",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 20,
+  "fields": {
+    "name": "limitlessli",
+    "abbreviation": "NA",
+    "state": "NA",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 21,
+  "fields": {
+    "name": "Greensboro, NC",
+    "abbreviation": "NCGBO",
+    "state": "North Carolina",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 22,
+  "fields": {
+    "name": "Bellaire, TX",
+    "abbreviation": "TXBEL",
+    "state": "Texas",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 23,
+  "fields": {
+    "name": "Katy, TX",
+    "abbreviation": "TXKAT",
+    "state": "Texas",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 24,
+  "fields": {
+    "name": "Webster, TX",
+    "abbreviation": "TXWEB",
+    "state": "Texas",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 25,
+  "fields": {
+    "name": "Cary, NC",
+    "abbreviation": "NCCAR",
+    "state": "North Carolina",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 26,
+  "fields": {
+    "name": "Shelby, MI",
+    "abbreviation": "MISHE",
+    "state": "Michigan",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 27,
+  "fields": {
+    "name": "Dearborn, MI",
+    "abbreviation": "MIDBR",
+    "state": "Michigan",
+    "is_active": true
+  }
+},
+{
+  "model": "superadmin.location",
+  "pk": 28,
+  "fields": {
+    "name": "Flint, MI",
+    "abbreviation": "MIFLI",
+    "state": "Michigan",
+    "is_active": true
+  }
+}
+]

@@ -1,0 +1,555 @@
+[
+{
+  "model": "superadmin.team",
+  "pk": 1,
+  "fields": {
+    "name": "6-Mo Re-eval"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 2,
+  "fields": {
+    "name": "Advertising & Marketing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 3,
+  "fields": {
+    "name": "AKPC Foundation"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 4,
+  "fields": {
+    "name": "All Practices - Completed Treatment"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 5,
+  "fields": {
+    "name": "AZPHX Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 6,
+  "fields": {
+    "name": "AZPHX Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 7,
+  "fields": {
+    "name": "CC Gurus"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 8,
+  "fields": {
+    "name": "CC Management"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 9,
+  "fields": {
+    "name": "Clinical Documentation/Compliance"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 10,
+  "fields": {
+    "name": "Community Engagement"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 11,
+  "fields": {
+    "name": "Contact Center"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 12,
+  "fields": {
+    "name": "CureMD Meetings"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 13,
+  "fields": {
+    "name": "DAWG"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 14,
+  "fields": {
+    "name": "Dublin Crew"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 15,
+  "fields": {
+    "name": "Executive"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 16,
+  "fields": {
+    "name": "FINAL Summit Presentations"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 17,
+  "fields": {
+    "name": "Finance"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 18,
+  "fields": {
+    "name": "For Employees"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 19,
+  "fields": {
+    "name": "Front Desk Ladies"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 20,
+  "fields": {
+    "name": "Hiring Committee"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 21,
+  "fields": {
+    "name": "Human Resources"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 22,
+  "fields": {
+    "name": "Kristin's Team"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 23,
+  "fields": {
+    "name": "KYLEX Clinic UPDATES"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 24,
+  "fields": {
+    "name": "KYLEX Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 25,
+  "fields": {
+    "name": "KYLEX Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 26,
+  "fields": {
+    "name": "KYLOU Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 27,
+  "fields": {
+    "name": "KYLOU Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 28,
+  "fields": {
+    "name": "Legal"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 29,
+  "fields": {
+    "name": "Lexington Staff"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 30,
+  "fields": {
+    "name": "Management"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 31,
+  "fields": {
+    "name": "Marketing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 32,
+  "fields": {
+    "name": "NCCAR Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 33,
+  "fields": {
+    "name": "NCCAR Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 34,
+  "fields": {
+    "name": "NCCHA Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 35,
+  "fields": {
+    "name": "NCCHA Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 36,
+  "fields": {
+    "name": "NCGBO Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 37,
+  "fields": {
+    "name": "NCGBO Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 38,
+  "fields": {
+    "name": "NCPIN Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 39,
+  "fields": {
+    "name": "NCPIN Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 40,
+  "fields": {
+    "name": "NCPinevilleteam"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 41,
+  "fields": {
+    "name": "NCUniversityteam"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 42,
+  "fields": {
+    "name": "New Practice Opening"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 43,
+  "fields": {
+    "name": "NJWALL Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 44,
+  "fields": {
+    "name": "NJWALL Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 45,
+  "fields": {
+    "name": "Nutraceutical"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 46,
+  "fields": {
+    "name": "NYGC Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 47,
+  "fields": {
+    "name": "NYGC Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 48,
+  "fields": {
+    "name": "NYMAN Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 49,
+  "fields": {
+    "name": "NYMAN Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 50,
+  "fields": {
+    "name": "NYSMI Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 51,
+  "fields": {
+    "name": "NYSMI Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 52,
+  "fields": {
+    "name": "NYWP Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 53,
+  "fields": {
+    "name": "NYWP Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 54,
+  "fields": {
+    "name": "OHCIN Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 55,
+  "fields": {
+    "name": "OHCIN Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 56,
+  "fields": {
+    "name": "OHDUB Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 57,
+  "fields": {
+    "name": "OHDUB Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 58,
+  "fields": {
+    "name": "Operations"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 59,
+  "fields": {
+    "name": "Patient Refunds"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 60,
+  "fields": {
+    "name": "Policies & Procedures Meetings"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 61,
+  "fields": {
+    "name": "Practice Mgrs & Directors"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 62,
+  "fields": {
+    "name": "Reporting"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 63,
+  "fields": {
+    "name": "SCCOL Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 64,
+  "fields": {
+    "name": "SCCOL Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 65,
+  "fields": {
+    "name": "Shared"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 66,
+  "fields": {
+    "name": "TXBEL Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 67,
+  "fields": {
+    "name": "TXBEL Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 68,
+  "fields": {
+    "name": "TXDAL Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 69,
+  "fields": {
+    "name": "TXDAL Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 70,
+  "fields": {
+    "name": "TXKAT Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 71,
+  "fields": {
+    "name": "TXKAT Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 72,
+  "fields": {
+    "name": "TXWEB Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 73,
+  "fields": {
+    "name": "TXWEB Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 74,
+  "fields": {
+    "name": "TXWOO Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 75,
+  "fields": {
+    "name": "TXWOO Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 76,
+  "fields": {
+    "name": "All Practice Mgr"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 77,
+  "fields": {
+    "name": "All Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 78,
+  "fields": {
+    "name": "GAALP Insur/Billing"
+  }
+},
+{
+  "model": "superadmin.team",
+  "pk": 79,
+  "fields": {
+    "name": "GAALP Practice Mgr"
+  }
+}
+]
