@@ -1,1 +1,22 @@
 @import "bootstrap";
+
+// Pagination — compact, right-aligned
+.pagination {
+  margin-bottom: 0;
+
+  .page-link {
+    font-size: 13px;
+    padding: 4px 10px;
+    color: #0077b6;
+    border-color: #dee2e6;
+  }
+
+  .page-item.active .page-link {
+    background-color: #0077b6;
+    border-color: #0077b6;
+  }
+
+  .page-item.disabled .page-link {
+    color: #adb5bd;
+  }
+}

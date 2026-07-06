@@ -20,7 +20,6 @@ gem "active_model_serializers"
 
 # Pagination
 gem "kaminari"
-gem "pagy"
 
 # Password hashing
 gem "bcrypt", "~> 3.1.7"

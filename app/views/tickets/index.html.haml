@@ -75,3 +75,15 @@
       .text-center.text-muted.py-5
         %i.bi.bi-ticket-perforated{style: "font-size: 2rem;"}
         %p.mt-2 No tickets found.
+
+- if @tickets.total_pages > 1
+  .d-flex.justify-content-between.align-items-center.mt-3.px-1
+    %small.text-muted
+      Showing
+      %strong= @tickets.offset_value + 1
+      –
+      %strong= [@tickets.offset_value + @tickets.limit_value, @tickets.total_count].min
+      of
+      %strong= @tickets.total_count
+      tickets
+    = paginate @tickets

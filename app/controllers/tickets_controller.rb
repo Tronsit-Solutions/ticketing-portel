@@ -24,6 +24,7 @@ class TicketsController < ApplicationController
       @tickets = @tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
       @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present?
       @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
+      @tickets = @tickets.page(params[:page]).per(25)
     end
   end
 
@@ -129,7 +130,9 @@ class TicketsController < ApplicationController
   private
 
   def set_ticket
-    @ticket = Ticket.find(params[:id])
+    @ticket = Ticket.includes(
+      :customer, :assignee, :assigned_by, :resolved_by, :created_by, :location,
+      :hiring_detail, :termination_detail).find(params[:id])
   end
 
   def notify_staff_of_new_ticket
