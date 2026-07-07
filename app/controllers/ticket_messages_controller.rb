@@ -9,11 +9,15 @@ class TicketMessagesController < ApplicationController
       "customer_reply"
     end
 
+    form_data = params[:message_data].presence
+    structured = form_data.is_a?(ActionController::Parameters) ? form_data.to_unsafe_h.compact_blank : nil
+
     @message = @ticket.ticket_messages.build(
-      details:      params[:details],
-      message_type: message_type,
-      sender:       current_user,
-      internal_note: params[:internal_note] == "true"
+      details:         params[:details].presence || structured&.values&.join(", ") || "",
+      structured_data: structured.presence,
+      message_type:    message_type,
+      sender:          current_user,
+      internal_note:   params[:internal_note] == "true"
     )
 
     if @message.save

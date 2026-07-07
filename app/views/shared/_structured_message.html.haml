@@ -1,0 +1,8 @@
+/ Renders a structured_data hash as labelled key-value rows.
+/ Usage: = render "shared/structured_message", data: message.structured_data
+- data.each do |key, value|
+  - display_val = value.is_a?(Array) ? value.join(", ") : value.to_s
+  - next if display_val.blank? || display_val.downcase == "none"
+  .structured-field
+    %span.structured-label= key.to_s.titleize
+    %span.structured-value= display_val
