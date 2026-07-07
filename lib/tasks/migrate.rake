@@ -246,11 +246,28 @@ namespace :migrate do
 
     # ── 5. Ticket Details → TicketMessages + HiringDetail/TerminationDetail ─
     puts "\n==> Migrating ticket messages"
-    imported_messages  = 0
-    imported_hiring    = 0
-    imported_term      = 0
+    imported_messages      = 0
+    imported_hiring        = 0
+    imported_term          = 0
+    imported_metadata      = 0
 
     HTML_PATTERN = /<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i
+
+    # Ticket columns that can be populated from parsed HTML fields (case-insensitive key match)
+    TICKET_FIELD_MAP = {
+      "title"       => "title",
+      "subject"     => "title",
+      "status"      => "status",
+      "resolution"  => "resolution",
+    }.freeze
+
+    # Pre-compute the first message pk per ticket so we only process details once
+    first_message_pk = details_raw
+      .select { |r| ticket_id_map.key?(r["fields"]["ticket_no"]) }
+      .group_by { |r| r["fields"]["ticket_no"] }
+      .transform_values { |recs|
+        recs.min_by { |r| [r["fields"]["created_date"], r["fields"]["created_time"]] }["pk"]
+      }
 
     details_raw.each do |rec|
       f          = rec["fields"]
@@ -262,51 +279,68 @@ namespace :migrate do
       body        = f["details"].presence || "(no details)"
       is_html     = HTML_PATTERN.match?(body)
       ticket_type = ticket_type_map[django_pk]
+      is_first    = first_message_pk[django_pk] == rec["pk"]
+
+      parsed_fields = is_html ? parse_html_fields(body) : nil
 
       TicketMessage.create!(
-        ticket_id:    ticket_id,
-        sender_id:    user_email_map[f["sender"]&.downcase&.strip],
-        details:      body,
-        message_type: "customer_reply",
-        message_id:   f["message_id"],
-        mail_to:      f["mail_to"],
-        mail_cc:      f["mail_cc"],
-        mail_subject: f["mail_subject"],
-        is_html:      is_html,
-        created_at:   created_at,
-        updated_at:   created_at,
+        ticket_id:       ticket_id,
+        sender_id:       user_email_map[f["sender"]&.downcase&.strip],
+        details:         body,
+        structured_data: parsed_fields.presence,
+        message_type:    "customer_reply",
+        message_id:      f["message_id"],
+        mail_to:         f["mail_to"],
+        mail_cc:         f["mail_cc"],
+        mail_subject:    f["mail_subject"],
+        is_html:         is_html,
+        created_at:      created_at,
+        updated_at:      created_at,
       )
       imported_messages += 1
       dot
 
-      # Parse structured fields from the HTML body and create detail records
-      if ticket_type == "hiring_departure" && is_html
-        fields = parse_html_fields(body)
-        status = fields["STATUS"].to_s.strip.downcase
+      next unless is_first && parsed_fields.present?
 
-        ticket = Ticket.find(ticket_id)
+      parsed = parsed_fields
 
-        if status == "hire"
-          create_hiring_detail(ticket, fields)
+      if ticket_type == "hiring_departure"
+        # Determine hire vs termination from STATUS field or key presence
+        status_val = parsed["STATUS"].to_s.strip.downcase
+        ticket     = Ticket.find(ticket_id)
+
+        if status_val == "hire" || (status_val.blank? && parsed["FULLNAME"].present?)
+          create_hiring_detail(ticket, parsed)
           imported_hiring += 1
-        elsif %w[termination terminate departure].include?(status)
-          create_termination_detail(ticket, fields)
+        elsif %w[termination terminate departure].include?(status_val) ||
+              (status_val.blank? && (parsed["TERMINATION REASON"].present? || parsed["REASON"].present?))
+          create_termination_detail(ticket, parsed)
           imported_term += 1
-        else
-          # Fall back: if FULLNAME present assume hiring, else termination
-          if fields["FULLNAME"].present?
-            create_hiring_detail(ticket, fields)
-            imported_hiring += 1
-          elsif fields["TERMINATION REASON"].present? || fields["REASON"].present?
-            create_termination_detail(ticket, fields)
-            imported_term += 1
+        end
+      else
+        # For all other ticket types: map known keys to ticket columns,
+        # store the remainder in metadata.
+        ticket_updates = {}
+        metadata       = {}
+
+        parsed.each do |raw_key, val|
+          col = TICKET_FIELD_MAP[raw_key.downcase.strip]
+          if col
+            ticket_updates[col] = val.is_a?(Array) ? val.join(", ") : val.to_s.strip
+          else
+            metadata[raw_key] = val
           end
         end
+
+        update_attrs = ticket_updates.merge(metadata: metadata)
+        Ticket.where(id: ticket_id).update_all(update_attrs) if update_attrs.any?
+        imported_metadata += 1
       end
     end
     puts "\n    #{imported_messages} messages imported."
     puts "    #{imported_hiring} hiring details created."
     puts "    #{imported_term} termination details created."
+    puts "    #{imported_metadata} tickets enriched from HTML metadata."
 
     # ── 6. Ticket Notifications ──────────────────────────────────────────
     puts "\n==> Migrating ticket notifications"
@@ -347,6 +381,7 @@ namespace :migrate do
     puts "  Messages:      #{imported_messages}"
     puts "  Hiring details:      #{imported_hiring}"
     puts "  Termination details: #{imported_term}"
+    puts "  Tickets w/ metadata: #{imported_metadata}"
     puts "  Notifications: #{imported_notifs} imported (#{skipped_notifs} skipped)"
     puts "#{'=' * 50}"
     puts "\nNOTE: Imported users have random passwords. Direct them to use 'Forgot Password'."
