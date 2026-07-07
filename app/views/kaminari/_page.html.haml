@@ -1,0 +1,3 @@
+%li.page-item{class: page.current? ? "active" : ""}
+  = link_to_unless page.current?, page, url, class: "page-link", rel: (page.next? ? "next" : page.prev? ? "prev" : nil) do
+    %span.page-link= page
