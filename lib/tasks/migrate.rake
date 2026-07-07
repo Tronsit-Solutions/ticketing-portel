@@ -116,6 +116,8 @@ namespace :migrate do
       )
     end
 
+    MEDIA_DIR = Rails.root.join("media")
+
     # ── Clear existing data (in dependency order) ────────────────────────
     puts "\n==> Clearing existing data"
     TicketNotification.delete_all
@@ -123,6 +125,7 @@ namespace :migrate do
     TicketAssignment.delete_all
     HiringDetail.delete_all
     TerminationDetail.delete_all
+    ActiveStorage::Attachment.where(record_type: "Ticket").each(&:purge)
     Ticket.delete_all
     User.delete_all
     Team.delete_all
@@ -130,13 +133,14 @@ namespace :migrate do
     puts "    All tables cleared."
 
     puts "\n==> Loading JSON files"
-    users_raw     = load_json("users.json")
-    my_users_raw  = load_json("my_users.json")
-    teams_raw     = load_json("teams.json")
-    locations_raw = load_json("locations.json")
-    tickets_raw   = load_json("tickets.json")
-    details_raw   = load_json("ticket_details.json")
-    notifs_raw    = load_json("ticket_notifications.json")
+    users_raw       = load_json("users.json")
+    my_users_raw    = load_json("my_users.json")
+    teams_raw       = load_json("teams.json")
+    locations_raw   = load_json("locations.json")
+    tickets_raw     = load_json("tickets.json")
+    details_raw     = load_json("ticket_details.json")
+    notifs_raw      = load_json("ticket_notifications.json")
+    ticket_files_raw = load_json("ticket_files.json")
 
     # ── 1. Locations ─────────────────────────────────────────────────────
     puts "\n==> Migrating locations"
@@ -371,6 +375,48 @@ namespace :migrate do
     end
     puts "\n    #{imported_notifs} notifications imported, #{skipped_notifs} skipped (orphaned ticket)."
 
+    # ── 7. Ticket File Attachments ───────────────────────────────────────
+    puts "\n==> Attaching ticket files/images from media/"
+    attached_files  = 0
+    missing_files   = 0
+    skipped_files   = 0
+
+    ticket_files_raw.each do |rec|
+      f          = rec["fields"]
+      django_pk  = f["ticket_no"].to_i
+      image_path = f["images"].to_s.strip
+      file_path  = f["file"].to_s.strip
+
+      ticket = Ticket.find_by(id: ticket_id_map[django_pk])
+      unless ticket
+        skipped_files += 1
+        next
+      end
+
+      candidates = []
+      candidates << MEDIA_DIR.join(image_path) if image_path.present? && image_path != "False"
+      candidates << MEDIA_DIR.join(file_path)  if file_path.present?  && file_path  != "False"
+
+      candidates.each do |abs_path|
+        unless abs_path.exist?
+          puts "    MISSING: #{abs_path} (ticket ##{django_pk})"
+          missing_files += 1
+          next
+        end
+
+        filename     = abs_path.basename.to_s
+        io           = File.open(abs_path)
+        content_type = Marcel::MimeType.for(io, name: filename)
+        io.rewind
+
+        ticket.attachments.attach(io: io, filename: filename, content_type: content_type)
+        io.close
+        attached_files += 1
+        dot
+      end
+    end
+    puts "\n    #{attached_files} files attached, #{missing_files} missing, #{skipped_files} skipped (no ticket)."
+
     # ── Summary ──────────────────────────────────────────────────────────
     puts "\n#{'=' * 50}"
     puts "Migration complete!"
@@ -383,6 +429,7 @@ namespace :migrate do
     puts "  Termination details: #{imported_term}"
     puts "  Tickets w/ metadata: #{imported_metadata}"
     puts "  Notifications: #{imported_notifs} imported (#{skipped_notifs} skipped)"
+    puts "  Files attached:  #{attached_files} (#{missing_files} missing, #{skipped_files} skipped)"
     puts "#{'=' * 50}"
     puts "\nNOTE: Imported users have random passwords. Direct them to use 'Forgot Password'."
   end
