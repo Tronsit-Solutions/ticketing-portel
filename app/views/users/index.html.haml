@@ -64,3 +64,15 @@
                   method: :patch,                                  |
                   class: "btn btn-sm btn-outline-danger",          |
                   data: { turbo_confirm: "Deactivate this user?" } |
+
+- if @users.total_pages > 1
+  .d-flex.justify-content-between.align-items-center.mt-3.px-1
+    %small.text-muted
+      Showing
+      %strong= @users.offset_value + 1
+      –
+      %strong= [@users.offset_value + @users.limit_value, @users.total_count].min
+      of
+      %strong= @users.total_count
+      users
+    = paginate @users

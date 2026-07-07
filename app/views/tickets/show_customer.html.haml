@@ -275,12 +275,12 @@
               %i.bi.bi-folder2-open
 
           .ticket-field
-            %span.field-label Subject:
+            %span.field-label Title:
             %span.field-value= @ticket.title
 
           - if @ticket.metadata["details"].present?
             .ticket-field
-              %span.field-label Issue:
+              %span.field-label Description:
               %span.field-value= @ticket.metadata["details"]
 
           - (@ticket.metadata.except("details") || {}).each do |key, value|
@@ -317,7 +317,7 @@
                   %span.field-value.text-muted Not yet submitted.
 
         / Message thread
-        - @ticket_messages.each do |message|
+        - @ticket_messages.drop(1).each do |message|
           - next if message.internal_note? && current_user.customer?
           - if message.structured_data.present?
             - msg_modal_rows = [{ label: "Date", value: message.created_at.strftime("%B %-d, %Y at %-I:%M %p") }]

@@ -6,6 +6,7 @@ class UsersController < ApplicationController
     @users = User.includes(:team).order(:fullname)
     @users = @users.where(role: params[:role])          if params[:role].present?
     @users = @users.where(is_active: params[:active])   if params[:active].present?
+    @users = @users.page(params[:page]).per(25)
   end
 
   def show
