@@ -1,0 +1,760 @@
+Received: from 10.213.251.174
+ by atlas101.ptnr.mail.gq1.yahoo.com with HTTPS; Fri, 18 Feb 2022 14:47:19 +0000
+Return-Path: <tkithcart@arthritiskneepain.com>
+X-Originating-Ip: [40.107.94.130]
+Received-SPF: pass (domain of arthritiskneepain.com designates 40.107.94.130 as permitted sender)
+Authentication-Results: atlas101.ptnr.mail.gq1.yahoo.com;
+ dkim=pass header.i=@arthritiskneepain.com header.s=selector1;
+ spf=pass smtp.mailfrom=arthritiskneepain.com;
+ dmarc=unknown header.from=arthritiskneepain.com;
+X-Apparently-To: support@tgc.digital; Fri, 18 Feb 2022 14:47:20 +0000
+X-YMailISG: oLxpc4gWLDueMsJPFCim77wMo9PID14wb1aBOiZOWWD7nKlr
+ zEWfHTY73j99UHWmvnIX_KI4IC4ry0Q5Ek_Xwmh_oBDzBc69dIRnRAdTHIUY
+ .eOnXDWW_nLyFKD_ozDz_0Fr_e0Mp5OekHl06HYklyk6VgSQGf8I8J2emSsK
+ E6LHfMV9gV6xGXfMjU59ipFmGx99FLMhLT5mwmoFpIbttWQQQ2XdL7Y.O_Ek
+ wf9W8RfDwHHu1gTFeQHss9A9vlOKeqggMohlsfTVFI._MEUB9CB0NFqIShW6
+ N2S4kRNOBmnNsNBMzI3C4HAhdVGrtaveHPHroLnyR5ulGYdHu08bXmCyXML4
+ NybyTsHILDBg13_N9ItR32OPz1g1l0m9PCKway31XAqH82TWlxZ2Cby76HqH
+ b.Kuwft8d_ML2Rp.vsyBjxD2mw.cYMTZquVkovngmYGlPldXWWQrBgou960P
+ TPPqkY_8roXUhUTMuT0eE3roCm64B6JvF9LeNVc52vOX5bpqjcUY_qXXcEXm
+ fkgk_GM2OyBGUksqFIOPko9AUM0unU_WqpuleMbL_6XxK_DLNL6W.x30wfZc
+ DdDhomItQv11hHpWHyJIap7G6erY0A6tQJjw1O4okL6DLkf.S_TSCUvlgOqj
+ XWixZiZL61dU_pKP_omZnOMDP9M3bJPbMLTtVgd071j7dJSsLeT3hCbq50XZ
+ 7dI1sgouCqS4SUlZxlWiakdY_m2bSNXtZZnoEdzg9nbIwqNPmv1cugSD.kDx
+ 2TrqGfXgZ7TQrQ4mXnwZyt3B9WYYhmvb6crUHlCfslU6.7Wn2XpGFfLq2dbP
+ qbgA0o2RdSw6xSZqik.MnWTMazxqaShqtde0SAOOBTqi5hYVhoGTXpMyWL6p
+ yZhjvdkOjquxBF9Lx6Ew7Glws2uHRDczxFXsD5roJwKWwkBEr4uO9ybWMnGk
+ yuo9J3a8Y05c49ERPR1DH9KPhiFSxceZAZQvGvxjYlfJAlHarlGLW.ZwOIjm
+ 7xra4_AC2SMojaE5EJyfzWMsg2VpyZhZkZR89G5vkjADtkDWU3ACP9oD6B_D
+ TPvLBpUSOCaFoMkltlVLe9kSAOeBXGrSTb9j5jTsQxOf5ScX2fhsBgEwn8X8
+ 1748uZwLtJOagMZdpMhDWgEL8zBAExia4FdV1x_xS4W7VJHLiVKq1DIeRAyT
+ zb2hbc8xgEyB1KZFmctA.IU71y3GhNyW_XCxx4iv
+Received: from 40.107.94.130 (EHLO NAM10-MW2-obe.outbound.protection.outlook.com)
+ by 10.213.251.174 with SMTPs
+ (version=TLS1_2 cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+ Fri, 18 Feb 2022 14:47:19 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VSw8z7u7JWoXUr4GJZ8k7JorocgWtplPp33yn21hUNK4nnjirNEBpbNOk47GcW6EYnlgruyw6Fn5wgZfWDl8jo1axsOsXBu811bIiPZ+bFeCLlrUQyIpg/mJvJ1JJhv7gDUES9WDI10EnIiX+Ges8el1yn+2FofAQlM1IKh7OzrWADXcKGafRFnS8HKk2RabaZch28/t9AcwMF/c5TC3kfObuQCb6iB6zzCNfJGSaJ8GdozRZmVadif89q92Ssgoto9U2Veth5wdG8716Uf0R4K4mdRnVQQgjf3cFNtMcOn0jkKPtMu8f+yqPE+t0ZGM9ou2tVHNLUNKR5fbnuv8dQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=XfwfdJ+ZcKJvMTNjbnb0pGrWVPqMC4NlMkx12Lozns4=;
+ b=PJHul7Vzx8hsi95Ei4kYGX9aOFh4mFWfrSSyjt66o0Wv2Y2SZbDA8X9zerE/0Btjyq5APeSp5uOENttSeP5XeuKstgej8oFtKxmE17H/p4D0b3htLuegXWXmY3NRbCcGFZBr5eGbEArg7Syz4F+HpZ/BbOeLKxgF90ffmDa89VrC9FWI3ae6GjNdflxqHJuXp3+PFfI1lm41kP9xkxyg7sJH/o+x81jQM1gclapVApnggPLvoJBiC8/MuCz7x9J12LjCZMP29A5ame6+t+PW71WS2ZxfJT7HEgh3/+9yqI6qBvNsvuVbCSFKpWle8wXkZwumoGBr9Qe6MH+EUpxRKw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=arthritiskneepain.com; dmarc=pass action=none
+ header.from=arthritiskneepain.com; dkim=pass header.d=arthritiskneepain.com;
+ arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arthritiskneepain.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=XfwfdJ+ZcKJvMTNjbnb0pGrWVPqMC4NlMkx12Lozns4=;
+ b=jVqz9aF+g7AUVCJt8nqHtGYeISPCXTlZ/WeaqXON3TYV9y26xDjqPi753H/LQvzl1EVxnsiTTQQNfsUEf5ZxVueFKBTa2tiBY4odqEqgR3Nzprp3we0EDaparXBOO6HsdGxjguaE5/SVtaG7X6a3CLyGjxdbiJYAc7zfscHsuII=
+Received: from SA1PR06MB8420.namprd06.prod.outlook.com (2603:10b6:806:1cf::6)
+ by DM6PR06MB6729.namprd06.prod.outlook.com (2603:10b6:5:25f::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4995.16; Fri, 18 Feb
+ 2022 14:47:18 +0000
+Received: from SA1PR06MB8420.namprd06.prod.outlook.com
+ ([fe80::f5b0:c6d8:ff29:f1fa]) by SA1PR06MB8420.namprd06.prod.outlook.com
+ ([fe80::f5b0:c6d8:ff29:f1fa%5]) with mapi id 15.20.4995.017; Fri, 18 Feb 2022
+ 14:47:17 +0000
+From: Tiffany Kithcart <tkithcart@arthritiskneepain.com>
+To: Tronsit Solutions - Support <Support@tgc.digital>,
+	"support@tronsitsolutions.com" <support@tronsitsolutions.com>
+Subject: Fwd: Login notification from PayPal
+Thread-Topic: Login notification from PayPal
+Thread-Index: AQHYJNR7MTw4tXIf4U69S+V7Vggm7KyZYv5l
+Date: Fri, 18 Feb 2022 14:47:17 +0000
+Message-ID:
+ <SA1PR06MB8420A8335F32830D9BB4F609B2379@SA1PR06MB8420.namprd06.prod.outlook.com>
+References:
+ <2a47db8d-a947-4da1-815c-dd47900e214c@securityiq.infosecinstitute.com>
+In-Reply-To:
+ <2a47db8d-a947-4da1-815c-dd47900e214c@securityiq.infosecinstitute.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+msip_labels:
+ MSIP_Label_2f820e0c-2e03-4a6d-af35-8c5ce76ffc23_Enabled=True;MSIP_Label_2f820e0c-2e03-4a6d-af35-8c5ce76ffc23_SiteId=0f5c175b-3dd1-4ebd-8438-f5d14c25be69;MSIP_Label_2f820e0c-2e03-4a6d-af35-8c5ce76ffc23_SetDate=2022-02-18T14:46:35.1389749Z;MSIP_Label_2f820e0c-2e03-4a6d-af35-8c5ce76ffc23_ContentBits=0;MSIP_Label_2f820e0c-2e03-4a6d-af35-8c5ce76ffc23_Method=Standard
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 22dfccb3-8261-450f-f9ef-08d9f2ed8f94
+x-ms-traffictypediagnostic: DM6PR06MB6729:EE_
+x-microsoft-antispam-prvs:
+ <DM6PR06MB6729DBB2F8CCA57DFA8750D0B2379@DM6PR06MB6729.namprd06.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:5797;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ UKniqZYVutosYr9ogOy77oz678zR69g9lKxTmPm7Zn20ZF8JjDu3WlT8SCtw4ysbFTcFGqSwq//L8Po2xQ4z0Biils0Wu/vVtFyRJg9ns8b+y0KU6XUw/SfoTdC8fb84GEUEjMzt78vX0VAB5ScfyiLs6zEKkJZZwtUNZv5wCsHfEl/h1TODUx828Ak6J4xPfHOyrF6Z8eVFrZTRJbvq17eGFyiVifOxG42v5XTBbf8nfE86KAieKaDEZdre6+7dGY3UhTR0KHMGzd0HpdocuU4+BsFNo31ep5eTEjnRyVDot67JbOYVuE77EqHfNNmKQmqysqL4RQAb3ifi3ju8Z1R0mKTmj1UNpQdOloVDpacCwroSrace6r4jtfyzMCT9AaQqOM69k67W0Syx23LLJaMt5yUEYDv0ryFTQhaIIWmHUe1jpb/pk2UHyqYW1+GYb2sO4jbqswGXcsX6nzkWkNxxO0hycPiFpYsQyg4i6ZArZmUJSp3wr08OIyNV57P9vuGKmLwkxP0Ha3k2pFvWKTy9wrMqPWD5UiebqMwuOiT8s8KsPZf4ZI4JN3wlAWjhUJgcWuMohRl2uhi0HcsuiFLjHJPprMr0eAaGdUpSiAq3NWpAFgkgdl3UDddj26OnDx1EjoQTazVsMoJ/m1gpu8P5qnOyg37UCMFTDRPTyjRyCKIBD9tNn7gO0ClfCoftpUlGMkwpm5GZmsPruGRiBQSqeVnYVE+co6ci9oUyfFyfbnVVSatmiB29uUBIgvaD8R0Xw2iej21SqCGcudj+eIO2YUGuT5SRsNYlxYZd2+E=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SA1PR06MB8420.namprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(39830400003)(366004)(396003)(346002)(136003)(376002)(47640400002)(2906002)(33656002)(8936002)(83380400001)(52536014)(40140700001)(71200400001)(508600001)(10130500003)(9686003)(15974865002)(7696005)(6506007)(53546011)(26005)(186003)(166002)(38070700005)(15650500001)(38100700002)(122000001)(5660300002)(86362001)(91956017)(76116006)(316002)(110136005)(66946007)(55016003)(66446008)(66476007)(66556008)(64756008)(8676002)(120234004);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?Windows-1252?Q?GJ0LUu4KXWkfs68Yla5PgT3bKcNNPs4Q3gpxrNWxv4fSYdfjNIlqebUt?=
+ =?Windows-1252?Q?s4sBqjDjBhzHJpC7ItftJhyFSCJJkjVPeXeq9rBYpJu3nR0YtXVAOjvn?=
+ =?Windows-1252?Q?YubDFoDswSHvyL9c6x4/ofE+r1VV3Se2XPhnQE5p7BMcr8AS1IYtv52M?=
+ =?Windows-1252?Q?x9cPvQOfeI70SqzsjJbgCS9oyPaaVLRHb0EADIxx8e92zEHO/snk2JZM?=
+ =?Windows-1252?Q?IwFHWFcsZ73e3hQ0qZibJpwDyZJJEdyI3x5Xe28IJPJvAkUUyIk+XfAs?=
+ =?Windows-1252?Q?RREHZsZbUmmANKVQF1QGkLlyeATWA5aQEtagzCNNnsG9mog9EVPnQrq0?=
+ =?Windows-1252?Q?lknhC8W7aC6mvvDISe/afdZBHBewmW1BTFBrgaFrBG83NCj6WzMmJ/dA?=
+ =?Windows-1252?Q?w5cv7BhbkN7NXfMLljZlJKLYy2TmOl+LvMFlElGxHByhwDP5dHnqKUlZ?=
+ =?Windows-1252?Q?4pGBp27LlKv7Vibx9HbQU53MwPOZnUV1XRaOENhprXC5R474t44iWjKe?=
+ =?Windows-1252?Q?yRsxTVZAdreEXJ6kdukQIHjW/0VP0Z39TSEqzt9E85FDyvlpODWzK4Qy?=
+ =?Windows-1252?Q?RRlIthzWbTRjf7F3oZaprLo/GstA2h4JaLmSlUIZ02bg3jQh1oAzSjMn?=
+ =?Windows-1252?Q?Udcn4CrL2VwQItU6foQHoKgyZ05r44VyIz8olsJvzy7AGsRYRtOb0UCd?=
+ =?Windows-1252?Q?Non1WQ3fyoeBLbEjUb98XJR50kZjgHNmbHOSZxYWA5hYNri/Yd9b2Wdu?=
+ =?Windows-1252?Q?ZwcRhMXJw8nZ1RBR8cua5krH0UhFTuNr6NAPZX4RD8SnECsCAY1lwpam?=
+ =?Windows-1252?Q?EtcPsh0npNFHj+kZbcb+Lk1ePpuu6UxgPriywv9o3EcDsCTObgGX8seD?=
+ =?Windows-1252?Q?xAoKwWaUEOJf8hMbHzjomNmkgU3B9PqFM6GlZD4iOZIu3QnT7PN7EslD?=
+ =?Windows-1252?Q?A1/27CtkwnuaTiFB7Gt8czfE5ucudkZ1vrujLu8auXa6qc91ZWxQFcJd?=
+ =?Windows-1252?Q?Z6uLp7n0G3uAXjtkKFTrWvsx8cWZxPzADI3Ey2rPehvRusfXQfRR5/cb?=
+ =?Windows-1252?Q?r0wNab96XntSc7ZwIibYuFe8uYrCv7pXs6Wz4UytvXFPa+iewyD6ff9x?=
+ =?Windows-1252?Q?roOG6e32PfevKyKMW5D9qRUyiMQVId7YHxH2blHzIfnm6lXSLuNrpEQk?=
+ =?Windows-1252?Q?DNQ0cKjftwpECd+OtkG4YXGYkCryi+VEiijp0SQPKBuMrIOKqcPUJ6G0?=
+ =?Windows-1252?Q?bi4S6LpguEQSwdvnErEq7DnehPEQ8CcbRnmczao5Z0NOueA5dqMG6hhD?=
+ =?Windows-1252?Q?Gql9q8uLjer9mXhVhmpq5iJDYT5b/J8IGQi6+y7zQcf6DaEhSosuFCYJ?=
+ =?Windows-1252?Q?xhnOsK6FECH+uXFzWTe17eZdkgfWZs6BCiLp6JvHp2vedoj6iY8CngrG?=
+ =?Windows-1252?Q?ac5KFFw9HJGU+6ES2G+18Uyd3tlYzoiVCRS/j4ws70UjnPTt0hiVc3Rv?=
+ =?Windows-1252?Q?YBrP88aTVsYBjdhKKhsEWhK7ZV9sooWd8fGKieQu/cqV5BQVjhgyBO/n?=
+ =?Windows-1252?Q?ATJk3Vnw8xBrDhaA98dVQMbPWfc2mrQb7aET00fSWmQEi1Ueh3gFgulT?=
+ =?Windows-1252?Q?kQVpr5ryWfT9hPEbQIzg6p92q1O/FUTBvvo2ek9s0mB4Bw6DwhNACans?=
+ =?Windows-1252?Q?mRMt1h/57J74DOG8uJLgPDKoVkm68IKHxgIRC3fNPmhPb1GIF8yc/uvr?=
+ =?Windows-1252?Q?Ws93uHE+n1WYh0rDGyo+DwfgPCcXMzNdGKNheyoo9YFZNQTYpeoukkvp?=
+ =?Windows-1252?Q?TpTuQ+VkT6kepxPF5UMcv7Th7wE=3D?=
+Content-Type: multipart/alternative;
+	boundary="_000_SA1PR06MB8420A8335F32830D9BB4F609B2379SA1PR06MB8420namp_"
+MIME-Version: 1.0
+X-OriginatorOrg: arthritiskneepain.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SA1PR06MB8420.namprd06.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 22dfccb3-8261-450f-f9ef-08d9f2ed8f94
+X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Feb 2022 14:47:17.7993
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 0f5c175b-3dd1-4ebd-8438-f5d14c25be69
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 5DB1P1axKVROvtqMh3dbF9jOleiz+p2K4vA7GRuoFxPZKDV8rHBJp8cJvedJxja22EsfW5LJUetyrsEErguPYWH2u8TLqyNxd/tfGZ6BT44=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR06MB6729
+Content-Length: 25117
+
+--_000_SA1PR06MB8420A8335F32830D9BB4F609B2379SA1PR06MB8420namp_
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+
+Phishing. My work account is not associated with my personal affairs.
+
+Tiffany N. Kithcart, Esq.
+General Counsel
+Arthritis Knee Pain Centers
+P:  346-331-4068
+E: tkithcart@arthritiskneepain.com
+www.arthritiskneepain.com
+________________________________
+From: PayPal <service@norepliez.com>
+Sent: Friday, February 18, 2022 8:33:16 AM
+To: Tiffany Kithcart <tkithcart@arthritiskneepain.com>
+Subject: Login notification from PayPal
+
+Hello, Tiffany Kithcart
+[https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481030802-paypal_0.png]
+[PayPal]
+[https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481766156-paypal_21.jpg=
+]
+[https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481079714-paypal_2.png]=
+     [https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481106298-paypal_3=
+.png]     [https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481129599-pay=
+pal_4.png]     [https://s3.amazonaws.com/infosec-iq-unlayer-na/161648115227=
+2-paypal_5.png]     [https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481=
+228985-paypal_6.png]
+[https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481267444-paypal_7.jpg]
+[https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481293448-paypal_8.jpg]
+
+
+
+New Login to PayPal
+
+We noticed a new login with your PayPal account associated with tkithcart@a=
+rthritiskneepain.com from a device we don't recognize.
+
+Phone Chrome Mobile Android 11
+
+Wisconsin,US
+
+Report Login<https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__noreplie=
+z.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&d=3DDwMDaQ&c=3De=
+uGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI53fq2jb=
+lpSLwvVw6VoGjuM&m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtgVcAT=
+wjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&e=3D>
+
+Let us know if this was you, change your password immediately and review yo=
+ur account for unauthorized activity.
+
+[https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481350835-paypal_10.jpg=
+]
+
+[https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481403142-paypal_12.png=
+]    [https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481425301-paypal_1=
+3.png]    [PayPal]        [https://s3.amazonaws.com/infosec-iq-unlayer-na/1=
+616481476376-paypal_15.png]    [https://s3.amazonaws.com/infosec-iq-unlayer=
+-na/1616481504246-paypal_16.png]
+Help & Contact<https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norepl=
+iez.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&d=3DDwMDaQ&c=
+=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI53f=
+q2jblpSLwvVw6VoGjuM&m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtg=
+VcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&e=3D> | Security<https://urldefens=
+e.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-=
+2D4da1-2D815c-2Ddd47900e214c&d=3DDwMDaQ&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A=
+_CdpgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&m=3DC9s6f0FftU=
+jQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZY=
+pLT5hM&e=3D> | Apps<https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__n=
+orepliez.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&d=3DDwMDa=
+Q&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI=
+53fq2jblpSLwvVw6VoGjuM&m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3D=
+DtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&e=3D>
+[Twitter]<https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.c=
+om_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&d=3DDwMDaQ&c=3DeuGZ=
+stcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpS=
+LwvVw6VoGjuM&m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtgVcATwjv=
+pKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&e=3D>   [Instagram] <https://urldefense.p=
+roofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2D4=
+da1-2D815c-2Ddd47900e214c&d=3DDwMDaQ&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_Cd=
+pgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&m=3DC9s6f0FftUjQv=
+gTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT=
+5hM&e=3D>        [Facebook] <https://urldefense.proofpoint.com/v2/url?u=3Dh=
+ttp-3A__norepliez.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&=
+d=3DDwMDaQ&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D_YsLXoffCItq=
+0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo=
+8AvQ&s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&e=3D>         [LinkedI=
+n] <https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_lan=
+ding_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&d=3DDwMDaQ&c=3DeuGZstcaTD=
+llvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6=
+VoGjuM&m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtgVcATwjvpKjK7v=
+p_NbN471t30_6qJA-HtZYpLT5hM&e=3D>
+
+
+Please don't reply to this email. To get in touch with us, click Help & Con=
+tact<https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_la=
+nding_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&d=3DDwMDaQ&c=3DeuGZstcaT=
+DllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw=
+6VoGjuM&m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtgVcATwjvpKjK7=
+vp_NbN471t30_6qJA-HtZYpLT5hM&e=3D>.
+
+Not sure why you received this email? Learn more<https://urldefense.proofpo=
+int.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2D4da1-2D=
+815c-2Ddd47900e214c&d=3DDwMDaQ&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfi=
+iMM&r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&m=3DC9s6f0FftUjQvgTLlQi=
+aXj1JMts8B1V_U3E46Fo8AvQ&s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&e=
+=3D>
+
+Copyright =A9 1999-2020 PayPal. All rights reserved.
+
+Consumer advisory =96 PayPal Pte. Ltd., the holder of PayPal's stored value=
+ facility, does not require the approval of the Monetary Authority of Singa=
+pore. Users are advised to read the terms and conditions carefully.
+
+[http://norepliez.com/phished/opened/2a47db8d-a947-4da1-815c-dd47900e214c]
+
+--_000_SA1PR06MB8420A8335F32830D9BB4F609B2379SA1PR06MB8420namp_
+Content-Type: text/html; charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3DWindows-1=
+252">
+</head>
+<body>
+<div dir=3D"auto" style=3D"color: rgb(33, 33, 33); background-color: rgb(25=
+5, 255, 255);">
+Phishing. My work account is not associated with my personal affairs.&nbsp;=
+</div>
+<div id=3D"ms-outlook-mobile-signature" dir=3D"auto">
+<div><br>
+</div>
+<div style=3D"color:rgb(33, 33, 33);background-color:rgb(255, 255, 255)" di=
+r=3D"auto">
+</div>
+Tiffany N. Kithcart, Esq.
+<div>General Counsel</div>
+<div>Arthritis Knee Pain Centers</div>
+<div>P: &nbsp;346-331-4068</div>
+<div>E: tkithcart@arthritiskneepain.com</div>
+www.arthritiskneepain.com</div>
+<hr style=3D"display:inline-block;width:98%" tabindex=3D"-1">
+<div id=3D"divRplyFwdMsg" dir=3D"ltr"><font face=3D"Calibri, sans-serif" st=
+yle=3D"font-size:11pt" color=3D"#000000"><b>From:</b> PayPal &lt;service@no=
+repliez.com&gt;<br>
+<b>Sent:</b> Friday, February 18, 2022 8:33:16 AM<br>
+<b>To:</b> Tiffany Kithcart &lt;tkithcart@arthritiskneepain.com&gt;<br>
+<b>Subject:</b> Login notification from PayPal</font>
+<div>&nbsp;</div>
+</div>
+<style type=3D"text/css">
+<!--
+table, td
+	{color:#000000}
+a
+	{color:#0000ee;
+	text-decoration:underline}
+div
+	{margin:0;
+	padding:0}
+table, tr, td
+	{vertical-align:top;
+	border-collapse:collapse}
+p
+	{margin:0}
+.x_ie-container table, .x_mso-container table
+	{table-layout:fixed}
+*
+	{line-height:inherit}
+a[x-apple-data-detectors=3D'true']
+	{color:inherit!important;
+	text-decoration:none!important}
+-->
+</style>
+<div class=3D"x_clean-body x_u_body" style=3D"margin:0; padding:0; backgrou=
+nd-color:#ffffff; color:#000000">
+<table cellpadding=3D"0" cellspacing=3D"0" style=3D"border-collapse:collaps=
+e; table-layout:fixed; border-spacing:0; vertical-align:top; min-width:320p=
+x; margin:0 auto; background-color:#ffffff; width:100%">
+<tbody>
+<tr style=3D"vertical-align:top">
+<td style=3D"word-break:break-word; border-collapse:collapse!important; ver=
+tical-align:top">
+<div class=3D"x_u-row-container" style=3D"padding:0px; background-color:tra=
+nsparent">
+<div class=3D"x_u-row" style=3D"margin:0 auto; min-width:320px; max-width:7=
+00px; word-wrap:break-word; word-break:break-word; background-color:transpa=
+rent">
+<div style=3D"border-collapse:collapse; display:table; width:100%; backgrou=
+nd-color:transparent">
+<div class=3D"x_u-col x_u-col-100" style=3D"max-width:320px; min-width:700p=
+x; display:table-cell; vertical-align:top">
+<div style=3D"width:100%!important">
+<div style=3D"padding:0px; border-top:0px solid transparent; border-left:0p=
+x solid transparent; border-right:0px solid transparent; border-bottom:0px =
+solid transparent">
+<table role=3D"presentation" cellpadding=3D"0" cellspacing=3D"0" width=3D"1=
+00%" border=3D"0" style=3D"font-family:arial,helvetica,sans-serif">
+<tbody>
+<tr>
+<td align=3D"left" style=3D"word-break:break-word; padding:0px; font-family=
+:arial,helvetica,sans-serif">
+<div>
+<table>
+<tbody>
+<tr>
+<td bgcolor=3D"#ffffff" style=3D"font-size:0px"></td>
+<td align=3D"center" width=3D"660" bgcolor=3D"#ffffff">
+<table dir=3D"ltr" width=3D"100%" border=3D"0" cellspacing=3D"0" cellpaddin=
+g=3D"0">
+<tbody>
+<tr>
+<td>
+<table width=3D"100%" border=3D"0" cellspacing=3D"0" cellpadding=3D"0">
+<tbody>
+<tr>
+<td width=3D"600" colspan=3D"3" align=3D"center">
+<table dir=3D"ltr" bgcolor=3D"#f5f7fa" border=3D"0" cellspacing=3D"0" cellp=
+adding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td align=3D"center" style=3D"font-size:14px; line-height:18px; color:#6871=
+73; padding:20px">
+Hello, Tiffany Kithcart</td>
+</tr>
+<tr>
+<td valign=3D"bottom" align=3D"center"><img alt=3D"" border=3D"0" src=3D"ht=
+tps://s3.amazonaws.com/infosec-iq-unlayer-na/1616481030802-paypal_0.png" st=
+yle=3D"display:block; width:116px; max-width:116px"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td></td>
+<td width=3D"600" align=3D"center"><img title=3D"PayPal" alt=3D"PayPal" bor=
+der=3D"0" src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/16164810564=
+30-paypal_1.png" style=3D"display:block; width:116px; max-width:116px"></td=
+>
+<td></td>
+</tr>
+<tr>
+<td bgcolor=3D"#004f9b" valign=3D"top" align=3D"center" style=3D"min-width:=
+10px"><img alt=3D"" border=3D"0" src=3D"https://s3.amazonaws.com/infosec-iq=
+-unlayer-na/1616481766156-paypal_21.jpg" height=3D"81" width=3D"100%" style=
+=3D"display:block"></td>
+<td width=3D"600" align=3D"center">
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td valign=3D"top" align=3D"center" width=3D"12"><img alt=3D"" border=3D"0"=
+ src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481079714-paypal=
+_2.png" height=3D"81" width=3D"12" style=3D"display:block"></td>
+<td valign=3D"top" align=3D"center" width=3D"229"><img alt=3D"" border=3D"0=
+" src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481106298-paypa=
+l_3.png" style=3D"display:block; max-width:230px"></td>
+<td valign=3D"top" align=3D"center" width=3D"118"><img alt=3D"" border=3D"0=
+" src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481129599-paypa=
+l_4.png" style=3D"display:block; width:118px; max-width:116px"></td>
+<td valign=3D"top" align=3D"center" width=3D"229"><img alt=3D"" border=3D"0=
+" src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481152272-paypa=
+l_5.png" style=3D"display:block; max-width:230px"></td>
+<td valign=3D"top" align=3D"center" width=3D"12"><img alt=3D"" border=3D"0"=
+ src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481228985-paypal=
+_6.png" height=3D"81" width=3D"12" style=3D"display:block"></td>
+</tr>
+</tbody>
+</table>
+</td>
+<td bgcolor=3D"#004f9b" valign=3D"top" align=3D"center" style=3D"min-width:=
+10px"><img alt=3D"" border=3D"0" src=3D"https://s3.amazonaws.com/infosec-iq=
+-unlayer-na/1616481267444-paypal_7.jpg" height=3D"81" width=3D"100%" style=
+=3D"display:block"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<table dir=3D"ltr" width=3D"100%" border=3D"0" cellspacing=3D"0" cellpaddin=
+g=3D"0">
+<tbody>
+<tr>
+<td valign=3D"top" align=3D"left" style=3D"min-width:10px">
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td bgcolor=3D"#004f9b" valign=3D"top" align=3D"center"><img alt=3D"" borde=
+r=3D"0" height=3D"96" width=3D"100%" src=3D"https://s3.amazonaws.com/infose=
+c-iq-unlayer-na/1616481293448-paypal_8.jpg" style=3D"display:block"></td>
+</tr>
+<tr>
+<td valign=3D"top" align=3D"right"><img alt=3D"" height=3D"100" width=3D"1"=
+ src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481316211-paypal=
+_9.png" style=3D"display:block"></td>
+</tr>
+</tbody>
+</table>
+</td>
+<td align=3D"center" valign=3D"top" width=3D"600"><br>
+<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" width=3D"100%" styl=
+e=3D"padding:0px 20px 30px 20px">
+<tbody>
+<tr>
+<td align=3D"center">
+<p dir=3D"ltr" style=3D"font-size:32px; line-height:40px; color:#000; margi=
+n:0"><span>New Login to PayPal</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"padding:0px 20px 20px 20px">
+<p dir=3D"ltr" style=3D"font-size:16px; line-height:24px; color:#2c2e2f; ma=
+rgin:0"><span>We noticed a new login with your PayPal account associated wi=
+th tkithcart@arthritiskneepain.com from a device we don't recognize.</span>=
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"padding:0px 20px 20px 20px">
+<p dir=3D"ltr" style=3D"font-size:20px; line-height:24px; color:#2c2e2f; ma=
+rgin:0"><span>Phone Chrome Mobile Android 11</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"padding:0px 20px 20px 20px">
+<p dir=3D"ltr" style=3D"font-size:20px; line-height:24px; color:#2c2e2f; ma=
+rgin:0"><span>Wisconsin,US</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td align=3D"center" style=3D"padding:0px 30px 30px 30px">
+<table>
+<tbody>
+<tr>
+<td style=3D"line-height:1.6; font-size:15px; padding:10px 20px; display:in=
+line-block; border:1px solid #0070ba; font-weight:500; text-align:center; t=
+ext-decoration:none; background-color:#0070ba; min-width:150px">
+<a target=3D"_blank" rel=3D"noreferrer noopener" href=3D"https://urldefense=
+.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2=
+D4da1-2D815c-2Ddd47900e214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvimEN8b7jXrw=
+qOf-v5A_CdpgnVfiiMM&amp;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&amp=
+;m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATwjvpKjK7vp_=
+NbN471t30_6qJA-HtZYpLT5hM&amp;e=3D" style=3D"color:#ffffff; text-decoration=
+:none">Report
+ Login</a></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"padding:0px 20px 20px 20px">
+<p dir=3D"ltr" style=3D"font-size:16px; line-height:24px; color:#2c2e2f; ma=
+rgin:0"><span>Let us know if this was you, change your password immediately=
+ and review your account for unauthorized activity.
+</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td align=3D"left" valign=3D"top" style=3D"min-width:10px">
+<table border=3D"0" cellpadding=3D"0" cellspacing=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td bgcolor=3D"#004f9b" align=3D"center" valign=3D"top"><img src=3D"https:/=
+/s3.amazonaws.com/infosec-iq-unlayer-na/1616481350835-paypal_10.jpg" height=
+=3D"96" border=3D"0" width=3D"100%" style=3D"display:block"></td>
+</tr>
+<tr>
+<td align=3D"left" valign=3D"top"><img src=3D"https://s3.amazonaws.com/info=
+sec-iq-unlayer-na/1616481374628-paypal_11.png" height=3D"100" width=3D"1" s=
+tyle=3D"display:block"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td></td>
+<td width=3D"600" align=3D"center">
+<table dir=3D"ltr" border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=
+=3D"100%">
+<tbody>
+<tr>
+<td>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td valign=3D"top" align=3D"center" width=3D"12"><img alt=3D"" border=3D"0"=
+ height=3D"141" width=3D"12" src=3D"https://s3.amazonaws.com/infosec-iq-unl=
+ayer-na/1616481403142-paypal_12.png" style=3D"display:block"></td>
+<td valign=3D"top" align=3D"center"><img alt=3D"" border=3D"0" src=3D"https=
+://s3.amazonaws.com/infosec-iq-unlayer-na/1616481425301-paypal_13.png" styl=
+e=3D"display:block; max-width:228px"></td>
+<td valign=3D"top" align=3D"center" width=3D"120"><img alt=3D"PayPal" borde=
+r=3D"0" src=3D"https://s3.amazonaws.com/infosec-iq-unlayer-na/1616481449672=
+-paypal_14.png" style=3D"display:block; width:120px; max-width:120px"></td>
+<td valign=3D"top" align=3D"center"><img alt=3D"" border=3D"0" src=3D"https=
+://s3.amazonaws.com/infosec-iq-unlayer-na/1616481476376-paypal_15.png" styl=
+e=3D"display:block; max-width:228px"></td>
+<td valign=3D"top" align=3D"center" width=3D"12"><img alt=3D"" border=3D"0"=
+ height=3D"141" width=3D"12" src=3D"https://s3.amazonaws.com/infosec-iq-unl=
+ayer-na/1616481504246-paypal_16.png" style=3D"display:block"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td align=3D"center" style=3D"font-size:15px; line-height:22px; color:#4444=
+44; padding:20px">
+<a target=3D"_blank" rel=3D"noreferrer noopener" href=3D"https://urldefense=
+.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2=
+D4da1-2D815c-2Ddd47900e214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvimEN8b7jXrw=
+qOf-v5A_CdpgnVfiiMM&amp;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&amp=
+;m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATwjvpKjK7vp_=
+NbN471t30_6qJA-HtZYpLT5hM&amp;e=3D" style=3D"color:#0070ba; text-decoration=
+:none">Help
+ &amp; Contact</a><span> | </span><a target=3D"_blank" rel=3D"noreferrer no=
+opener" href=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norep=
+liez.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&amp;d=3DDwMDa=
+Q&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3D_YsLXoffCItq0=
+ewBJpjSI53fq2jblpSLwvVw6VoGjuM&amp;m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E4=
+6Fo8AvQ&amp;s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&amp;e=3D" style=
+=3D"color:#0070ba; text-decoration:none">Security</a><span>
+ | </span><a target=3D"_blank" rel=3D"noreferrer noopener" href=3D"https://=
+urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8=
+d-2Da947-2D4da1-2D815c-2Ddd47900e214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvi=
+mEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6=
+VoGjuM&amp;m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATw=
+jvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&amp;e=3D" style=3D"color:#0070ba; text-=
+decoration:none">Apps</a></td>
+</tr>
+<tr>
+<td align=3D"center" style=3D"padding-bottom:20px">
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" align=3D"center">
+<tbody>
+<tr>
+<td width=3D"50" valign=3D"middle" align=3D"center"><a target=3D"_blank" re=
+l=3D"noreferrer noopener" href=3D"https://urldefense.proofpoint.com/v2/url?=
+u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e=
+214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp=
+;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&amp;m=3DC9s6f0FftUjQvgTLlQ=
+iaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5=
+hM&amp;e=3D"><img alt=3D"Twitter" height=3D"28" width=3D"28" src=3D"https:/=
+/s3.amazonaws.com/infosec-iq-unlayer-na/1616481533439-paypal_17.png" border=
+=3D"0" style=3D"display:block"></a></td>
+<td width=3D"50" valign=3D"middle" align=3D"center"><a target=3D"_blank" hr=
+ef=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_l=
+anding_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e214c&amp;d=3DDwMDaQ&amp;c=3D=
+euGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3D_YsLXoffCItq0ewBJpjSI53=
+fq2jblpSLwvVw6VoGjuM&amp;m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&am=
+p;s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&amp;e=3D"><img alt=3D"Ins=
+tagram" height=3D"28" width=3D"28" src=3D"https://s3.amazonaws.com/infosec-=
+iq-unlayer-na/1616481562264-paypal_18.png" border=3D"0" style=3D"display:bl=
+ock"></a></td>
+<td width=3D"50" valign=3D"middle" align=3D"center"><a target=3D"_blank" re=
+l=3D"noreferrer noopener" href=3D"https://urldefense.proofpoint.com/v2/url?=
+u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e=
+214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp=
+;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&amp;m=3DC9s6f0FftUjQvgTLlQ=
+iaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5=
+hM&amp;e=3D"><img alt=3D"Facebook" height=3D"28" width=3D"28" src=3D"https:=
+//s3.amazonaws.com/infosec-iq-unlayer-na/1616481588413-paypal_19.png" borde=
+r=3D"0" style=3D"display:block"></a></td>
+<td width=3D"50" valign=3D"middle" align=3D"center"><a target=3D"_blank" re=
+l=3D"noreferrer noopener" href=3D"https://urldefense.proofpoint.com/v2/url?=
+u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2D4da1-2D815c-2Ddd47900e=
+214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp=
+;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&amp;m=3DC9s6f0FftUjQvgTLlQ=
+iaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATwjvpKjK7vp_NbN471t30_6qJA-HtZYpLT5=
+hM&amp;e=3D"><img alt=3D"LinkedIn" height=3D"28" width=3D"28" src=3D"https:=
+//s3.amazonaws.com/infosec-iq-unlayer-na/1616481612662-paypal_20.png" borde=
+r=3D"0" style=3D"display:block"></a></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table width=3D"100%" border=3D"0" cellspacing=3D"0" cellpadding=3D"0" styl=
+e=3D"padding-bottom:20px">
+<tbody>
+<tr>
+<td>&nbsp;</td>
+<td width=3D"600" align=3D"center">
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"font-size:13px; line-height:20px; color:#687173; padding:10px =
+30px 10px 30px">
+<p dir=3D"ltr" style=3D"font-size:13px; margin:0"><span>Please don't reply =
+to this email. To get in touch with us, click
+<strong><a target=3D"_blank" rel=3D"noreferrer noopener" href=3D"https://ur=
+ldefense.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8d-=
+2Da947-2D4da1-2D815c-2Ddd47900e214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvimE=
+N8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6Vo=
+GjuM&amp;m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATwjv=
+pKjK7vp_NbN471t30_6qJA-HtZYpLT5hM&amp;e=3D" style=3D"color:#0070ba; text-de=
+coration:none">Help
+ &amp; Contact</a></strong>.</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"font-size:13px; line-height:20px; color:#687173; padding:10px =
+30px 10px 30px">
+<p dir=3D"ltr" style=3D"font-size:13px; margin:0"><span>Not sure why you re=
+ceived this email?
+<a target=3D"_blank" rel=3D"noreferrer noopener" href=3D"https://urldefense=
+.proofpoint.com/v2/url?u=3Dhttp-3A__norepliez.com_landing_2a47db8d-2Da947-2=
+D4da1-2D815c-2Ddd47900e214c&amp;d=3DDwMDaQ&amp;c=3DeuGZstcaTDllvimEN8b7jXrw=
+qOf-v5A_CdpgnVfiiMM&amp;r=3D_YsLXoffCItq0ewBJpjSI53fq2jblpSLwvVw6VoGjuM&amp=
+;m=3DC9s6f0FftUjQvgTLlQiaXj1JMts8B1V_U3E46Fo8AvQ&amp;s=3DDtgVcATwjvpKjK7vp_=
+NbN471t30_6qJA-HtZYpLT5hM&amp;e=3D" style=3D"color:#0070ba; text-decoration=
+:none">
+Learn more</a></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<table border=3D"0" cellspacing=3D"0" cellpadding=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"font-size:13px; line-height:20px; color:#687173; padding:10px =
+30px 10px 30px">
+<p dir=3D"ltr" style=3D"font-size:13px; margin:0"></p>
+<div dir=3D"ltr" style=3D"font-size:13px"><span>Copyright =A9 1999-2020 Pay=
+Pal. All rights reserved.<br>
+<br>
+Consumer advisory =96 PayPal Pte. Ltd., the holder of PayPal's stored value=
+ facility, does not require the approval of the Monetary Authority of Singa=
+pore. Users are advised to read the terms and conditions carefully.</span><=
+/div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td bgcolor=3D"#ffffff" style=3D"font-size:0px"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table role=3D"presentation" cellpadding=3D"0" cellspacing=3D"0" width=3D"1=
+00%" border=3D"0" style=3D"font-family:arial,helvetica,sans-serif">
+<tbody>
+<tr>
+<td align=3D"left" style=3D"word-break:break-word; padding:10px; font-famil=
+y:arial,helvetica,sans-serif">
+<div class=3D"x_indicator"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<img id=3D"x_siq-image" src=3D"http://norepliez.com/phished/opened/2a47db8d=
+-a947-4da1-815c-dd47900e214c" alt=3D"" style=3D"height:1px; width:1px">
+</div>
+</body>
+</html>
+
+--_000_SA1PR06MB8420A8335F32830D9BB4F609B2379SA1PR06MB8420namp_--

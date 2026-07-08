@@ -1,0 +1,6 @@
+generated_date,generated_time,customer_refno,customer_mobile,customer_Name,Customer_Cnic,gender,customer_age,City,address,Profession,customerBankName,customerAccountNo,Policy_selected,beneficiary_name,beneficiary_relation,beneficiary_age,beneficiary_mobile,systemGenrateOtp,otp
+29-09-2020,16:52:52,52521629092020,03354806699,Ahmed,3540208912323,Male,24,Lahore,Bahria town Lahore,Employee,Bank Alfalah Limited.,2345612451,Silver-PKR 4000,Ali,Brother,31,03041441882,34546,34546
+29-09-2020,16:56:33,33561629092020,03454356781,Shavaiz,354012345671,Male,24,Lahore,Gari Shahu,Employee,Bank Al-Habib Limited.,345671232,Platinum-PKR 7000,Safdar,Father,55,03367867811,67234,67234
+29-09-2020,16:58:42,42581629092020,03364532657,Ayesha,3310256723432,Female,23,Faisalabad,Jinnah Colony,Business Person,The Bank of Punjab .,7687543210,Gold-PKR 6000,Naeem,Father,51,03367563421,27865,27865
+29-09-2020,17:00:30,30001729092020,03457893452,Nabia,3101223879761,Female,24,Lahore,Garden Town Lahore,Govt Worker,Zarai Taraqiati Bank Limited .,324568910,Silver-PKR 4000,Nadeem,Husband,29,03214567891,34521,34521
+29-09-2020,17:06:53,53061729092020,03324567891,Mehmood,3310245678912,Male,28,Lahore,Hussain Chowk,Business Person,Bank Alfalah Limited.,345689101,Bronze-PKR 2000,Ali Khan,Father,51,0334567123,32581,32581
