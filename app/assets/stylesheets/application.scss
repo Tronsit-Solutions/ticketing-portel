@@ -1,5 +1,28 @@
 @import "bootstrap";
 
+// Flash messages — fixed bottom-left, above everything
+#flash-container {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 22rem;
+}
+
+#flash-container .flash-alert {
+  opacity: 1;
+  transition: opacity 0.8s ease;
+  margin: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#flash-container .flash-alert.fading {
+  opacity: 0;
+}
+
 // Pagination — compact, right-aligned
 .pagination {
   margin-bottom: 0;

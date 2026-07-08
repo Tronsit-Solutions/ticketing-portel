@@ -3,9 +3,7 @@ Rails.application.routes.draw do
     sessions: 'users/sessions'
   }
 
-  devise_scope :user do
-    root "devise/sessions#new"
-  end
+  root "home#index"
   namespace :admin do
     root "dashboard#index"
   end

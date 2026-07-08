@@ -399,7 +399,7 @@ namespace :migrate do
 
       candidates.each do |abs_path|
         unless abs_path.exist?
-          puts "    MISSING: #{abs_path} (ticket ##{django_pk})"
+          puts "    [MISSING]  django_ticket=#{django_pk} → new_ticket=#{ticket.id} | #{abs_path}"
           missing_files += 1
           next
         end
@@ -412,7 +412,7 @@ namespace :migrate do
         ticket.attachments.attach(io: io, filename: filename, content_type: content_type)
         io.close
         attached_files += 1
-        dot
+        puts "    [ATTACHED] django_ticket=#{django_pk} → new_ticket=#{ticket.id} | #{abs_path.relative_path_from(Rails.root)}"
       end
     end
     puts "\n    #{attached_files} files attached, #{missing_files} missing, #{skipped_files} skipped (no ticket)."
