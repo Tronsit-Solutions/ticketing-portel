@@ -49,6 +49,7 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "shoulda-matchers", "~> 6.0"
+  gem "rspec_junit_formatter"
 end
 
 gem "simplecov", "~> 0.22.0", :group => :test
