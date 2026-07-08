@@ -37,25 +37,25 @@ namespace :migrate do
       "Open"  => "open",
       "Close" => "closed",
     }.freeze
-
+ 
     def load_json(filename)
       puts "  Loading #{filename}..."
       JSON.parse(File.read(DATA_DIR.join(filename)))
     end
-
+ 
     GREEN_DOT = "\e[32m.\e[0m".freeze
-
+ 
     def dot
       $stdout.print GREEN_DOT
       $stdout.flush
     end
-
+ 
     def parse_datetime(date_str, time_str)
       DateTime.parse("#{date_str}T#{time_str}Z")
     rescue StandardError
       Time.current
     end
-
+ 
     # Parses "<p>KEY : value</p>..." into { "KEY" => "value", ... }
     # Comma-separated values are returned as arrays.
     def parse_html_fields(html)
@@ -68,17 +68,17 @@ namespace :migrate do
         h[key] = val.include?(",") ? val.split(",").map(&:strip).reject(&:blank?) : val
       end
     end
-
+ 
     def create_hiring_detail(ticket, fields)
       start_date = begin
         Date.parse(fields["START DATE"].to_s)
       rescue StandardError
         nil
       end
-
+ 
       access_raw = Array(fields["ACCESS SYSTEMS"])
       dist_raw   = Array(fields["DISTRIBUTION"])
-
+ 
       HiringDetail.create!(
         ticket_id:                  ticket.id,
         start_date:                 start_date,
@@ -96,14 +96,14 @@ namespace :migrate do
         distribution_groups:        dist_raw.reject { |v| v.casecmp?("none") },
       )
     end
-
+ 
     def create_termination_detail(ticket, fields)
       term_date = begin
         Date.parse(fields["TERMINATION DATE"].to_s)
       rescue StandardError
         nil
       end
-
+ 
       TerminationDetail.create!(
         ticket_id:               ticket.id,
         termination_reason:      fields["TERMINATION REASON"].presence || fields["REASON"].presence,
@@ -115,7 +115,7 @@ namespace :migrate do
         additional_instructions: fields["USEFUL INFO"].presence || fields["ADDITIONAL INFO"].presence,
       )
     end
-
+ 
     # ── Clear existing data (in dependency order) ────────────────────────
     puts "\n==> Clearing existing data"
     TicketNotification.delete_all
@@ -128,7 +128,7 @@ namespace :migrate do
     Team.delete_all
     Location.delete_all
     puts "    All tables cleared."
-
+ 
     puts "\n==> Loading JSON files"
     users_raw     = load_json("users.json")
     my_users_raw  = load_json("my_users.json")
@@ -137,11 +137,11 @@ namespace :migrate do
     tickets_raw   = load_json("tickets.json")
     details_raw   = load_json("ticket_details.json")
     notifs_raw    = load_json("ticket_notifications.json")
-
+ 
     # ── 1. Locations ─────────────────────────────────────────────────────
     puts "\n==> Migrating locations"
     location_id_map = {}
-
+ 
     locations_raw.each do |rec|
       f = rec["fields"]
       loc = Location.find_or_create_by!(name: f["name"]) do |l|
@@ -153,27 +153,27 @@ namespace :migrate do
       dot
     end
     puts "\n    #{location_id_map.size} locations done."
-
+ 
     # ── 2. Teams ─────────────────────────────────────────────────────────
     puts "\n==> Migrating teams"
     teams_raw.each { |rec| Team.find_or_create_by!(name: rec["fields"]["name"]) && dot }
     puts "\n    #{teams_raw.size} teams done."
-
+ 
     # ── 3. Users ─────────────────────────────────────────────────────────
     puts "\n==> Migrating users"
     my_user_index = my_users_raw.each_with_object({}) do |rec, h|
       h[rec["fields"]["my_user"]] = rec["fields"]
     end
-
+ 
     imported_users = 0
-
+ 
     users_raw.each do |rec|
       f       = rec["fields"]
       email   = f["username"].to_s.downcase.strip
       next if email.blank?
-
+ 
       profile = my_user_index[rec["pk"]] || {}
-
+ 
       role = if f["is_superuser"] || profile["is_admin"]
                "admin"
              elsif profile["is_manager"]
@@ -183,9 +183,9 @@ namespace :migrate do
              else
                "customer"
              end
-
+ 
       next if User.exists?(email: email)
-
+ 
       user = User.new(
         email:              email,
         fullname:           profile["fullname"].presence || email.split("@").first.capitalize,
@@ -203,17 +203,17 @@ namespace :migrate do
       dot
     end
     puts "\n    #{imported_users} users imported."
-
+ 
     # Reload full email→id map (includes pre-existing users)
     user_email_map = User.pluck(:email, :id).to_h
-
+ 
     # ── 4. Tickets ───────────────────────────────────────────────────────
     puts "\n==> Migrating tickets"
     ticket_id_map   = {}
     ticket_type_map = {}   # django pk → new_type string
     imported_tickets = 0
     skipped_tickets  = 0
-
+ 
     tickets_raw.each do |rec|
       f        = rec["fields"]
       new_type = TICKET_TYPE_MAP[f["ticket_type"]]
@@ -222,9 +222,9 @@ namespace :migrate do
         skipped_tickets += 1
         next
       end
-
+ 
       created_at = parse_datetime(f["created_date"], f["created_time"])
-
+ 
       ticket = Ticket.new(
         ticket_type:  new_type,
         title:        f["title"].presence || new_type.humanize,
@@ -243,26 +243,26 @@ namespace :migrate do
       dot
     end
     puts "\n    #{imported_tickets} tickets imported, #{skipped_tickets} skipped."
-
+ 
     # ── 5. Ticket Details → TicketMessages + HiringDetail/TerminationDetail ─
     puts "\n==> Migrating ticket messages"
     imported_messages  = 0
     imported_hiring    = 0
     imported_term      = 0
-
+ 
     HTML_PATTERN = /<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i
-
+ 
     details_raw.each do |rec|
       f          = rec["fields"]
       django_pk  = f["ticket_no"]
       ticket_id  = ticket_id_map[django_pk]
       next unless ticket_id
-
+ 
       created_at  = parse_datetime(f["created_date"], f["created_time"])
       body        = f["details"].presence || "(no details)"
       is_html     = HTML_PATTERN.match?(body)
       ticket_type = ticket_type_map[django_pk]
-
+ 
       TicketMessage.create!(
         ticket_id:    ticket_id,
         sender_id:    user_email_map[f["sender"]&.downcase&.strip],
@@ -278,14 +278,14 @@ namespace :migrate do
       )
       imported_messages += 1
       dot
-
+ 
       # Parse structured fields from the HTML body and create detail records
       if ticket_type == "hiring_departure" && is_html
         fields = parse_html_fields(body)
         status = fields["STATUS"].to_s.strip.downcase
-
+ 
         ticket = Ticket.find(ticket_id)
-
+ 
         if status == "hire"
           create_hiring_detail(ticket, fields)
           imported_hiring += 1
@@ -307,12 +307,12 @@ namespace :migrate do
     puts "\n    #{imported_messages} messages imported."
     puts "    #{imported_hiring} hiring details created."
     puts "    #{imported_term} termination details created."
-
+ 
     # ── 6. Ticket Notifications ──────────────────────────────────────────
     puts "\n==> Migrating ticket notifications"
     imported_notifs = 0
     skipped_notifs  = 0
-
+ 
     notifs_raw.each do |rec|
       f         = rec["fields"]
       ticket_id = ticket_id_map[f["ticket_id"].to_i]
@@ -320,9 +320,9 @@ namespace :migrate do
         skipped_notifs += 1
         next
       end
-
+ 
       created_at = parse_datetime(f["created_date"], f["created_time"])
-
+ 
       TicketNotification.create!(
         ticket_id:       ticket_id,
         responded_by_id: user_email_map[f["responded_by"]&.downcase&.strip],
@@ -336,19 +336,64 @@ namespace :migrate do
       dot
     end
     puts "\n    #{imported_notifs} notifications imported, #{skipped_notifs} skipped (orphaned ticket)."
-
+ 
+    # ── 7. Ticket File Attachments ───────────────────────────────────────
+    puts "\n==> Migrating ticket attachments"
+    files_raw         = load_json("ticket_files.json")
+    MEDIA_ROOT        = Rails.root.join("ticket_media")
+    attached_count    = 0
+    missing_count     = 0
+    orphan_count      = 0
+ 
+    files_raw.each do |rec|
+      f         = rec["fields"]
+      ticket_id = ticket_id_map[f["ticket_no"]]
+      unless ticket_id
+        orphan_count += 1
+        next
+      end
+ 
+      ticket = Ticket.find(ticket_id)
+ 
+      [[f["images"], :image], [f["file"], :file]].each do |raw_path, kind|
+        next if raw_path.blank? || raw_path == "False"
+ 
+        # Images were stored under technicalImages/user_N/filename
+        # Files were stored flat — both live in ticket_media/ now
+        rel_path  = raw_path.sub(/\Atechnical[Ii]mages\//, "")
+        full_path = MEDIA_ROOT.join(rel_path)
+ 
+        unless File.exist?(full_path)
+          missing_count += 1
+          next
+        end
+ 
+        filename = File.basename(full_path)
+        ticket.attachments.attach(
+          io:       File.open(full_path),
+          filename: filename
+        )
+        attached_count += 1
+        dot
+      end
+    end
+    puts "\n    #{attached_count} files attached, #{missing_count} missing, #{orphan_count} orphaned."
+ 
     # ── Summary ──────────────────────────────────────────────────────────
     puts "\n#{'=' * 50}"
     puts "Migration complete!"
-    puts "  Locations:     #{location_id_map.size}"
-    puts "  Teams:         #{teams_raw.size}"
-    puts "  Users:         #{imported_users} imported"
-    puts "  Tickets:       #{imported_tickets} imported (#{skipped_tickets} skipped)"
-    puts "  Messages:      #{imported_messages}"
+    puts "  Locations:           #{location_id_map.size}"
+    puts "  Teams:               #{teams_raw.size}"
+    puts "  Users:               #{imported_users} imported"
+    puts "  Tickets:             #{imported_tickets} imported (#{skipped_tickets} skipped)"
+    puts "  Messages:            #{imported_messages}"
     puts "  Hiring details:      #{imported_hiring}"
     puts "  Termination details: #{imported_term}"
-    puts "  Notifications: #{imported_notifs} imported (#{skipped_notifs} skipped)"
+    puts "  Notifications:       #{imported_notifs} imported (#{skipped_notifs} skipped)"
+    puts "  Attachments:         #{attached_count} attached (#{missing_count} missing)"
     puts "#{'=' * 50}"
     puts "\nNOTE: Imported users have random passwords. Direct them to use 'Forgot Password'."
   end
 end
+ 
+ 
