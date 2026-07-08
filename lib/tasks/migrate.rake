@@ -123,6 +123,7 @@ namespace :migrate do
     TicketAssignment.delete_all
     HiringDetail.delete_all
     TerminationDetail.delete_all
+    ActiveStorage::Attachment.where(record_type: "Ticket").each(&:purge)
     Ticket.delete_all
     User.delete_all
     Team.delete_all
@@ -264,17 +265,18 @@ namespace :migrate do
       ticket_type = ticket_type_map[django_pk]
  
       TicketMessage.create!(
-        ticket_id:    ticket_id,
-        sender_id:    user_email_map[f["sender"]&.downcase&.strip],
-        details:      body,
-        message_type: "customer_reply",
-        message_id:   f["message_id"],
-        mail_to:      f["mail_to"],
-        mail_cc:      f["mail_cc"],
-        mail_subject: f["mail_subject"],
-        is_html:      is_html,
-        created_at:   created_at,
-        updated_at:   created_at,
+        ticket_id:       ticket_id,
+        sender_id:       user_email_map[f["sender"]&.downcase&.strip],
+        details:         body,
+        structured_data: parsed_fields.presence,
+        message_type:    "customer_reply",
+        message_id:      f["message_id"],
+        mail_to:         f["mail_to"],
+        mail_cc:         f["mail_cc"],
+        mail_subject:    f["mail_subject"],
+        is_html:         is_html,
+        created_at:      created_at,
+        updated_at:      created_at,
       )
       imported_messages += 1
       dot
@@ -289,19 +291,29 @@ namespace :migrate do
         if status == "hire"
           create_hiring_detail(ticket, fields)
           imported_hiring += 1
-        elsif %w[termination terminate departure].include?(status)
-          create_termination_detail(ticket, fields)
+        elsif %w[termination terminate departure].include?(status_val) ||
+              (status_val.blank? && (parsed["TERMINATION REASON"].present? || parsed["REASON"].present?))
+          create_termination_detail(ticket, parsed)
           imported_term += 1
-        else
-          # Fall back: if FULLNAME present assume hiring, else termination
-          if fields["FULLNAME"].present?
-            create_hiring_detail(ticket, fields)
-            imported_hiring += 1
-          elsif fields["TERMINATION REASON"].present? || fields["REASON"].present?
-            create_termination_detail(ticket, fields)
-            imported_term += 1
+        end
+      else
+        # For all other ticket types: map known keys to ticket columns,
+        # store the remainder in metadata.
+        ticket_updates = {}
+        metadata       = {}
+
+        parsed.each do |raw_key, val|
+          col = TICKET_FIELD_MAP[raw_key.downcase.strip]
+          if col
+            ticket_updates[col] = val.is_a?(Array) ? val.join(", ") : val.to_s.strip
+          else
+            metadata[raw_key] = val
           end
         end
+
+        update_attrs = ticket_updates.merge(metadata: metadata)
+        Ticket.where(id: ticket_id).update_all(update_attrs) if update_attrs.any?
+        imported_metadata += 1
       end
     end
     puts "\n    #{imported_messages} messages imported."

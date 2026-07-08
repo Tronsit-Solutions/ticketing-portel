@@ -96,6 +96,20 @@
     font-size: 14px;
     color: #0077b6;
   }
+  .structured-field {
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .structured-label {
+    font-weight: 600;
+    color: #1a1a1a;
+    min-width: 120px;
+  }
+  .structured-label::after { content: ":"; }
+  .structured-value { color: #0077b6; }
   .folder-btn {
     background: none;
     border: 1px solid #e5e7eb;
@@ -261,12 +275,12 @@
               %i.bi.bi-folder2-open
 
           .ticket-field
-            %span.field-label Subject:
+            %span.field-label Title:
             %span.field-value= @ticket.title
 
           - if @ticket.metadata["details"].present?
             .ticket-field
-              %span.field-label Issue:
+              %span.field-label Description:
               %span.field-value= @ticket.metadata["details"]
 
           - (@ticket.metadata.except("details") || {}).each do |key, value|
@@ -303,13 +317,21 @@
                   %span.field-value.text-muted Not yet submitted.
 
         / Message thread
-        - @ticket_messages.each do |message|
+        - @ticket_messages.drop(1).each do |message|
           - next if message.internal_note? && current_user.customer?
-          - msg_modal_json = "[{label:\"Date\",value:#{message.created_at.strftime('%B %-d, %Y at %-I:%M %p').to_json}},{label:\"Message\",value:#{message.details.to_json}}]"
+          - if message.structured_data.present?
+            - msg_modal_rows = [{ label: "Date", value: message.created_at.strftime("%B %-d, %Y at %-I:%M %p") }]
+            - message.structured_data.each { |k, v| display = v.is_a?(Array) ? v.join(", ") : v.to_s; msg_modal_rows << { label: k.to_s.titleize, value: display } if display.present? && display.downcase != "none" }
+            - msg_modal_json = "[#{msg_modal_rows.map { |r| "{label:#{r[:label].to_json},value:#{r[:value].to_json}}" }.join(",")}]"
+          - else
+            - msg_modal_json = "[{label:\"Date\",value:#{message.created_at.strftime('%B %-d, %Y at %-I:%M %p').to_json}},{label:\"Message\",value:#{message.details.to_json}}]"
           .ticket-message-block
             .ticket-msg-header
               .ticket-msg-date= message.created_at.strftime("%B %-d, %Y at %-I:%M %p")
               %button.folder-btn{"onclick" => "openMsgModal(#{msg_modal_json})", "type" => "button", "aria-label" => "View message"}
                 %i.bi.bi-folder2-open
-            .ticket-msg-text= message.details
+            - if message.structured_data.present?
+              = render "shared/structured_message", data: message.structured_data
+            - else
+              .ticket-msg-text= message.details
 

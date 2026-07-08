@@ -252,7 +252,10 @@
                   = msg.created_at.strftime("%b %d, %Y %I:%M %p")
                   - if msg.internal_note?
                     %span.badge.bg-warning.text-dark.ms-1 Internal Note
-              %p.mb-0= msg.details
+              - if msg.structured_data.present?
+                = render "shared/structured_message", data: msg.structured_data
+              - else
+                %p.mb-0= msg.details
         - else
           %p.text-muted.mb-0 No messages yet.
 
