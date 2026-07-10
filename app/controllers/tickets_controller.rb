@@ -6,18 +6,20 @@ class TicketsController < ApplicationController
   before_action :authorize_close!,       only: [:close]
 
   def catalogue
-    @catalogue = Ticket::CATALOGUE
+    if current_user.customer?
+      load_customer_home_data
+      @active_panel = :catalogue
+      render :customer_home
+    else
+      @catalogue = Ticket::CATALOGUE
+    end
   end
 
   def index
     if current_user.customer?
-      all             = Ticket.where(customer: current_user).recent.includes(:customer)
-      @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
-      @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
-      @all_count      = all.count
-      @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
-      @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
-      render :my_tickets
+      load_customer_home_data
+      @active_panel = :my_tickets
+      render :customer_home
     else
       @tickets = Ticket.all.recent.includes(:customer, :assignee, :location)
       @tickets = @tickets.where(status: params[:status])           if params[:status].present?
@@ -128,6 +130,16 @@ class TicketsController < ApplicationController
   end
 
   private
+
+  def load_customer_home_data
+    @catalogue      = Ticket::CATALOGUE
+    all             = Ticket.where(customer: current_user).recent.includes(:customer)
+    @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
+    @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
+    @all_count      = all.count
+    @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
+    @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
+  end
 
   def set_ticket
     @ticket = Ticket.includes(

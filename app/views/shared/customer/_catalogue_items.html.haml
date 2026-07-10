@@ -1,0 +1,20 @@
+- catalogue.each do |item|
+  - if item[:children]
+    .catalogue-group{"onclick" => "this.classList.toggle('open')"}
+      .catalogue-row
+        %i{class: "bi #{item[:icon]} cat-icon"}
+        .cat-row-body
+          .cat-row-label= item[:label]
+          .cat-row-desc= item[:desc]
+        %i.bi.bi-caret-down-fill.cat-toggle
+      .catalogue-children
+        - item[:children].each do |child|
+          = link_to new_ticket_path(ticket_type: child[:type]), class: "catalogue-child-row" do
+            .cat-child-label= child[:label]
+            .cat-child-desc= child[:desc]
+  - else
+    = link_to new_ticket_path(ticket_type: item[:type]), class: "catalogue-row" do
+      %i{class: "bi #{item[:icon]} cat-icon"}
+      .cat-row-body
+        .cat-row-label= item[:label]
+        .cat-row-desc= item[:desc]

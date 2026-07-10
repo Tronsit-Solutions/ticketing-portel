@@ -1,0 +1,5 @@
+.left-panel
+  .panel-title Categories
+  = link_to tickets_path, class: "category-chip #{active == :my_tickets ? 'active' : ''}" do
+    %span My Tickets
+    %span.chip-count= my_tickets_count

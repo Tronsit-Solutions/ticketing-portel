@@ -1,0 +1,20 @@
+.ticket-list-tabs
+  = link_to tickets_path, class: "ticket-tab-link #{active_tab == 'opened' ? 'active' : ''}" do
+    %span Opened
+    %span.tab-count= open_tickets.count
+  = link_to tickets_path(tab: "closed"), class: "ticket-tab-link #{active_tab == 'closed' ? 'active' : ''}" do
+    %span Closed
+    %span.tab-count= closed_tickets.count
+
+- if listed_tickets.any?
+  - listed_tickets.each do |ticket|
+    - badge_class = { "open" => "badge-open", "in_progress" => "badge-in-progress", "closed" => "badge-closed", "cancelled" => "badge-cancelled" }[ticket.status] || "badge-open"
+    - badge_label = ticket.status == "in_progress" ? "Open" : ticket.status.humanize
+    = link_to ticket_path(ticket), class: "ticket-list-row" do
+      %div
+        .ticket-row-title= ticket.title
+        .ticket-row-meta
+          \##{ticket.id} by #{ticket.customer&.email} was #{badge_label} on #{ticket.created_at.strftime("%b %-d, %Y")}
+      %span{class: "ticket-status-badge #{badge_class}"}= badge_label
+- else
+  .ticket-list-empty No tickets found.

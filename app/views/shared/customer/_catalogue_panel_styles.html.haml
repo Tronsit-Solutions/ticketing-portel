@@ -1,0 +1,71 @@
+:css
+  .catalogue-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 22px;
+    border-bottom: 1px solid #f3f4f6;
+    text-decoration: none;
+    color: #1a1a1a;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s, padding 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .catalogue-row:last-child { border-bottom: none; }
+  .catalogue-row:hover { background: #f0f8ff; color: #0077b6; }
+  .catalogue-row i.cat-icon { font-size: 18px; color: #374151; width: 22px; text-align: center; flex-shrink: 0; transition: color 0.2s; }
+  .catalogue-row:hover i.cat-icon { color: #0077b6; }
+  .cat-row-body { display: flex; align-items: center; flex: 1; min-width: 0; }
+  .cat-row-label { font-size: 14px; font-weight: 500; transition: color 0.2s; }
+  .cat-row-desc {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .catalogue-row:hover .cat-row-desc { opacity: 1; }
+  .cat-toggle { margin-left: auto; font-size: 12px; color: #6b7280; transition: transform 0.2s; flex-shrink: 0; }
+  .catalogue-group.open .cat-toggle { transform: rotate(180deg); }
+  .catalogue-children {
+    display: none;
+    background: #f9fafb;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .catalogue-group.open .catalogue-children { display: block; }
+  .catalogue-child-row {
+    display: flex;
+    align-items: center;
+    padding: 11px 22px 11px 58px;
+    font-size: 13px;
+    color: #374151;
+    text-decoration: none;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s, color 0.2s, padding 0.2s;
+    position: relative;
+  }
+  .catalogue-child-row:last-child { border-bottom: none; }
+  .catalogue-child-row:hover { background: #e8f4fb; color: #0077b6; }
+  .cat-child-label { font-weight: 500; }
+  .cat-child-desc {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .catalogue-child-row:hover .cat-child-desc { opacity: 1; }

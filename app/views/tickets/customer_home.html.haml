@@ -1,0 +1,15 @@
+= render "shared/customer/tickets_layout_styles"
+= render "shared/customer/catalogue_panel_styles"
+
+.tickets-layout
+  = render "shared/customer/ticket_categories", active: @active_panel, my_tickets_count: @all_count
+
+  .right-panel
+    - if @active_panel == :my_tickets
+      .ticket-list-card
+        = render "shared/customer/ticket_list_items", active_tab: @active_tab, open_tickets: @open_tickets, closed_tickets: @closed_tickets, listed_tickets: @listed_tickets
+    - else
+      .catalogue-panel
+        .catalogue-panel-header
+          To create a new ticket, kindly select a suitable service catalogue
+        = render "shared/customer/catalogue_items", catalogue: @catalogue
