@@ -2,6 +2,12 @@ namespace :migrate do
   desc "Enrich ticket title, location and metadata from first HTML message body"
   task enrich_tickets: :environment do
     HTML_PATTERN = /<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i
+    GREEN_DOT    = "\e[32m.\e[0m".freeze
+
+    def dot
+      $stdout.print GREEN_DOT
+      $stdout.flush
+    end
 
     def clean_key(key)
       key.to_s.strip.downcase.gsub(/[^a-z0-9_]/, "_")
@@ -25,11 +31,13 @@ namespace :migrate do
 
       unless first_message
         skipped += 1
+        dot
         next
       end
 
       unless HTML_PATTERN.match?(first_message.details.to_s)
         without_html += 1
+        dot
         next
       end
 
@@ -71,6 +79,7 @@ namespace :migrate do
           ticket.save!(validate: false)
           updated += 1
         end
+        dot
       rescue => e
         puts "  ERROR ticket ##{ticket.id}: #{e.message}"
         errors += 1

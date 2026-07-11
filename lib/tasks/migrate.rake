@@ -69,50 +69,65 @@ namespace :migrate do
       end
     end
  
+    # Legacy exports used two label vocabularies over time (an old terse
+    # all-caps set and a newer verbose one) — each field is looked up
+    # under every known variant, first match wins.
+    def dig_field(fields, *keys)
+      keys.each { |k| v = fields[k]; return v if v.present? }
+      nil
+    end
+
     def create_hiring_detail(ticket, fields)
       start_date = begin
-        Date.parse(fields["START DATE"].to_s)
+        Date.parse(dig_field(fields, "START DATE").to_s)
       rescue StandardError
         nil
       end
- 
-      access_raw = Array(fields["ACCESS SYSTEMS"])
-      dist_raw   = Array(fields["DISTRIBUTION"])
- 
+
+      date_of_birth = begin
+        Date.parse(dig_field(fields, "Date of Birth", "DATE OF BIRTH").to_s)
+      rescue StandardError
+        nil
+      end
+
+      access_raw = Array(dig_field(fields, "ACCESS SYSTEMS", "What Access/Systems Are Needed"))
+      dist_raw   = Array(dig_field(fields, "DISTRIBUTION", "What Distribution Groups should the new team mate be added to if any"))
+
       HiringDetail.create!(
         ticket_id:                  ticket.id,
         start_date:                 start_date,
-        title_position:             fields["POSITION"].presence,
-        department:                 fields["DEPARTMENT"].presence,
-        gender:                     fields["GENDER"].presence,
-        cell_phone:                 fields["CONTACT"].presence,
-        badge_number:               fields["BADGE NO"].presence,
-        credentials_send_to:        fields["CREDENTIALS"].presence,
-        existing_pc_user:           fields["EXISTING PC USER"].presence,
-        pc_requirement:             fields["PC REUIREMENTS"].presence || fields["PC REQUIREMENTS"].presence,
-        additional_info:            fields["USEFUL INFO"].presence,
-        microsoft_teams_department: Array(fields["MICROSOFT TEAMS"]).join(", ").presence,
+        date_of_birth:              date_of_birth,
+        title_position:             dig_field(fields, "POSITION", "Title/Position").presence,
+        department:                 dig_field(fields, "DEPARTMENT", "Please select their Department").presence,
+        gender:                     dig_field(fields, "GENDER", "Gender").presence,
+        cell_phone:                 dig_field(fields, "CONTACT", "Cell Phone Number").presence,
+        badge_number:               dig_field(fields, "BADGE NO", "What is the badge/key card number", "What is the badge/keycard Number").presence,
+        credentials_send_to:        dig_field(fields, "CREDENTIALS", "Who shoud we send their credentials to if anyone", "Who should we send their credentials to if anyone").presence,
+        existing_pc_user:           dig_field(fields, "EXISTING PC USER", "If existing PC , Who was using before").presence,
+        pc_requirement:             dig_field(fields, "PC REUIREMENTS", "PC REQUIREMENTS", "PC Requirements").presence,
+        additional_info:            dig_field(fields, "USEFUL INFO", "Any other information that would be useful to know").presence,
+        microsoft_teams_department: Array(dig_field(fields, "MICROSOFT TEAMS", "What Microsoft Teams should the member be a part of")).join(", ").presence,
         access_systems:             access_raw.reject { |v| v.casecmp?("none") },
         distribution_groups:        dist_raw.reject { |v| v.casecmp?("none") },
       )
     end
- 
+
     def create_termination_detail(ticket, fields)
       term_date = begin
-        Date.parse(fields["TERMINATION DATE"].to_s)
+        Date.parse(dig_field(fields, "TERMINATION DATE").to_s)
       rescue StandardError
         nil
       end
- 
+
       TerminationDetail.create!(
         ticket_id:               ticket.id,
-        termination_reason:      fields["TERMINATION REASON"].presence || fields["REASON"].presence,
+        termination_reason:      dig_field(fields, "TERMINATION REASON", "REASON").presence,
         termination_date:        term_date,
-        termination_time:        fields["TERMINATION TIME"].presence,
-        email_address:           fields["EMAIL"].presence || fields["EMAIL ADDRESS"].presence,
-        key_card:                fields["KEY CARD"].presence,
-        email_forwarded_to:      fields["EMAIL FORWARDED TO"].presence,
-        additional_instructions: fields["USEFUL INFO"].presence || fields["ADDITIONAL INFO"].presence,
+        termination_time:        dig_field(fields, "TERMINATION TIME").presence,
+        email_address:           dig_field(fields, "EMAIL", "EMAIL ADDRESS").presence,
+        key_card:                dig_field(fields, "KEY CARD", "Keycard").presence,
+        email_forwarded_to:      dig_field(fields, "FORWARDED TO", "EMAIL FORWARDED TO").presence,
+        additional_instructions: dig_field(fields, "USEFUL INFO", "ADDITIONAL INFO", "MISSED INFO").presence,
       )
     end
  
@@ -250,25 +265,41 @@ namespace :migrate do
     imported_messages  = 0
     imported_hiring    = 0
     imported_term      = 0
- 
+    imported_metadata  = 0
+
     HTML_PATTERN = /<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i
- 
+
+    # Legacy HTML label (downcased) → metadata key actually read by the app
+    # (see Ticket::CATALOGUE forms / tickets_controller#ticket_params).
+    METADATA_KEY_MAP = {
+      "description" => "details",
+      "reason"      => "details",
+      "information" => "details",
+      "issue"       => "issue",
+      "ideas"       => "idea_types",
+      "great work"  => "work_types",
+      "mobile"      => "mobile",
+      "contact"     => "mobile",
+    }.freeze
+    ARRAY_METADATA_KEYS = %w[idea_types work_types hr_types].freeze
+
     details_raw.each do |rec|
       f          = rec["fields"]
       django_pk  = f["ticket_no"]
       ticket_id  = ticket_id_map[django_pk]
       next unless ticket_id
- 
+
       created_at  = parse_datetime(f["created_date"], f["created_time"])
       body        = f["details"].presence || "(no details)"
       is_html     = HTML_PATTERN.match?(body)
       ticket_type = ticket_type_map[django_pk]
- 
+      parsed      = is_html ? parse_html_fields(body) : {}
+
       TicketMessage.create!(
         ticket_id:       ticket_id,
         sender_id:       user_email_map[f["sender"]&.downcase&.strip],
         details:         body,
-        structured_data: parsed_fields.presence,
+        structured_data: parsed.presence,
         message_type:    "customer_reply",
         message_id:      f["message_id"],
         mail_to:         f["mail_to"],
@@ -280,43 +311,50 @@ namespace :migrate do
       )
       imported_messages += 1
       dot
- 
+
+      next if parsed.blank?
+
       # Parse structured fields from the HTML body and create detail records
-      if ticket_type == "hiring_departure" && is_html
-        fields = parse_html_fields(body)
-        status = fields["STATUS"].to_s.strip.downcase
- 
+      if ticket_type == "hiring_departure"
+        status = parsed["STATUS"].to_s.strip.downcase
+
         ticket = Ticket.find(ticket_id)
- 
+
         if status == "hire"
-          create_hiring_detail(ticket, fields)
+          create_hiring_detail(ticket, parsed)
           imported_hiring += 1
-        elsif %w[termination terminate departure].include?(status_val) ||
-              (status_val.blank? && (parsed["TERMINATION REASON"].present? || parsed["REASON"].present?))
+        elsif %w[termination terminate departure].include?(status) ||
+              (status.blank? && (parsed["TERMINATION REASON"].present? || parsed["REASON"].present?))
           create_termination_detail(ticket, parsed)
           imported_term += 1
         end
       else
-        # For all other ticket types: map known keys to ticket columns,
-        # store the remainder in metadata.
-        ticket_updates = {}
-        metadata       = {}
+        # For all other ticket types: map known legacy labels onto the
+        # metadata keys the app reads; anything unrecognized is kept as
+        # extra metadata rather than dropped.
+        metadata = {}
 
         parsed.each do |raw_key, val|
-          col = TICKET_FIELD_MAP[raw_key.downcase.strip]
-          if col
-            ticket_updates[col] = val.is_a?(Array) ? val.join(", ") : val.to_s.strip
+          key = METADATA_KEY_MAP[raw_key.downcase.strip]
+          next if key.nil? && raw_key.blank?
+          key ||= raw_key.downcase.strip.gsub(/\s+/, "_")
+
+          if ARRAY_METADATA_KEYS.include?(key)
+            metadata[key] = Array(metadata[key]) + Array(val)
           else
-            metadata[raw_key] = val
+            metadata[key] = val.is_a?(Array) ? val.join(", ") : val.to_s.strip
           end
         end
 
-        update_attrs = ticket_updates.merge(metadata: metadata)
-        Ticket.where(id: ticket_id).update_all(update_attrs) if update_attrs.any?
-        imported_metadata += 1
+        if metadata.present?
+          existing = Ticket.where(id: ticket_id).pick(:metadata) || {}
+          Ticket.where(id: ticket_id).update_all(metadata: existing.merge(metadata))
+          imported_metadata += 1
+        end
       end
     end
     puts "\n    #{imported_messages} messages imported."
+    puts "    #{imported_metadata} tickets updated with parsed metadata."
     puts "    #{imported_hiring} hiring details created."
     puts "    #{imported_term} termination details created."
  
