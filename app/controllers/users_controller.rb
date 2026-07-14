@@ -29,6 +29,7 @@ class UsersController < ApplicationController
     if @user.save
       redirect_to users_path, notice: "User created successfully."
     else
+      flash.now[:alert] = @user.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end
@@ -39,6 +40,7 @@ class UsersController < ApplicationController
     if @user.update(user_params_without_password)
       redirect_to user_path(@user), notice: "User updated."
     else
+      flash.now[:alert] = @user.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_entity
     end
   end

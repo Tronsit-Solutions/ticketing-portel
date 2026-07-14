@@ -20,6 +20,7 @@ class TerminationDetailsController < ApplicationController
     if @termination_detail.save
       redirect_to @ticket, notice: "Termination details submitted successfully."
     else
+      flash.now[:alert] = @termination_detail.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end

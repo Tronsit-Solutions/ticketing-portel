@@ -20,6 +20,7 @@ class HiringDetailsController < ApplicationController
     if @hiring_detail.save
       redirect_to @ticket, notice: "Hiring details submitted successfully."
     else
+      flash.now[:alert] = @hiring_detail.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end

@@ -17,6 +17,7 @@ class Manager::UsersController < ApplicationController
       redirect_to manager_root_path, notice: "User created successfully."
     else
       @role = @user.role
+      flash.now[:alert] = @user.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end

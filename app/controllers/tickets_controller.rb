@@ -77,6 +77,7 @@ class TicketsController < ApplicationController
     else
       @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
       @customers   = User.customers.active.order(:fullname) unless current_user.customer?
+      flash.now[:alert] = @ticket.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end
