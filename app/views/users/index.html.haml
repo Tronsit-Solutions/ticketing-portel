@@ -5,7 +5,10 @@
 .card.border-0.shadow-sm.mb-4
   .card-body.py-2
     = form_with url: users_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
-      .col-md-3
+      .col-md-4
+        = label_tag :search, "Search", class: "form-label mb-1 fw-bold"
+        = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Search by name or email"
+      .col-md-2
         = label_tag :role, "Role", class: "form-label mb-1 fw-bold"
         = select_tag :role,                                                                                                |
           options_for_select(                                                                                              |
@@ -13,7 +16,7 @@
             params[:role]                                                                                                  |
           ),                                                                                                               |
           class: "form-select form-select-sm"                                                                              |
-      .col-md-3
+      .col-md-2
         = label_tag :active, "Status", class: "form-label mb-1 fw-bold"
         = select_tag :active,                                         |
           options_for_select(                                         |

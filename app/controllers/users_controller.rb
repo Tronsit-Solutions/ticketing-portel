@@ -6,6 +6,10 @@ class UsersController < ApplicationController
     @users = User.includes(:team).order(:fullname)
     @users = @users.where(role: params[:role])          if params[:role].present?
     @users = @users.where(is_active: params[:active])   if params[:active].present?
+    if params[:search].present?
+      term   = "%#{params[:search].strip}%"
+      @users = @users.where("fullname ILIKE :term OR email ILIKE :term", term: term)
+    end
     @users = @users.page(params[:page]).per(25)
   end
 
