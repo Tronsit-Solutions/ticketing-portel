@@ -1,11 +1,11 @@
-.cust-field
-  %label.cust-form-label Is this a new hire or termination request ?
-  = select_tag "ticket[metadata][request_type]", options_for_select([["Select Option", ""], "New Hire", "Termination"], ticket.metadata&.dig("request_type")), class: "cust-form-select"
+%div{class: fld}
+  %label{class: lbl} Is this a new hire or termination request ?
+  = select_tag "ticket[metadata][request_type]", options_for_select([["Select Option", ""], "New Hire", "Termination"], ticket.metadata&.dig("request_type")), class: sel
 
-.cust-field
-  %label.cust-form-label Full Name :
-  = text_field_tag "ticket[metadata][full_name]", ticket.metadata&.dig("full_name"), class: "cust-form-control", placeholder: ""
+%div{class: fld}
+  %label{class: lbl} Full Name :
+  = text_field_tag "ticket[metadata][full_name]", ticket.metadata&.dig("full_name"), class: ctrl, placeholder: ""
 
-.cust-field
-  %label.cust-form-label Which Location ?
-  = select_tag "ticket[location_id]", options_from_collection_for_select(Location.active.ordered, :id, :name, ticket.location_id), class: "cust-form-select", prompt: "Select Option"
+%div{class: fld}
+  %label{class: lbl} Which Location ?
+  = select_tag "ticket[location_id]", options_from_collection_for_select(Location.active.ordered, :id, :name, ticket.location_id), class: sel, prompt: "Select Option"

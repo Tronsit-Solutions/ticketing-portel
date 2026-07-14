@@ -1,5 +1,5 @@
-.cust-field
-  %label.cust-form-label
+%div{class: fld}
+  %label{class: lbl}
     What Kind of Bright Idea do you have ?
     %span{style: "color:#e02020;"} *
   - idea_types = Array(ticket.metadata&.dig("idea_types"))

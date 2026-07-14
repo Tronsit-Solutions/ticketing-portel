@@ -1,3 +1,3 @@
-.cust-field
-  %label.cust-form-label Reason
-  = text_area_tag "ticket[metadata][details]", ticket.metadata&.dig("details"), class: "cust-form-control", placeholder: "State Reason"
+%div{class: fld}
+  %label{class: lbl} Reason
+  = text_area_tag "ticket[metadata][details]", ticket.metadata&.dig("details"), class: ctrl, placeholder: "State Reason"

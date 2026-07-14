@@ -1,5 +1,5 @@
-.cust-field
-  %label.cust-form-label
+%div{class: fld}
+  %label{class: lbl}
     What Kind of HR Assistance do you need ?
     %span{style: "color:#e02020;"} *
   - hr_types = Array(ticket.metadata&.dig("hr_types"))

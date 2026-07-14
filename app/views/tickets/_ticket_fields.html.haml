@@ -32,7 +32,7 @@
     = text_field_tag "ticket[metadata][mobile]", ticket.metadata["mobile"], class: ctrl, placeholder: "Enter Contact No"
 
   - if ticket.ticket_type == "tronshealth"
-    = render "tickets/forms/tronshealth", ticket: ticket
+    = render "tickets/forms/tronshealth", ticket: ticket, ctrl: ctrl, sel: sel, lbl: lbl, fld: fld
 
   %div{class: fld}
     %label{class: lbl} Which Location?
@@ -40,7 +40,7 @@
 
 - partial = "tickets/forms/#{ticket.ticket_type}"
 - if lookup_context.template_exists?(partial, [], true) && ticket.ticket_type != "tronshealth"
-  = render partial, ticket: ticket
+  = render partial, ticket: ticket, ctrl: ctrl, sel: sel, lbl: lbl, fld: fld
 
 - unless hide_details
   - details_label = %w[technical_support tronshealth carecloud curemd].include?(ticket.ticket_type) ? "Description" : "Please add details here"
