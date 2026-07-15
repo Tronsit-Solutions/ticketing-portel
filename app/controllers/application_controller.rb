@@ -42,6 +42,23 @@ class ApplicationController < ActionController::Base
     redirect_back(fallback_location: root_path)
   end
 
+  # ── Pending (not-yet-persisted) ticket for the hiring/termination two-step flow ──
+
+  def build_pending_ticket
+    pending = session[:pending_ticket]
+    return nil unless pending
+
+    ticket = Ticket.new(pending.except("customer_id"))
+    if current_user.agent? || current_user.manager?
+      ticket.customer   = User.find_by(id: pending["customer_id"])
+      ticket.created_by = current_user
+      ticket.status     = "open"
+    else
+      ticket.customer = current_user
+    end
+    ticket
+  end
+
   # ── Post-login redirect ────────────────────────────────────────────────────
 
   def after_sign_in_path_for(resource)

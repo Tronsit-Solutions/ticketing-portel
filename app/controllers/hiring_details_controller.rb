@@ -1,5 +1,5 @@
 class HiringDetailsController < ApplicationController
-  before_action :set_ticket
+  before_action :set_ticket, only: [:new, :create]
 
   def new
     if @ticket.hiring_detail.present?
@@ -25,12 +25,67 @@ class HiringDetailsController < ApplicationController
     end
   end
 
+  # Step 2 of the new-ticket flow: the ticket itself has not been persisted
+  # yet (see TicketsController#create) — it lives in the session until this
+  # form is submitted, so both the ticket and its hiring detail are created
+  # together, or neither is.
+  def new_pending
+    @ticket = build_pending_ticket
+    return redirect_to new_ticket_path, alert: "Your ticket details expired. Please start again." unless @ticket
+
+    @hiring_detail = @ticket.build_hiring_detail
+    render :new
+  end
+
+  def create_pending
+    @ticket = build_pending_ticket
+    return redirect_to new_ticket_path, alert: "Your ticket details expired. Please start again." unless @ticket
+
+    @hiring_detail = @ticket.build_hiring_detail(hiring_detail_params)
+
+    ActiveRecord::Base.transaction do
+      @ticket.save!
+      @hiring_detail.save!
+    end
+    session.delete(:pending_ticket)
+    notify_staff_of_new_ticket(@ticket) if current_user.customer?
+    redirect_to @ticket, notice: "Ticket submitted successfully."
+  rescue ActiveRecord::RecordInvalid
+    flash.now[:alert] = (@ticket.errors.full_messages + @hiring_detail.errors.full_messages).to_sentence
+    render :new, status: :unprocessable_entity
+  end
+
+  # Staff-only shortcut: create the ticket without hiring details, to be
+  # filled in later (matches the pre-existing "Skip" behavior for staff).
+  def skip_pending
+    unauthorized! and return unless current_user.admin? || current_user.agent? || current_user.manager?
+
+    @ticket = build_pending_ticket
+    return redirect_to new_ticket_path, alert: "Your ticket details expired. Please start again." unless @ticket
+
+    @ticket.save!
+    session.delete(:pending_ticket)
+    redirect_to @ticket, notice: "Ticket submitted successfully."
+  end
+
   private
 
   def set_ticket
     @ticket = Ticket.find(params[:ticket_id])
     unless @ticket.ticket_type == "hiring_departure"
       redirect_to @ticket, alert: "This ticket does not require hiring details."
+    end
+  end
+
+  def notify_staff_of_new_ticket(ticket)
+    User.where(role: %w[agent manager]).active.find_each do |staff|
+      TicketNotification.create!(
+        ticket:       ticket,
+        responded_by: current_user,
+        receiver:     staff,
+        details:      "New ticket ##{ticket.id} submitted by #{current_user.fullname}: \"#{ticket.title}\"",
+        status:       "unread"
+      )
     end
   end
 

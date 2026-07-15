@@ -102,26 +102,30 @@ RSpec.describe "Tickets", type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
-      it "redirects hiring ticket to hiring detail form" do
-        post tickets_path, params: {
-          ticket: {
-            ticket_type: "hiring_departure",
-            title: "New Hire",
-            metadata: { request_type: "Hire", full_name: "John Doe" }
+      it "redirects hiring ticket to hiring detail form without creating the ticket yet" do
+        expect {
+          post tickets_path, params: {
+            ticket: {
+              ticket_type: "hiring_departure",
+              title: "New Hire",
+              metadata: { request_type: "Hire", full_name: "John Doe" }
+            }
           }
-        }
-        expect(response).to redirect_to(new_ticket_hiring_detail_path(Ticket.last))
+        }.not_to change(Ticket, :count)
+        expect(response).to redirect_to(new_pending_hiring_detail_path)
       end
 
-      it "redirects termination ticket to termination detail form" do
-        post tickets_path, params: {
-          ticket: {
-            ticket_type: "hiring_departure",
-            title: "Termination",
-            metadata: { request_type: "Termination", full_name: "Jane Doe" }
+      it "redirects termination ticket to termination detail form without creating the ticket yet" do
+        expect {
+          post tickets_path, params: {
+            ticket: {
+              ticket_type: "hiring_departure",
+              title: "Termination",
+              metadata: { request_type: "Termination", full_name: "Jane Doe" }
+            }
           }
-        }
-        expect(response).to redirect_to(new_ticket_termination_detail_path(Ticket.last))
+        }.not_to change(Ticket, :count)
+        expect(response).to redirect_to(new_pending_termination_detail_path)
       end
 
       it "creates notifications for staff on new ticket" do

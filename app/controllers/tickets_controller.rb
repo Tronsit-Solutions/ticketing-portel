@@ -50,30 +50,26 @@ class TicketsController < ApplicationController
 
   def create
     @ticket = Ticket.new(ticket_params)
+    apply_submitter!(@ticket)
 
-    if current_user.agent? || current_user.manager?
-      @ticket.customer    = User.find(params[:ticket][:customer_id])
-      @ticket.created_by  = current_user
-      # @ticket.assignee    = current_user
-      # @ticket.assigned_by = current_user
-      # @ticket.assigned_at = Time.current
-      @ticket.status      = "open"
-    else
-      @ticket.customer = current_user
-    end
-
-    if @ticket.save
-      save_attachments(@ticket)
-      notify_staff_of_new_ticket if current_user.customer?
-      if @ticket.ticket_type == "hiring_departure"
+    if @ticket.ticket_type == "hiring_departure"
+      if @ticket.valid?
+        session[:pending_ticket] = ticket_params.to_h.merge("customer_id" => params.dig(:ticket, :customer_id))
         if @ticket.metadata["request_type"] == "Termination"
-          redirect_to new_ticket_termination_detail_path(@ticket)
+          redirect_to new_pending_termination_detail_path
         else
-          redirect_to new_ticket_hiring_detail_path(@ticket)
+          redirect_to new_pending_hiring_detail_path
         end
       else
-        redirect_to @ticket, notice: "Ticket submitted successfully."
+        @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
+        @customers   = User.customers.active.order(:fullname) unless current_user.customer?
+        flash.now[:alert] = @ticket.errors.full_messages.to_sentence
+        render :new, status: :unprocessable_entity
       end
+    elsif @ticket.save
+      save_attachments(@ticket)
+      notify_staff_of_new_ticket if current_user.customer?
+      redirect_to @ticket, notice: "Ticket submitted successfully."
     else
       @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
       @customers   = User.customers.active.order(:fullname) unless current_user.customer?
@@ -131,6 +127,16 @@ class TicketsController < ApplicationController
   end
 
   private
+
+  def apply_submitter!(ticket)
+    if current_user.agent? || current_user.manager?
+      ticket.customer   = User.find(params[:ticket][:customer_id])
+      ticket.created_by = current_user
+      ticket.status     = "open"
+    else
+      ticket.customer = current_user
+    end
+  end
 
   def load_customer_home_data
     @catalogue      = Ticket::CATALOGUE

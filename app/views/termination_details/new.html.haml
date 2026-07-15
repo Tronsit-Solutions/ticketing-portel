@@ -121,12 +121,12 @@
     / Right — Form
     .right-panel
       .form-header
-        = link_to @ticket, class: "form-header-back", "aria-label" => "Back" do
+        = link_to (@ticket.new_record? ? new_ticket_path(ticket_type: "hiring_departure") : @ticket), class: "form-header-back", "aria-label" => "Back" do
           %i.bi.bi-arrow-left
         New Team Member or Departure
 
 
-      = form_with model: @termination_detail, url: ticket_termination_detail_path(@ticket), method: :post, local: true do |f|
+      = form_with model: @termination_detail, url: (@ticket.new_record? ? pending_termination_detail_path : ticket_termination_detail_path(@ticket)), method: :post, local: true do |f|
         = render "termination_details/form", f: f, termination_detail: @termination_detail, css_class: "cust"
 
         .cust-submit-row
@@ -207,7 +207,7 @@
       margin-bottom: 20px;
     }
 
-  = link_to @ticket, class: "form-back-link" do
+  = link_to (@ticket.new_record? ? new_ticket_path(ticket_type: "hiring_departure") : @ticket), class: "form-back-link" do
     %i.bi.bi-arrow-left
     Back to ticket
 
@@ -222,9 +222,12 @@
     .notice-banner= flash[:notice]
 
   .form-card
-    = form_with model: @termination_detail, url: ticket_termination_detail_path(@ticket), method: :post, local: true do |f|
+    = form_with model: @termination_detail, url: (@ticket.new_record? ? pending_termination_detail_path : ticket_termination_detail_path(@ticket)), method: :post, local: true do |f|
       = render "termination_details/form", f: f, termination_detail: @termination_detail, css_class: "std"
 
       .d-flex.align-items-center.gap-3.mt-4.pt-2
         = f.submit "Submit", class: "btn btn-submit"
-        = link_to "Skip", @ticket, class: "btn btn-cancel"
+        - if @ticket.new_record?
+          = button_to "Skip", skip_pending_termination_detail_path, class: "btn btn-cancel"
+        - else
+          = link_to "Skip", @ticket, class: "btn btn-cancel"

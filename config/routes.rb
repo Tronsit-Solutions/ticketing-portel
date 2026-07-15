@@ -48,6 +48,13 @@ Rails.application.routes.draw do
     resource  :termination_detail, only: [:new, :create]
   end
 
+  get  "hiring_detail/new",      to: "hiring_details#new_pending",      as: :new_pending_hiring_detail
+  post "hiring_detail",          to: "hiring_details#create_pending",   as: :pending_hiring_detail
+  post "hiring_detail/skip",     to: "hiring_details#skip_pending",     as: :skip_pending_hiring_detail
+  get  "termination_detail/new", to: "termination_details#new_pending", as: :new_pending_termination_detail
+  post "termination_detail",     to: "termination_details#create_pending", as: :pending_termination_detail
+  post "termination_detail/skip", to: "termination_details#skip_pending", as: :skip_pending_termination_detail
+
   resources :ticket_notifications, only: [:index] do
     member    { patch :mark_read }
     collection { patch :mark_all_read }
