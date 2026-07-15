@@ -21,6 +21,7 @@ class UsersController < ApplicationController
       @total_count      = @user.assigned_tickets.count
 
       @assigned_tickets = @assigned_tickets.where(status: params[:status]) if params[:status].present?
+      @assigned_tickets = @assigned_tickets.page(params[:page]).per(25)
     end
   end
 
@@ -42,7 +43,7 @@ class UsersController < ApplicationController
 
   def update
     if @user.update(user_params_without_password)
-      redirect_to user_path(@user), notice: "User updated."
+      redirect_to user_path(@user), notice: "User updated successfully."
     else
       flash.now[:alert] = @user.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_entity

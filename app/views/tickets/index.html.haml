@@ -13,13 +13,16 @@
   .card-body.py-2
     = form_with url: tickets_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
       .col-md-3
+        = label_tag :search, "Search", class: "form-label mb-1 fw-bold"
+        = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Search by title"
+      .col-md-2
         = label_tag :status, "Status", class: "form-label mb-1 fw-bold"
         = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
-      .col-md-3
+      .col-md-2
         = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
         = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }, params[:ticket_type]), class: "form-select form-select-sm"
       - unless current_user.customer?
-        .col-md-3
+        .col-md-2
           = label_tag :unassigned, "Assignment", class: "form-label mb-1 fw-bold"
           = select_tag :unassigned, options_for_select([["All", ""], ["Unassigned only", "true"]], params[:unassigned]), class: "form-select form-select-sm"
       .col-md-2
