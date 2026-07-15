@@ -26,6 +26,10 @@ class TicketsController < ApplicationController
       @tickets = @tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
       @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present?
       @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
+      if params[:search].present?
+        term     = "%#{params[:search].strip}%"
+        @tickets = @tickets.where("title ILIKE :term", term: term)
+      end
       @tickets = @tickets.page(params[:page]).per(25)
     end
   end

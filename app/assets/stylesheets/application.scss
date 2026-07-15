@@ -1,10 +1,10 @@
 @import "bootstrap";
 
-// Flash messages — fixed bottom-left, above everything
+// Flash messages — fixed top-right, above everything
 #flash-container {
   position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
+  top: 4.0rem;
+  right: 1.5rem;
   z-index: 99999;
   display: flex;
   flex-direction: column;

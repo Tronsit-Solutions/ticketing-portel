@@ -66,6 +66,7 @@
             = link_to "Open",        user_path(@user, status: "open"),        class: "btn btn-sm #{params[:status] == 'open' ? 'btn-primary' : 'btn-outline-secondary'}"
             = link_to "In Progress", user_path(@user, status: "in_progress"), class: "btn btn-sm #{params[:status] == 'in_progress' ? 'btn-warning' : 'btn-outline-secondary'}"
             = link_to "Closed",      user_path(@user, status: "closed"),      class: "btn btn-sm #{params[:status] == 'closed' ? 'btn-success' : 'btn-outline-secondary'}"
+            = link_to "Cancelled",   user_path(@user, status: "cancelled"),   class: "btn btn-sm #{params[:status] == 'cancelled' ? 'btn-danger' : 'btn-outline-secondary'}"
 
         .card-body.p-0
           - if @assigned_tickets.any?
@@ -94,6 +95,10 @@
                     %td= ticket.location&.name || "-"
                     %td{style: "font-size:13px;"}= ticket.assigned_at&.strftime("%b %d, %Y") || "-"
                     %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
+            .card-footer.bg-white
+              = page_entries_info @assigned_tickets
+              .pagination-wrapper
+                = paginate @assigned_tickets
           - else
             .text-center.text-muted.py-5
               %i.bi.bi-ticket-perforated{style: "font-size: 2rem;"}

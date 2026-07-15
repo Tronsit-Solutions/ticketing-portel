@@ -14,7 +14,7 @@ class Manager::UsersController < ApplicationController
     end
 
     if @user.save
-      redirect_to manager_root_path, notice: "User created successfully."
+      redirect_to manager_root_path, notice: "#{@user.role.humanize} created successfully."
     else
       @role = @user.role
       flash.now[:alert] = @user.errors.full_messages.to_sentence
