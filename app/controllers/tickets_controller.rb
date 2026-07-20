@@ -1,9 +1,10 @@
 class TicketsController < ApplicationController
-  before_action :set_ticket,            only: [:show, :assign, :self_assign, :close]
+  before_action :set_ticket,            only: [:show, :assign, :self_assign, :close, :cancel]
   before_action :authorize_show!,        only: [:show]
   before_action :authorize_assign!,      only: [:assign]
   before_action :authorize_self_assign!, only: [:self_assign]
   before_action :authorize_close!,       only: [:close]
+  before_action :authorize_cancel!,      only: [:cancel]
 
   def catalogue
     if current_user.customer?
@@ -146,6 +147,16 @@ class TicketsController < ApplicationController
     redirect_to @ticket, notice: "Ticket closed."
   end
 
+  def cancel
+    @ticket.update!(
+      status:      "closed",
+      resolved_by: current_user,
+      resolved_at: Time.current
+    )
+    notify_staff_of_cancellation
+    redirect_to @ticket, notice: "Ticket cancelled."
+  end
+
   private
 
   def apply_submitter!(ticket)
@@ -159,13 +170,16 @@ class TicketsController < ApplicationController
   end
 
   def load_customer_home_data
-    @catalogue      = Ticket::CATALOGUE
-    all             = Ticket.where(customer: current_user).recent.includes(:customer)
-    @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
-    @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
-    @all_count      = all.count
-    @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
-    @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
+    @catalogue = Ticket::CATALOGUE
+    scope      = Ticket.where(customer: current_user)
+
+    @open_tickets_count   = scope.where.not(status: %w[closed cancelled]).count
+    @closed_tickets_count = scope.where(status: %w[closed cancelled]).count
+    @all_count            = @open_tickets_count + @closed_tickets_count
+    @active_tab           = params[:tab] == "closed" ? "closed" : "opened"
+
+    tab_scope       = @active_tab == "closed" ? scope.where(status: %w[closed cancelled]) : scope.where.not(status: %w[closed cancelled])
+    @listed_tickets = tab_scope.recent.includes(:customer).page(params[:page]).per(10)
   end
 
   def set_ticket
@@ -196,6 +210,20 @@ class TicketsController < ApplicationController
     )
   end
 
+  def notify_staff_of_cancellation
+    receivers = User.where(role: "manager").active.to_a
+    receivers << @ticket.assignee if @ticket.assignee.present?
+    receivers.uniq.reject { |user| user == current_user }.each do |staff|
+      TicketNotification.create!(
+        ticket:       @ticket,
+        responded_by: current_user,
+        receiver:     staff,
+        details:      "Ticket ##{@ticket.id} was cancelled by #{current_user.fullname}: \"#{@ticket.title}\"",
+        status:       "unread"
+      )
+    end
+  end
+
   def authorize_show!
     return if current_user.admin? || current_user.manager? || current_user.agent?
     unauthorized! unless @ticket.customer == current_user
@@ -215,6 +243,10 @@ class TicketsController < ApplicationController
            @ticket.customer == current_user
       unauthorized!
     end
+  end
+
+  def authorize_cancel!
+    unauthorized! unless current_user.admin? || @ticket.customer == current_user
   end
 
   def ticket_params

@@ -14,6 +14,19 @@ RSpec.describe "TicketNotifications", type: :request do
       get ticket_notifications_path
       expect(response).to have_http_status(:ok)
     end
+
+    it "paginates notifications, 25 per page" do
+      notifications = Array.new(30) { create(:ticket_notification, receiver: user, details: SecureRandom.hex(8)) }
+      notifications_by_recency = ([notif] + notifications).sort_by(&:created_at).reverse
+
+      get ticket_notifications_path
+      expect(response.body).to include(notifications_by_recency[24].details)
+      expect(response.body).not_to include(notifications_by_recency[25].details)
+
+      get ticket_notifications_path, params: { page: 2 }
+      expect(response.body).to include(notifications_by_recency[25].details)
+      expect(response.body).to include(notifications_by_recency[30].details)
+    end
   end
 
   describe "PATCH /ticket_notifications/:id/mark_read" do

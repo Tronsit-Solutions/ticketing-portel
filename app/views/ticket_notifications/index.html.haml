@@ -27,9 +27,18 @@
     gap: 18px;
     padding: 18px 24px;
     border-bottom: 1px solid #f0f0f0;
+    width: 100%;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s;
   }
   .notif-row:last-child { border-bottom: none; }
   .notif-row.unread { background: #f5f9fd; }
+  .notif-row:hover { background: #eef6fc; }
   .notif-avatar-link {
     flex-shrink: 0;
     display: block;
@@ -37,9 +46,7 @@
     height: 48px;
     border-radius: 50%;
     overflow: hidden;
-    transition: opacity 0.15s;
   }
-  .notif-avatar-link:hover { opacity: 0.8; }
   .notif-avatar-img {
     width: 48px;
     height: 48px;
@@ -89,8 +96,8 @@
   .notif-card
     - if @notifications.any?
       - @notifications.each do |notification|
-        .notif-row{class: notification.unread? ? "unread" : ""}
-          = button_to mark_read_ticket_notification_path(notification), method: :patch, class: "notif-avatar-link", style: "background:none;border:none;padding:0;" do
+        = button_to mark_read_ticket_notification_path(notification), method: :patch, class: "notif-row #{"unread" if notification.unread?}" do
+          .notif-avatar-link
             .notif-avatar-img
               %i.bi.bi-person-fill
           .notif-body
@@ -109,3 +116,7 @@
       .empty-state
         %i.bi.bi-bell-slash
         %p No notifications yet.
+
+  - if @notifications.any?
+    .notif-pagination.mt-3.d-flex.justify-content-center
+      = paginate @notifications

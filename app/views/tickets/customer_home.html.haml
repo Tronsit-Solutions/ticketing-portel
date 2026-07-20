@@ -7,7 +7,11 @@
   .right-panel
     - if @active_panel == :my_tickets
       .ticket-list-card
-        = render "shared/customer/ticket_list_items", active_tab: @active_tab, open_tickets: @open_tickets, closed_tickets: @closed_tickets, listed_tickets: @listed_tickets
+        = render "shared/customer/ticket_list_items", active_tab: @active_tab, open_tickets_count: @open_tickets_count, closed_tickets_count: @closed_tickets_count, listed_tickets: @listed_tickets
+
+      - if @listed_tickets.any?
+        .ticket-list-pagination.mt-3.d-flex.justify-content-center
+          = paginate @listed_tickets, params: { tab: @active_tab }
     - else
       .catalogue-panel
         .catalogue-panel-header

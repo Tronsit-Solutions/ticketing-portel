@@ -342,3 +342,33 @@
             - else
               .ticket-msg-text= message.details
 
+- if @ticket.status.in?(%w[open in_progress])
+  / ── Send Message Modal ──────────────────────────────────────────
+  #sendMessageModal.modal.fade{"aria-labelledby" => "sendMessageModalLabel", "aria-hidden" => "true", tabindex: "-1"}
+    .modal-dialog.modal-dialog-centered
+      .modal-content
+        .modal-header.border-0.pb-0
+          %button.btn-close{"data-bs-dismiss" => "modal", type: "button", "aria-label" => "Close"}
+        = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
+          .modal-body
+            %h5.fw-semibold.mb-3 Send Message
+            = text_area_tag "details", nil, rows: 8, class: "form-control", required: true
+          .modal-footer.border-0.pt-0.justify-content-center
+            = f.submit "Submit", class: "btn btn-dark px-4"
+
+  / ── Cancel Ticket Modal ──────────────────────────────────────────
+  #cancelTicketModal.modal.fade{"aria-labelledby" => "cancelTicketModalLabel", "aria-hidden" => "true", tabindex: "-1"}
+    .modal-dialog.modal-dialog-centered
+      .modal-content
+        .modal-header.border-0.pb-0
+          %button.btn-close{"data-bs-dismiss" => "modal", type: "button", "aria-label" => "Close"}
+        = form_with url: cancel_ticket_path(@ticket), method: :patch, local: true do |f|
+          .modal-body
+            .text-center.mb-3
+              %i.bi.bi-exclamation-triangle.text-danger{style: "font-size: 2.5rem;"}
+              %p.mt-3.mb-1.fw-semibold Are you sure you want to cancel this ticket?
+              %p.text-muted{style: "font-size: 13px;"}= "\"#{@ticket.title}\""
+          .modal-footer.border-0.pt-0.justify-content-center.gap-2
+            %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal", type: "button"} Keep Ticket
+            = f.submit "Cancel Ticket", class: "btn btn-danger px-4"
+

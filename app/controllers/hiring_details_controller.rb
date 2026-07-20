@@ -1,5 +1,6 @@
 class HiringDetailsController < ApplicationController
   before_action :set_ticket, only: [:new, :create]
+  before_action :set_my_tickets_count, only: [:new, :create, :new_pending, :create_pending]
 
   def new
     if @ticket.hiring_detail.present?
@@ -84,6 +85,10 @@ class HiringDetailsController < ApplicationController
     unless @ticket.ticket_type == "hiring_departure"
       redirect_to @ticket, alert: "This ticket does not require hiring details."
     end
+  end
+
+  def set_my_tickets_count
+    @my_tickets_count = Ticket.where(customer: current_user).count if current_user.customer?
   end
 
   def notify_staff_of_new_ticket(ticket)

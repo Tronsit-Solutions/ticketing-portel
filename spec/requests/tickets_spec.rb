@@ -47,6 +47,28 @@ RSpec.describe "Tickets", type: :request do
         get tickets_path
         expect(response).to have_http_status(:ok)
       end
+
+      it "paginates open tickets, 10 per page" do
+        tickets = Array.new(12) { create(:ticket, :open, customer: customer) }.sort_by(&:created_at).reverse
+
+        get tickets_path
+        expect(response.body).to include(tickets[9].title)   # 10th most recent, on page 1
+        expect(response.body).not_to include(tickets[10].title) # 11th most recent, pushed to page 2
+        expect(response.body).to include("12") # open tab count
+
+        get tickets_path, params: { page: 2 }
+        expect(response.body).to include(tickets[10].title)
+        expect(response.body).to include(tickets[11].title)
+      end
+
+      it "paginates closed tickets separately via the closed tab" do
+        5.times { create(:ticket, :closed, customer: customer) }
+        3.times { create(:ticket, :open, customer: customer) }
+
+        get tickets_path, params: { tab: "closed" }
+        expect(response.body).to include("5") # closed tab count
+        expect(response.body).to include("3") # open tab count
+      end
     end
   end
 
@@ -300,6 +322,63 @@ RSpec.describe "Tickets", type: :request do
       it "is unauthorized" do
         sign_in other
         patch close_ticket_path(assigned_ticket)
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  describe "PATCH /tickets/:id/cancel" do
+    let(:manager)        { create(:user, :manager) }
+    let(:assigned_ticket) { create(:ticket, :assigned, assignee: agent, customer: customer) }
+
+    context "as the ticket's customer" do
+      before { sign_in customer }
+
+      it "cancels the ticket by marking it closed" do
+        patch cancel_ticket_path(assigned_ticket)
+        expect(assigned_ticket.reload.status).to eq("closed")
+        expect(assigned_ticket.reload.resolved_by).to eq(customer)
+      end
+
+      it "redirects to the ticket" do
+        patch cancel_ticket_path(assigned_ticket)
+        expect(response).to redirect_to(ticket_path(assigned_ticket))
+      end
+
+      it "notifies the assignee and managers" do
+        manager
+        patch cancel_ticket_path(assigned_ticket)
+        expect(TicketNotification.find_by(ticket: assigned_ticket, receiver: agent)).to be_present
+        expect(TicketNotification.find_by(ticket: assigned_ticket, receiver: manager)).to be_present
+      end
+
+      it "does not notify the customer themselves" do
+        patch cancel_ticket_path(assigned_ticket)
+        expect(TicketNotification.find_by(ticket: assigned_ticket, receiver: customer)).to be_nil
+      end
+    end
+
+    context "as admin" do
+      it "can cancel any ticket" do
+        sign_in admin
+        patch cancel_ticket_path(assigned_ticket)
+        expect(assigned_ticket.reload.status).to eq("closed")
+      end
+    end
+
+    context "as an unrelated customer" do
+      it "is unauthorized" do
+        sign_in other
+        patch cancel_ticket_path(assigned_ticket)
+        expect(response).to redirect_to(root_path)
+        expect(assigned_ticket.reload.status).not_to eq("closed")
+      end
+    end
+
+    context "as the assignee (agent, not the customer)" do
+      it "is unauthorized" do
+        sign_in agent
+        patch cancel_ticket_path(assigned_ticket)
         expect(response).to redirect_to(root_path)
       end
     end

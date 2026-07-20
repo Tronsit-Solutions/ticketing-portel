@@ -38,6 +38,27 @@
         letter-spacing: 0.5px;
       }
 
+      .top-navbar .dropdown {
+        margin-left: auto;
+      }
+
+      .top-navbar .ticket-actions-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        background: none;
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+      }
+      .top-navbar .ticket-actions-toggle:hover { background: rgba(255,255,255,0.12); border-color: #ffffff; }
+      .top-navbar .ticket-actions-toggle::after { display: none; }
+
       .sidebar {
         width: 280px;
         min-height: 100vh;
@@ -102,6 +123,16 @@
     / Topbar
     .top-navbar
       .brand Customer Portal
+
+      - if @ticket.present? && @ticket.persisted? && @ticket.status.in?(%w[open in_progress])
+        .dropdown
+          %button.ticket-actions-toggle{type: "button", "data-bs-toggle" => "dropdown", "aria-expanded" => "false", "aria-label" => "Ticket actions"}
+            %i.bi.bi-three-dots-vertical
+          %ul.dropdown-menu.dropdown-menu-end
+            %li
+              %button.dropdown-item{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#sendMessageModal"} Send Message
+            %li
+              %button.dropdown-item.text-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#cancelTicketModal"} Cancel Ticket
 
     / Sidebar
     .sidebar
