@@ -52,4 +52,4 @@ group :test do
   gem "rspec_junit_formatter"
 end
 
-gem "simplecov", "~> 0.22.0", :group => :test
+gem "simplecov", "~> 1.0.2", :group => :test
