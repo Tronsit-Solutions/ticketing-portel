@@ -80,6 +80,20 @@ class Ticket < ApplicationRecord
     )
   end
 
+  def notify_staff!(details:, responded_by:)
+    receivers = User.where(role: "manager").active.to_a
+    receivers << assignee if assignee.present?
+
+    receivers.uniq.reject { |user| user == responded_by }.each do |staff|
+      ticket_notifications.create!(
+        responded_by: responded_by,
+        receiver:     staff,
+        details:      details,
+        status:       "unread"
+      )
+    end
+  end
+
   # Callbacks
   before_update :set_resolved_at, if: :status_changed_to_closed?
 

@@ -3,6 +3,8 @@ Rails.application.routes.draw do
     sessions: 'users/sessions'
   }
 
+  mount ActionCable.server => "/cable"
+
   root "home#index"
   resources :password_reset_requests, only: [:new, :create]
   namespace :admin do
@@ -65,7 +67,10 @@ Rails.application.routes.draw do
 
   resources :ticket_notifications, only: [:index] do
     member    { patch :mark_read }
-    collection { patch :mark_all_read }
+    collection do
+      patch :mark_all_read
+      get   :unread_count
+    end
   end
   resources :users, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
     member do

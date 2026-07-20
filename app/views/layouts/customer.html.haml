@@ -149,12 +149,11 @@
           %i.bi.bi-ticket-perforated-fill
           Tickets
 
+        = turbo_stream_from current_user, :ticket_notifications
         = link_to ticket_notifications_path do
           %i.bi.bi-bell-fill
           Notifications
-          - unread = TicketNotification.for_user(current_user).unread.count
-          - if unread > 0
-            %span.badge.bg-danger.ms-auto= unread
+          = render "shared/notification_bell_badge", user: current_user, badge_class: "ms-auto", badge_style: nil
 
         = link_to customer_wiki_path do
           %i.bi.bi-people-fill

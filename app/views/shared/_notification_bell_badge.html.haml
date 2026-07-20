@@ -1,0 +1,4 @@
+- unread = TicketNotification.for_user(user).unread.count
+- badge_id = local_assigns[:badge_id].presence || "notif-bell-badge"
+%span.badge.bg-danger{id: badge_id, class: badge_class, style: badge_style, hidden: unread.zero?}
+  = unread

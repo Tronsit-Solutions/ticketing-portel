@@ -1,0 +1,16 @@
+= button_to mark_read_ticket_notification_path(notification), method: :patch, class: "notif-row #{"unread" if notification.unread?}", id: dom_id(notification) do
+  .notif-avatar-link
+    .notif-avatar-img
+      %i.bi.bi-person-fill
+  .notif-body
+    .notif-text
+      - if notification.responded_by.present?
+        %strong= notification.responded_by.email
+      - else
+        %strong System
+      = " — #{notification.details}"
+    .notif-meta
+      was sent on
+      %span.notif-date= notification.created_at.strftime("%d %B, %y")
+  - if notification.unread?
+    .notif-badge

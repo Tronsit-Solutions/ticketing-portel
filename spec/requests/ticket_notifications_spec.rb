@@ -74,6 +74,30 @@ RSpec.describe "TicketNotifications", type: :request do
     end
   end
 
+  describe "GET /ticket_notifications/unread_count" do
+    it "returns the current user's unread count as JSON" do
+      get unread_count_ticket_notifications_path
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["count"]).to eq(1)
+    end
+
+    it "reflects newly created notifications without a page reload" do
+      get unread_count_ticket_notifications_path
+      expect(JSON.parse(response.body)["count"]).to eq(1)
+
+      create(:ticket_notification, :unread, receiver: user)
+
+      get unread_count_ticket_notifications_path
+      expect(JSON.parse(response.body)["count"]).to eq(2)
+    end
+
+    it "does not include another user's notifications" do
+      get unread_count_ticket_notifications_path
+      expect(JSON.parse(response.body)["count"]).to eq(1) # not 2, excludes other_notif
+    end
+  end
+
   describe "PATCH /ticket_notifications/mark_all_read" do
     it "marks all unread notifications for current user as read" do
       patch mark_all_read_ticket_notifications_path

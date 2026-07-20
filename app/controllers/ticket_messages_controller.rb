@@ -26,6 +26,11 @@ class TicketMessagesController < ApplicationController
           responded_by: current_user,
           details:      "#{current_user.fullname} replied to your ticket ##{@ticket.id}: \"#{@ticket.title}\""
         )
+      elsif message_type == "customer_reply"
+        @ticket.notify_staff!(
+          responded_by: current_user,
+          details:      "#{current_user.fullname} replied to ticket ##{@ticket.id}: \"#{@ticket.title}\""
+        )
       end
       redirect_to ticket_path(@ticket), notice: "Reply added."
     else

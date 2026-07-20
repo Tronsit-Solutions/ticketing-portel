@@ -21,6 +21,10 @@ class TicketNotificationsController < ApplicationController
     redirect_to ticket_notifications_path, notice: "All notifications marked as read."
   end
 
+  def unread_count
+    render json: { count: TicketNotification.for_user(current_user).unread.count }
+  end
+
   private
 
   def user_show_path_for(user)

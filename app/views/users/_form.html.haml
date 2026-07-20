@@ -17,19 +17,12 @@
     .mb-3
       = f.label :password_confirmation, "Confirm Password", class: "form-label fw-bold"
       = f.password_field :password_confirmation, class: "form-control", placeholder: "Confirm password"
-  .row
-    .col-md-6.mb-3
-      = f.label :role, class: "form-label fw-bold"
-      = f.select :role,                                              |
-        User::ROLES.map { |r| [r.humanize, r] }.sort_by(&:first),    |
-        { prompt: "Select role" },                                   |
-        class: "form-select"                                         |
-    .col-md-6.mb-3
-      = f.label :team_id, "Team", class: "form-label fw-bold"
-      = f.collection_select :team_id, |
-        Team.ordered, :id, :name,     |
-        { prompt: "No team" },        |
-        class: "form-select"          |
+  .mb-3
+    = f.label :role, class: "form-label fw-bold"
+    = f.select :role,                                              |
+      User::ROLES.map { |r| [r.humanize, r] }.sort_by(&:first),    |
+      { prompt: "Select role" },                                   |
+      class: "form-select"                                         |
   .mb-3
     = f.label :contact_no, "Contact Number", class: "form-label fw-bold"
     = f.text_field :contact_no, class: "form-control", placeholder: "Contact number"

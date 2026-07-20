@@ -84,36 +84,25 @@
   .empty-state i { font-size: 2.5rem; }
   .empty-state p { margin-top: 12px; font-size: 14px; }
 
+= turbo_stream_from current_user, :ticket_notifications
+
 .notif-wrap
   .notif-header
     %h4 Notifications
-    - if @notifications.any?(&:unread?)
-      = button_to "Mark All as Read",
-        mark_all_read_ticket_notifications_path,
-        method: :patch,
-        class: "btn btn-sm btn-outline-secondary"
+    #notif-mark-all-wrap
+      - if @notifications.any?(&:unread?)
+        = button_to "Mark All as Read",
+          mark_all_read_ticket_notifications_path,
+          method: :patch,
+          class: "btn btn-sm btn-outline-secondary"
 
   .notif-card
     - if @notifications.any?
-      - @notifications.each do |notification|
-        = button_to mark_read_ticket_notification_path(notification), method: :patch, class: "notif-row #{"unread" if notification.unread?}" do
-          .notif-avatar-link
-            .notif-avatar-img
-              %i.bi.bi-person-fill
-          .notif-body
-            .notif-text
-              - if notification.responded_by.present?
-                %strong= notification.responded_by.email
-              - else
-                %strong System
-              = " — #{notification.details}"
-            .notif-meta
-              was sent on
-              %span.notif-date= notification.created_at.strftime("%d %B, %y")
-          - if notification.unread?
-            .notif-badge
+      #notif-list
+        - @notifications.each do |notification|
+          = render "ticket_notifications/notification", notification: notification
     - else
-      .empty-state
+      #notif-list.empty-state
         %i.bi.bi-bell-slash
         %p No notifications yet.
 

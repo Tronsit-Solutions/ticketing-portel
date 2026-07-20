@@ -181,4 +181,60 @@ RSpec.describe Ticket, type: :model do
       }.not_to change(TicketNotification, :count)
     end
   end
+
+  describe "#notify_staff!" do
+    let(:customer) { create(:user, :customer) }
+
+    it "notifies all managers and the assignee" do
+      manager1 = create(:user, :manager)
+      manager2 = create(:user, :manager)
+      agent    = create(:user, :agent)
+      ticket   = create(:ticket, customer: customer, assignee: agent)
+
+      expect {
+        ticket.notify_staff!(responded_by: customer, details: "Update")
+      }.to change(TicketNotification, :count).by(3)
+
+      expect(TicketNotification.find_by(receiver: manager1)).to be_present
+      expect(TicketNotification.find_by(receiver: manager2)).to be_present
+      expect(TicketNotification.find_by(receiver: agent)).to be_present
+    end
+
+    it "sends only one notification to a manager when the ticket is self-assigned to them" do
+      manager       = create(:user, :manager)
+      other_manager = create(:user, :manager)
+      ticket        = create(:ticket, customer: customer, assignee: manager)
+
+      expect {
+        ticket.notify_staff!(responded_by: customer, details: "Update")
+      }.to change(TicketNotification, :count).by(2) # manager (deduped) + other_manager
+
+      expect(TicketNotification.where(receiver: manager).count).to eq(1)
+    end
+
+    it "excludes inactive managers" do
+      create(:user, :manager, :inactive)
+      ticket = create(:ticket, customer: customer)
+
+      expect {
+        ticket.notify_staff!(responded_by: customer, details: "Update")
+      }.not_to change(TicketNotification, :count)
+    end
+
+    it "does not notify the responder themselves" do
+      manager = create(:user, :manager)
+      ticket  = create(:ticket, customer: customer, assignee: manager)
+
+      expect {
+        ticket.notify_staff!(responded_by: manager, details: "Update")
+      }.not_to change(TicketNotification, :count)
+    end
+
+    it "does nothing when there are no managers and no assignee" do
+      ticket = create(:ticket, customer: customer)
+      expect {
+        ticket.notify_staff!(responded_by: customer, details: "Update")
+      }.not_to change(TicketNotification, :count)
+    end
+  end
 end

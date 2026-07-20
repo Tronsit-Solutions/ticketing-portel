@@ -129,12 +129,10 @@
     %nav.top-navbar
       .brand Agent Portal
       .nav-right
+        = turbo_stream_from current_user, :ticket_notifications
         %a.bell-wrap{:href => ticket_notifications_path}
           %i.bi.bi-bell-fill
-          - unread = TicketNotification.for_user(current_user).unread.count
-          - if unread > 0
-            %span.badge.bg-danger.position-absolute{:style => "top:-6px; right:-8px; font-size:9px; padding:2px 5px;"}
-              = unread
+          = render "shared/notification_bell_badge", user: current_user, badge_class: "position-absolute", badge_style: "top:-6px; right:-8px; font-size:9px; padding:2px 5px;"
         %span
           %i.bi.bi-person-fill.me-1
           = current_user.fullname
