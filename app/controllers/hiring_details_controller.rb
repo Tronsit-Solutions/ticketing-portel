@@ -48,7 +48,11 @@ class HiringDetailsController < ApplicationController
       @hiring_detail.save!
     end
     session.delete(:pending_ticket)
-    notify_staff_of_new_ticket(@ticket) if current_user.customer?
+    notify_staff_of_new_ticket(@ticket)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+    ) if @ticket.on_behalf?
     redirect_to @ticket, notice: "Ticket submitted successfully."
   rescue ActiveRecord::RecordInvalid
     flash.now[:alert] = (@ticket.errors.full_messages + @hiring_detail.errors.full_messages).to_sentence
@@ -65,6 +69,11 @@ class HiringDetailsController < ApplicationController
 
     @ticket.save!
     session.delete(:pending_ticket)
+    notify_staff_of_new_ticket(@ticket)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+    ) if @ticket.on_behalf?
     redirect_to @ticket, notice: "Ticket submitted successfully."
   end
 

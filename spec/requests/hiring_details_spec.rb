@@ -73,4 +73,36 @@ RSpec.describe "HiringDetails", type: :request do
       expect(hiring_detail.microsoft_teams_department).to contain_exactly("Human Resources", "Operations")
     end
   end
+
+  describe "manager creating a hiring ticket on behalf of a customer" do
+    let(:manager) { create(:user, :manager) }
+
+    before do
+      sign_in manager
+      post tickets_path, params: {
+        ticket: {
+          ticket_type: "hiring_departure", title: "New Hire", customer_id: customer.id,
+          metadata: { request_type: "Hire", full_name: "Jane Doe" }
+        }
+      }
+    end
+
+    it "notifies staff and the customer once the pending ticket is submitted" do
+      staff = create(:user, :agent)
+      expect {
+        post pending_hiring_detail_path, params: {
+          hiring_detail: {
+            start_date: 2.weeks.from_now.to_date, title_position: "Care Coordinator I",
+            department: "NYMAN", pc_requirement: "They Need A New Pc"
+          }
+        }
+      }.to change(TicketNotification, :count).by_at_least(2)
+
+      ticket = Ticket.last
+      expect(TicketNotification.find_by(ticket: ticket, receiver: staff)).to be_present
+      customer_notification = TicketNotification.find_by(ticket: ticket, receiver: customer)
+      expect(customer_notification).to be_present
+      expect(customer_notification.responded_by).to eq(manager)
+    end
+  end
 end

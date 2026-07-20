@@ -150,4 +150,35 @@ RSpec.describe Ticket, type: :model do
       expect(ticket.details).to eq("Some details")
     end
   end
+
+  describe "#notify_customer!" do
+    let(:customer) { create(:user, :customer) }
+    let(:agent)    { create(:user, :agent) }
+    let(:ticket)   { create(:ticket, customer: customer) }
+
+    it "creates a notification for the ticket's customer" do
+      expect {
+        ticket.notify_customer!(responded_by: agent, details: "Update")
+      }.to change(TicketNotification, :count).by(1)
+
+      notification = TicketNotification.last
+      expect(notification.receiver).to eq(customer)
+      expect(notification.responded_by).to eq(agent)
+      expect(notification.details).to eq("Update")
+      expect(notification.status).to eq("unread")
+    end
+
+    it "does not notify when the responder is the customer themselves" do
+      expect {
+        ticket.notify_customer!(responded_by: customer, details: "Update")
+      }.not_to change(TicketNotification, :count)
+    end
+
+    it "does not notify when the ticket has no customer" do
+      ticket = create(:ticket, customer: nil)
+      expect {
+        ticket.notify_customer!(responded_by: agent, details: "Update")
+      }.not_to change(TicketNotification, :count)
+    end
+  end
 end

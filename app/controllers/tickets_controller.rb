@@ -72,7 +72,11 @@ class TicketsController < ApplicationController
       end
     elsif @ticket.save
       save_attachments(@ticket)
-      notify_staff_of_new_ticket if current_user.customer?
+      notify_staff_of_new_ticket
+      @ticket.notify_customer!(
+        responded_by: current_user,
+        details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+      ) if @ticket.on_behalf?
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
       @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
@@ -100,6 +104,10 @@ class TicketsController < ApplicationController
       reason:        params[:reason]
     )
     notify_assignee(new_assignee, assigned_by: current_user)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "Your ticket ##{@ticket.id} has been assigned to #{new_assignee.fullname}: \"#{@ticket.title}\""
+    )
     redirect_to @ticket, notice: "Ticket assigned."
   end
 
@@ -117,6 +125,10 @@ class TicketsController < ApplicationController
       reason:      "Self-assigned"
     )
     notify_assignee(current_user, assigned_by: current_user)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "Your ticket ##{@ticket.id} has been assigned to #{current_user.fullname}: \"#{@ticket.title}\""
+    )
     redirect_to @ticket, notice: "Ticket self-assigned."
   end
 
@@ -126,6 +138,10 @@ class TicketsController < ApplicationController
       resolved_by: current_user,
       resolved_at: Time.current,
       resolution:  params.dig(:resolution, :how_resolved).presence
+    )
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "Your ticket ##{@ticket.id} has been closed: \"#{@ticket.title}\""
     )
     redirect_to @ticket, notice: "Ticket closed."
   end

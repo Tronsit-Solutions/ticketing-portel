@@ -69,6 +69,17 @@ class Ticket < ApplicationRecord
     created_by.present?
   end
 
+  def notify_customer!(details:, responded_by:)
+    return if customer.blank? || customer == responded_by
+
+    ticket_notifications.create!(
+      responded_by: responded_by,
+      receiver:     customer,
+      details:      details,
+      status:       "unread"
+    )
+  end
+
   # Callbacks
   before_update :set_resolved_at, if: :status_changed_to_closed?
 
