@@ -55,6 +55,34 @@ RSpec.describe "TicketMessages", type: :request do
       end
     end
 
+    context "as the assigned manager" do
+      let(:manager) { create(:user, :manager) }
+      let(:ticket)  { create(:ticket, customer: customer, assignee: manager) }
+
+      before { sign_in manager }
+
+      it "creates an agent_reply, not a customer_reply" do
+        post ticket_ticket_messages_path(ticket), params: { details: "Manager reply" }
+        expect(TicketMessage.last.message_type).to eq("agent_reply")
+      end
+
+      it "notifies the customer of the reply" do
+        expect {
+          post ticket_ticket_messages_path(ticket), params: { details: "Manager reply" }
+        }.to change(TicketNotification, :count).by(1)
+
+        notification = TicketNotification.last
+        expect(notification.receiver).to eq(customer)
+        expect(notification.responded_by).to eq(manager)
+      end
+
+      it "does not notify the customer for an internal note" do
+        expect {
+          post ticket_ticket_messages_path(ticket), params: { details: "Internal", internal_note: "true" }
+        }.not_to change(TicketNotification, :count)
+      end
+    end
+
     context "as an unrelated customer" do
       it "is unauthorized" do
         sign_in other

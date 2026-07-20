@@ -14,7 +14,7 @@
       %div
         .ticket-row-title= ticket.title
         .ticket-row-meta
-          \##{ticket.id} by #{ticket.customer&.email} was #{badge_label} on #{ticket.created_at.strftime("%b %-d, %Y")}
+          \##{ticket.id} by #{ticket.customer&.email} was #{badge_label} on #{ticket.created_at.strftime("%b %-d, %Y %-I:%M %p")}
       %span{class: "ticket-status-badge #{badge_class}"}= badge_label
 - else
   .ticket-list-empty No tickets found.

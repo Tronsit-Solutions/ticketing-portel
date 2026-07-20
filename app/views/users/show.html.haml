@@ -109,7 +109,10 @@
   .card.border-0.shadow-sm{style: "max-width: 680px;"}
     .card-header.bg-white.d-flex.justify-content-between.align-items-center
       %span.fw-bold= @user.fullname
-      %span{class: "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
+      .d-flex.align-items-center.gap-2
+        %span{class: "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
+        - if @user.customer?
+          %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_user_path(@user), "data-action-message" => "Reset #{@user.fullname}'s password to the default password?", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
     .card-body
       .row.mb-3
         .col-md-4.text-muted Email
@@ -141,3 +144,37 @@
         .row.mb-3
           .col-md-4.text-muted Open Tickets
           .col-md-8= @user.customer_tickets.open.count
+
+  - if @user.customer?
+    / ── Confirm Action Modal (Reset Password) ──
+    #confirmActionModal.modal.fade{"aria-labelledby" => "confirmActionModalLabel", "aria-hidden" => "true", tabindex: "-1"}
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header.border-0.pb-0
+            %button.btn-close{"data-bs-dismiss" => "modal", "aria-label" => "Close", type: "button"}
+          %form#confirmActionForm{method: "post", action: ""}
+            = hidden_field_tag :_method, "patch"
+            = hidden_field_tag :authenticity_token, form_authenticity_token
+            .modal-body
+              .text-center.mb-3
+                %i.bi.bi-exclamation-triangle.text-warning{style: "font-size: 2.5rem;"}
+                %p.mt-3.mb-0.fw-semibold#confirmActionMessage
+            .modal-footer.border-0.pt-0.justify-content-center.gap-2
+              %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal", type: "button"} Cancel
+              %button#confirmActionSubmit.btn{type: "submit"} Confirm
+
+    :javascript
+      document.getElementById('confirmActionModal').addEventListener('show.bs.modal', function(event) {
+        var trigger = event.relatedTarget;
+        var url = trigger.getAttribute('data-action-url');
+        var message = trigger.getAttribute('data-action-message');
+        var label = trigger.getAttribute('data-action-label');
+        var btnClass = trigger.getAttribute('data-action-class');
+
+        document.getElementById('confirmActionForm').setAttribute('action', url);
+        document.getElementById('confirmActionMessage').textContent = message;
+
+        var submitBtn = document.getElementById('confirmActionSubmit');
+        submitBtn.textContent = label;
+        submitBtn.className = 'btn ' + btnClass;
+      });

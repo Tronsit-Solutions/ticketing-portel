@@ -42,6 +42,19 @@ RSpec.describe "Users", type: :request do
       get user_path(agent)
       expect(response).to redirect_to(root_path)
     end
+
+    it "shows a Reset Password button on a customer's profile" do
+      sign_in admin
+      get user_path(customer)
+      expect(response.body).to include("Reset Password")
+      expect(response.body).to include(reset_password_user_path(customer))
+    end
+
+    it "does not show a Reset Password button on an agent's profile" do
+      sign_in admin
+      get user_path(agent)
+      expect(response.body).not_to include("Reset Password")
+    end
   end
 
   describe "GET /users/new" do
@@ -97,6 +110,16 @@ RSpec.describe "Users", type: :request do
       patch deactivate_user_path(customer)
       expect(customer.reload.is_active).to be false
       expect(response).to redirect_to(users_path)
+    end
+  end
+
+  describe "PATCH /users/:id/reset_password" do
+    before { sign_in admin }
+
+    it "resets the user's password to the default password" do
+      patch reset_password_user_path(customer)
+      expect(response).to redirect_to(user_path(customer))
+      expect(customer.reload.valid_password?("123456")).to eq(true)
     end
   end
 end

@@ -25,15 +25,15 @@ RSpec.describe HiringDetail, type: :model do
     expect(HiringDetail::TITLE_OPTIONS).to eq([
       "Select Option",
       "Asst. Medical Billing Specialist",
+      "Call Center Agent",
+      "Call Center Supervisor",
       "Care Coordinator I",
       "Care Coordinator II",
       "Certified Athletic Trainer",
-      "Certified Orthotic Fitter",
-      "Certified Medical Coder",
-      "Contact Center Agent",
-      "Call Center Agent",
-      "Call Center Supervisor",
       "Certified Medical Assistant",
+      "Certified Medical Coder",
+      "Certified Orthotic Fitter",
+      "Contact Center Agent",
       "Medical Billing Specialist",
       "Mid-Level",
       "Physician",
@@ -63,13 +63,13 @@ RSpec.describe HiringDetail, type: :model do
       "NYWP",
       "OHCIN",
       "OHDUB",
+      "RCC",
       "SCCOL",
       "TXBEL",
       "TXDAL",
       "TXKAT",
       "TXWEB",
-      "TXWOO",
-      "RCC"
+      "TXWOO"
     ])
   end
 

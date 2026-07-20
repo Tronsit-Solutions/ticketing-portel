@@ -44,6 +44,34 @@ RSpec.describe "TicketNotifications", type: :request do
       patch mark_read_ticket_notification_path(other_notif)
       expect(response).to have_http_status(:not_found)
     end
+
+    it "redirects to the notifications index for a ticket-less notification with no responder" do
+      ticketless = create(:ticket_notification, :unread, receiver: user, ticket: nil, responded_by: nil)
+      patch mark_read_ticket_notification_path(ticketless)
+      expect(response).to redirect_to(ticket_notifications_path)
+    end
+  end
+
+  describe "PATCH /ticket_notifications/:id/mark_read for a password-reset request notification" do
+    let(:customer) { create(:user, :customer) }
+
+    it "redirects a manager to the customer's manager-portal show page" do
+      manager = create(:user, :manager)
+      notification = create(:ticket_notification, :unread, receiver: manager, responded_by: customer, ticket: nil)
+      sign_in manager
+
+      patch mark_read_ticket_notification_path(notification)
+      expect(response).to redirect_to(manager_user_path(customer))
+    end
+
+    it "redirects an admin to the admin-portal show page" do
+      admin = create(:user, :admin)
+      notification = create(:ticket_notification, :unread, receiver: admin, responded_by: customer, ticket: nil)
+      sign_in admin
+
+      patch mark_read_ticket_notification_path(notification)
+      expect(response).to redirect_to(user_path(customer))
+    end
   end
 
   describe "PATCH /ticket_notifications/mark_all_read" do

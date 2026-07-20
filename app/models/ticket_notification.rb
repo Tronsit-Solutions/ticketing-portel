@@ -2,7 +2,7 @@ class TicketNotification < ApplicationRecord
 
   STATUSES = %w[unread read].freeze
 
-  belongs_to :ticket
+  belongs_to :ticket, optional: true
   belongs_to :responded_by, class_name: "User", optional: true
   belongs_to :receiver,     class_name: "User", optional: true
 

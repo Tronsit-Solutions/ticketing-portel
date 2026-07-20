@@ -4,13 +4,20 @@ Rails.application.routes.draw do
   }
 
   root "home#index"
+  resources :password_reset_requests, only: [:new, :create]
   namespace :admin do
     root "dashboard#index"
   end
 
   namespace :manager do
     root "dashboard#index"
-    resources :users, only: [:new, :create, :show, :edit, :update, :destroy]
+    resources :users, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
+      member do
+        patch :deactivate
+        patch :activate
+        patch :reset_password
+      end
+    end
   end
 
   namespace :agent do
@@ -61,6 +68,9 @@ Rails.application.routes.draw do
     collection { patch :mark_all_read }
   end
   resources :users, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
-    member { patch :deactivate }
+    member do
+      patch :deactivate
+      patch :reset_password
+    end
   end
 end

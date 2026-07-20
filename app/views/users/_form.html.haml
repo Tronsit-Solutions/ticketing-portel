@@ -20,10 +20,10 @@
   .row
     .col-md-6.mb-3
       = f.label :role, class: "form-label fw-bold"
-      = f.select :role,                          |
-        User::ROLES.map { |r| [r.humanize, r] }, |
-        { prompt: "Select role" },               |
-        class: "form-select"                     |
+      = f.select :role,                                              |
+        User::ROLES.map { |r| [r.humanize, r] }.sort_by(&:first),    |
+        { prompt: "Select role" },                                   |
+        class: "form-select"                                         |
     .col-md-6.mb-3
       = f.label :team_id, "Team", class: "form-label fw-bold"
       = f.collection_select :team_id, |

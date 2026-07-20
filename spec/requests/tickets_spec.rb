@@ -40,6 +40,32 @@ RSpec.describe "Tickets", type: :request do
       end
     end
 
+    context "as manager filtering by assignment" do
+      let(:manager) { create(:user, :manager) }
+
+      before { sign_in manager }
+
+      it "shows only tickets self-assigned to the current manager" do
+        mine       = create(:ticket, assignee: manager)
+        not_mine   = create(:ticket, assignee: agent)
+        unassigned = create(:ticket)
+
+        get tickets_path, params: { assignment: "self_assigned" }
+        expect(response.body).to include(mine.title)
+        expect(response.body).not_to include(not_mine.title)
+        expect(response.body).not_to include(unassigned.title)
+      end
+
+      it "shows only unassigned tickets via the combined assignment filter" do
+        unassigned = create(:ticket)
+        assigned   = create(:ticket, assignee: manager)
+
+        get tickets_path, params: { assignment: "unassigned" }
+        expect(response.body).to include(unassigned.title)
+        expect(response.body).not_to include(assigned.title)
+      end
+    end
+
     context "as customer" do
       before { sign_in customer }
 
@@ -94,6 +120,36 @@ RSpec.describe "Tickets", type: :request do
         sign_in other
         get ticket_path(ticket)
         expect(response).to redirect_to(root_path)
+      end
+    end
+
+    context "when the ticket is closed" do
+      it "shows the closed date/time and resolver name next to the status pill, to admin" do
+        closed_ticket = create(:ticket, :assigned, assignee: agent, customer: customer)
+        sign_in admin
+        patch close_ticket_path(closed_ticket)
+
+        get ticket_path(closed_ticket)
+        expect(response.body).to include("closed on")
+        expect(response.body).to include("by #{admin.fullname}")
+        expect(response.body).to include("Closed By")
+      end
+
+      it "shows the closed date/time and resolver name next to the status pill, to manager" do
+        manager = create(:user, :manager)
+        closed_ticket = create(:ticket, :assigned, assignee: manager, customer: customer)
+        sign_in manager
+        patch close_ticket_path(closed_ticket)
+
+        get ticket_path(closed_ticket)
+        expect(response.body).to include("closed on")
+        expect(response.body).to include("by #{manager.fullname}")
+      end
+
+      it "does not show closed info for an open ticket" do
+        sign_in admin
+        get ticket_path(ticket)
+        expect(response.body).not_to include("closed on")
       end
     end
   end
@@ -221,6 +277,23 @@ RSpec.describe "Tickets", type: :request do
         notification = TicketNotification.find_by(receiver: customer)
         expect(notification).to be_present
         expect(notification.responded_by).to eq(admin)
+      end
+    end
+
+    context "as manager" do
+      let(:manager) { create(:user, :manager) }
+
+      before { sign_in manager }
+
+      it "can assign the ticket to themselves" do
+        patch assign_ticket_path(ticket), params: { assignee_id: manager.id }
+        expect(ticket.reload.assignee).to eq(manager)
+        expect(ticket.reload.status).to eq("in_progress")
+      end
+
+      it "can assign the ticket to an agent" do
+        patch assign_ticket_path(ticket), params: { assignee_id: agent.id }
+        expect(ticket.reload.assignee).to eq(agent)
       end
     end
 

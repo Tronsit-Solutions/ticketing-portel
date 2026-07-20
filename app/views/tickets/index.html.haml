@@ -1,7 +1,9 @@
 .d-flex.justify-content-between.align-items-center.mb-4
   %h4.mb-0{style: "font-family: Poppins;"}
-    - if params[:unassigned].present?
+    - if params[:unassigned].present? || params[:assignment] == "unassigned"
       Unassigned Tickets
+    - elsif params[:assignment] == "self_assigned"
+      Self Assigned Tickets
     - elsif params[:status].present?
       = params[:status].humanize
       Tickets
@@ -20,11 +22,12 @@
         = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
       .col-md-2
         = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
-        = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }, params[:ticket_type]), class: "form-select form-select-sm"
+        = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }.sort_by(&:first), params[:ticket_type]), class: "form-select form-select-sm"
       - unless current_user.customer?
         .col-md-2
-          = label_tag :unassigned, "Assignment", class: "form-label mb-1 fw-bold"
-          = select_tag :unassigned, options_for_select([["All", ""], ["Unassigned only", "true"]], params[:unassigned]), class: "form-select form-select-sm"
+          = label_tag :assignment, "Assignment", class: "form-label mb-1 fw-bold"
+          - assignment_value = params[:unassigned].present? ? "unassigned" : params[:assignment]
+          = select_tag :assignment, options_for_select([["All", ""], ["Unassigned only", "unassigned"], ["Self Assigned", "self_assigned"]], assignment_value), class: "form-select form-select-sm"
       .col-md-2
         = f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100"
       .col-md-1
@@ -72,7 +75,7 @@
                     %span.text-danger Unassigned
                     - if current_user.agent?
                       = button_to "Grab", self_assign_ticket_path(ticket), method: :patch, class: "btn btn-xs btn-outline-success ms-1", style: "font-size:11px; padding: 1px 6px;"
-              %td{style: "font-size:13px;"}= ticket.created_at.strftime("%b %d, %Y")
+              %td{style: "font-size:13px;"}= ticket.created_at.strftime("%b %d, %Y %I:%M %p")
               %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
     - else
       .text-center.text-muted.py-5

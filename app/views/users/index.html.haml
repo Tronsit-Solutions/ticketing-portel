@@ -12,7 +12,7 @@
         = label_tag :role, "Role", class: "form-label mb-1 fw-bold"
         = select_tag :role,                                                                                                |
           options_for_select(                                                                                              |
-            [["All Roles", ""], ["Admin", "admin"], ["Agent", "agent"], ["Manager", "manager"], ["Customer", "customer"]], |
+            [["All Roles", ""]] + User::ROLES.map { |r| [r.humanize, r] }.sort_by(&:first),                                |
             params[:role]                                                                                                  |
           ),                                                                                                               |
           class: "form-select form-select-sm"                                                                              |

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_20_092807) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_20_150432) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -136,7 +136,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_20_092807) do
   end
 
   create_table "ticket_notifications", force: :cascade do |t|
-    t.bigint "ticket_id", null: false
+    t.bigint "ticket_id"
     t.bigint "responded_by_id"
     t.bigint "receiver_id"
     t.text "details"
