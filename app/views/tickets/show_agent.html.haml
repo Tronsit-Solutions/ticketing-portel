@@ -151,6 +151,20 @@
                 .col-md-6
                   %small.text-muted Is Provider?
                   %div= hd.is_provider? ? "Yes" : "No"
+                - if hd.is_provider?
+                  .col-md-6
+                    %small.text-muted Name of the Billing Provider
+                    %div= hd.billing_provider_name || "-"
+                  .col-md-6
+                    %small.text-muted Provider NPI
+                    %div= hd.provider_npi || "-"
+                  .col-md-6
+                    %small.text-muted Q5/Q6 Modifier Required?
+                    %div= hd.q5_q6_modifier_required? ? "Yes" : "No"
+                  - if hd.q5_q6_modifier_required?
+                    .col-md-6
+                      %small.text-muted Selected Modifier
+                      %div= hd.q5_q6_modifier || "-"
                 .col-md-6
                   %small.text-muted Department
                   %div= hd.department || "-"
@@ -171,7 +185,7 @@
                   %div= Array(hd.distribution_groups).reject(&:blank?).join(", ").presence || "-"
                 .col-md-6
                   %small.text-muted Microsoft Teams Department
-                  %div= hd.microsoft_teams_department || "-"
+                  %div= Array(hd.microsoft_teams_department).reject(&:blank?).join(", ").presence || "-"
                 .col-md-6
                   %small.text-muted Credentials Send To
                   %div= hd.credentials_send_to || "-"

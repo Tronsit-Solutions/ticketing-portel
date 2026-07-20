@@ -92,10 +92,11 @@ class HiringDetailsController < ApplicationController
   def hiring_detail_params
     params.require(:hiring_detail).permit(
       :start_date, :date_of_birth, :title_position, :is_provider,
+      :billing_provider_name, :provider_npi, :q5_q6_modifier_required, :q5_q6_modifier,
       :department, :gender, :cell_phone, :badge_number,
       :credentials_send_to, :existing_pc_user, :additional_info,
-      :pc_requirement, :microsoft_teams_department,
-      access_systems: [], distribution_groups: []
+      :pc_requirement,
+      access_systems: [], distribution_groups: [], microsoft_teams_department: []
     )
   end
 end

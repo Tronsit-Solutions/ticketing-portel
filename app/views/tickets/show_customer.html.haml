@@ -255,13 +255,18 @@
             - ticket_modal_data << { label: "Date of Birth", value: hd.date_of_birth&.strftime("%b %d, %Y") }
             - ticket_modal_data << { label: "Title/Position", value: hd.title_position }
             - ticket_modal_data << { label: "Is Provider", value: hd.is_provider? ? "Yes" : "No" }
+            - if hd.is_provider?
+              - ticket_modal_data << { label: "Name of the Billing Provider", value: hd.billing_provider_name }
+              - ticket_modal_data << { label: "Provider NPI", value: hd.provider_npi }
+              - ticket_modal_data << { label: "Q5/Q6 Modifier Required", value: hd.q5_q6_modifier_required? ? "Yes" : "No" }
+              - ticket_modal_data << { label: "Selected Modifier", value: hd.q5_q6_modifier } if hd.q5_q6_modifier_required?
             - ticket_modal_data << { label: "Department", value: hd.department }
             - ticket_modal_data << { label: "Gender", value: hd.gender }
             - ticket_modal_data << { label: "Cell Phone", value: hd.cell_phone }
             - ticket_modal_data << { label: "Badge Number", value: hd.badge_number }
             - ticket_modal_data << { label: "Access/Systems", value: Array(hd.access_systems).reject(&:blank?).join(", ") }
             - ticket_modal_data << { label: "Distribution Groups", value: Array(hd.distribution_groups).reject(&:blank?).join(", ") }
-            - ticket_modal_data << { label: "Microsoft Teams", value: hd.microsoft_teams_department }
+            - ticket_modal_data << { label: "Microsoft Teams", value: Array(hd.microsoft_teams_department).reject(&:blank?).join(", ") }
             - ticket_modal_data << { label: "Credentials Send To", value: hd.credentials_send_to }
             - ticket_modal_data << { label: "PC Requirement", value: hd.pc_requirement }
             - ticket_modal_data << { label: "Existing PC User", value: hd.existing_pc_user }
@@ -306,7 +311,9 @@
             - else
               - hd = @ticket.hiring_detail
               - if hd.present?
-                - [["Start Date", hd.start_date&.strftime("%b %d, %Y")], ["Date of Birth", hd.date_of_birth&.strftime("%b %d, %Y")], ["Title/Position", hd.title_position], ["Is Provider", hd.is_provider? ? "Yes" : "No"], ["Department", hd.department], ["Gender", hd.gender], ["Cell Phone", hd.cell_phone], ["Badge Number", hd.badge_number], ["Access/Systems", Array(hd.access_systems).reject(&:blank?).join(", ")], ["Distribution Groups", Array(hd.distribution_groups).reject(&:blank?).join(", ")], ["Microsoft Teams", hd.microsoft_teams_department], ["Credentials Send To", hd.credentials_send_to], ["PC Requirement", hd.pc_requirement], ["Existing PC User", hd.existing_pc_user], ["Additional Info", hd.additional_info]].each do |label, value|
+                - provider_fields = hd.is_provider? ? [["Name of the Billing Provider", hd.billing_provider_name], ["Provider NPI", hd.provider_npi], ["Q5/Q6 Modifier Required", hd.q5_q6_modifier_required? ? "Yes" : "No"]] : []
+                - provider_fields << ["Selected Modifier", hd.q5_q6_modifier] if hd.is_provider? && hd.q5_q6_modifier_required?
+                - ([["Start Date", hd.start_date&.strftime("%b %d, %Y")], ["Date of Birth", hd.date_of_birth&.strftime("%b %d, %Y")], ["Title/Position", hd.title_position], ["Is Provider", hd.is_provider? ? "Yes" : "No"]] + provider_fields + [["Department", hd.department], ["Gender", hd.gender], ["Cell Phone", hd.cell_phone], ["Badge Number", hd.badge_number], ["Access/Systems", Array(hd.access_systems).reject(&:blank?).join(", ")], ["Distribution Groups", Array(hd.distribution_groups).reject(&:blank?).join(", ")], ["Microsoft Teams", Array(hd.microsoft_teams_department).reject(&:blank?).join(", ")], ["Credentials Send To", hd.credentials_send_to], ["PC Requirement", hd.pc_requirement], ["Existing PC User", hd.existing_pc_user], ["Additional Info", hd.additional_info]]).each do |label, value|
                   - next if value.blank?
                   .ticket-field
                     %span.field-label= "#{label}:"
