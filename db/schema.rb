@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_07_100000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_20_092807) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -56,11 +56,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_100000) do
     t.string "existing_pc_user"
     t.text "additional_info"
     t.string "pc_requirement"
-    t.string "microsoft_teams_department"
     t.string "access_systems", default: [], array: true
     t.string "distribution_groups", default: [], array: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "billing_provider_name"
+    t.string "provider_npi"
+    t.boolean "q5_q6_modifier_required", default: false, null: false
+    t.string "q5_q6_modifier"
+    t.string "microsoft_teams_department", default: [], array: true
     t.index ["ticket_id"], name: "index_hiring_details_on_ticket_id"
   end
 

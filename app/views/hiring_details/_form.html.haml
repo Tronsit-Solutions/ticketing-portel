@@ -3,6 +3,78 @@
 - select_class = css_class == "cust" ? "cust-form-select"  : "form-select"
 - field_wrap   = css_class == "cust" ? "cust-field"        : "mb-3"
 
+:css
+  .team-select-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 46px;
+    padding: 8px 10px;
+    border: 1px solid #dde2ea;
+    border-radius: 8px;
+    background: #fafbfc;
+    cursor: pointer;
+  }
+  .team-select-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #eef1f5;
+    border-radius: 16px;
+    font-size: 13px;
+    color: #1a1a1a;
+  }
+  .team-select-pill-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+  .team-select-pill-remove:hover { color: #1a1a1a; }
+  .team-dropdown-menu {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+  .team-dropdown-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  .team-dropdown-option:hover { background: #f3f4f6; }
+  .team-dropdown-checkbox {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+  }
+  .team-select-summary {
+    padding: 10px 14px;
+    background: #ffffff;
+    border: 1px solid #dde2ea;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+  }
+  .team-select-summary:empty { display: none; }
+
 %div{class: field_wrap}
   = f.label :start_date, "Start Date", class: label_class
   = f.date_field :start_date, class: input_class
@@ -15,9 +87,26 @@
   = f.label :title_position, "Title/Position :", class: label_class
   = f.select :title_position, options_for_select(HiringDetail::TITLE_OPTIONS, hiring_detail.title_position), {}, class: select_class
 
-%div{class: field_wrap}
+%div{class: field_wrap, data: {controller: "provider-fields", action: "provider-fields#toggle"}}
   = f.label :is_provider, "Is this user a provider ?", class: label_class
-  = f.select :is_provider, options_for_select([["No", false], ["Yes", true]], hiring_detail.is_provider), {}, class: select_class
+  = f.select :is_provider, options_for_select([["No", false], ["Yes", true]], hiring_detail.is_provider), {}, class: select_class, data: {"provider-fields-target": "select", action: "change->provider-fields#toggle"}
+
+  %div{data: {"provider-fields-target": "fields"}}
+    %div{class: field_wrap}
+      = f.label :billing_provider_name, "Name of the Billing provider ?", class: label_class
+      = f.text_field :billing_provider_name, class: input_class, placeholder: "Your Answer"
+
+    %div{class: field_wrap}
+      = f.label :provider_npi, "Provider NPI ?", class: label_class
+      = f.text_field :provider_npi, class: input_class, placeholder: "Your Answer"
+
+    %div{class: field_wrap, data: {controller: "provider-fields", action: "provider-fields#toggle"}}
+      = f.label :q5_q6_modifier_required, "IS Q5/Q6 modifier required?", class: label_class
+      = f.select :q5_q6_modifier_required, options_for_select([["No", false], ["Yes", true]], hiring_detail.q5_q6_modifier_required), {}, class: select_class, data: {"provider-fields-target": "select", action: "change->provider-fields#toggle"}
+
+      %div{class: field_wrap, data: {"provider-fields-target": "fields"}}
+        = f.label :q5_q6_modifier, "Select Approriate Modifier", class: label_class
+        = f.select :q5_q6_modifier, options_for_select([["Choose option", nil]] + HiringDetail::Q5_Q6_MODIFIERS, hiring_detail.q5_q6_modifier), {}, class: select_class
 
 %div{class: field_wrap}
   = f.label :department, "Please select their Department :", class: label_class
@@ -54,9 +143,17 @@
       = check_box_tag "hiring_detail[distribution_groups][]", group, Array(hiring_detail.distribution_groups).include?(group), id: "dist_#{group.parameterize}", class: "form-check-input"
       = label_tag "dist_#{group.parameterize}", group, class: "form-check-label"
 
-%div{class: field_wrap}
+%div{class: field_wrap, data: {controller: "multi-select-summary"}}
   = f.label :microsoft_teams_department, "What Microsoft Teams should the member be a part of ?", class: label_class
-  = f.text_field :microsoft_teams_department, class: input_class, placeholder: "Select Department"
+  .dropdown
+    .team-select-box{"data-bs-toggle": "dropdown", "aria-expanded": "false", data: {"multi-select-summary-target": "pillBox"}}
+    %ul.dropdown-menu.w-100.team-dropdown-menu
+      - Team.ordered.pluck(:name).each do |team|
+        %li
+          %label.team-dropdown-option{for: "team_#{team.parameterize}"}
+            %input.team-dropdown-checkbox{type: "checkbox", name: "hiring_detail[microsoft_teams_department][]", value: team, checked: Array(hiring_detail.microsoft_teams_department).include?(team), id: "team_#{team.parameterize}", data: {"multi-select-summary-target": "checkbox", action: "change->multi-select-summary#render"}}
+            %span= team
+  %div.team-select-summary.mt-2{data: {"multi-select-summary-target": "summary"}}
 
 %div{class: field_wrap}
   = f.label :credentials_send_to, "Who should we send their credentials to if anyone ?", class: label_class

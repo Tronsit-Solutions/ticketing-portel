@@ -21,25 +21,53 @@ class HiringDetail < ApplicationRecord
 
   TITLE_OPTIONS = [
     "Select Option",
-    "Manager",
-    "Director",
+    "Asst. Medical Billing Specialist",
+    "Care Coordinator I",
+    "Care Coordinator II",
+    "Certified Athletic Trainer",
+    "Certified Orthotic Fitter",
+    "Certified Medical Coder",
+    "Contact Center Agent",
+    "Call Center Agent",
+    "Call Center Supervisor",
+    "Certified Medical Assistant",
+    "Medical Billing Specialist",
+    "Mid-Level",
     "Physician",
-    "Nurse",
-    "Medical Assistant",
-    "Administrative",
+    "Practice Manager",
+    "Regional Director",
+    "Senior Medical Billing Specialist",
+    "Surgical Tech",
     "Other"
   ].freeze
 
   DEPARTMENT_OPTIONS = [
     "Select Option",
-    "Administration",
-    "Clinical",
-    "Finance",
-    "Human Resources",
-    "Information Technology",
-    "Operations",
-    "Other"
+    "AZPHX",
+    "AZSUN",
+    "KYLEX",
+    "KYLOU",
+    "NCCAR",
+    "NCCHA",
+    "NCGBO",
+    "NCPIN",
+    "NJWALL",
+    "NYGC",
+    "NYMAN",
+    "NYSMI",
+    "NYWP",
+    "OHCIN",
+    "OHDUB",
+    "SCCOL",
+    "TXBEL",
+    "TXDAL",
+    "TXKAT",
+    "TXWEB",
+    "TXWOO",
+    "RCC"
   ].freeze
 
   PC_REQUIREMENTS = ["They Need A New Pc", "Use Existing Pc"].freeze
+
+  Q5_Q6_MODIFIERS = ["Q5", "Q6"].freeze
 end

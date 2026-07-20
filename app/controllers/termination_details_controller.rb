@@ -1,5 +1,6 @@
 class TerminationDetailsController < ApplicationController
   before_action :set_ticket, only: [:new, :create]
+  before_action :set_my_tickets_count, only: [:new, :create, :new_pending, :create_pending]
 
   def new
     if @ticket.termination_detail.present?
@@ -48,7 +49,11 @@ class TerminationDetailsController < ApplicationController
       @termination_detail.save!
     end
     session.delete(:pending_ticket)
-    notify_staff_of_new_ticket(@ticket) if current_user.customer?
+    notify_staff_of_new_ticket(@ticket)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+    ) if @ticket.on_behalf?
     redirect_to @ticket, notice: "Ticket submitted successfully."
   rescue ActiveRecord::RecordInvalid
     flash.now[:alert] = (@ticket.errors.full_messages + @termination_detail.errors.full_messages).to_sentence
@@ -65,6 +70,11 @@ class TerminationDetailsController < ApplicationController
 
     @ticket.save!
     session.delete(:pending_ticket)
+    notify_staff_of_new_ticket(@ticket)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+    ) if @ticket.on_behalf?
     redirect_to @ticket, notice: "Ticket submitted successfully."
   end
 
@@ -75,6 +85,10 @@ class TerminationDetailsController < ApplicationController
     unless @ticket.ticket_type == "hiring_departure" && @ticket.metadata["request_type"] == "Termination"
       redirect_to @ticket, alert: "This ticket does not require termination details."
     end
+  end
+
+  def set_my_tickets_count
+    @my_tickets_count = Ticket.where(customer: current_user).count if current_user.customer?
   end
 
   def notify_staff_of_new_ticket(ticket)

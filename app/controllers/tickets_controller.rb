@@ -1,9 +1,10 @@
 class TicketsController < ApplicationController
-  before_action :set_ticket,            only: [:show, :assign, :self_assign, :close]
+  before_action :set_ticket,            only: [:show, :assign, :self_assign, :close, :cancel]
   before_action :authorize_show!,        only: [:show]
   before_action :authorize_assign!,      only: [:assign]
   before_action :authorize_self_assign!, only: [:self_assign]
   before_action :authorize_close!,       only: [:close]
+  before_action :authorize_cancel!,      only: [:cancel]
 
   def catalogue
     if current_user.customer?
@@ -72,7 +73,11 @@ class TicketsController < ApplicationController
       end
     elsif @ticket.save
       save_attachments(@ticket)
-      notify_staff_of_new_ticket if current_user.customer?
+      notify_staff_of_new_ticket
+      @ticket.notify_customer!(
+        responded_by: current_user,
+        details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+      ) if @ticket.on_behalf?
       redirect_to @ticket, notice: "Ticket submitted successfully."
     else
       @ticket_type = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == params[:ticket][:ticket_type] }
@@ -100,6 +105,10 @@ class TicketsController < ApplicationController
       reason:        params[:reason]
     )
     notify_assignee(new_assignee, assigned_by: current_user)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "Your ticket ##{@ticket.id} has been assigned to #{new_assignee.fullname}: \"#{@ticket.title}\""
+    )
     redirect_to @ticket, notice: "Ticket assigned."
   end
 
@@ -117,6 +126,10 @@ class TicketsController < ApplicationController
       reason:      "Self-assigned"
     )
     notify_assignee(current_user, assigned_by: current_user)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "Your ticket ##{@ticket.id} has been assigned to #{current_user.fullname}: \"#{@ticket.title}\""
+    )
     redirect_to @ticket, notice: "Ticket self-assigned."
   end
 
@@ -127,7 +140,21 @@ class TicketsController < ApplicationController
       resolved_at: Time.current,
       resolution:  params.dig(:resolution, :how_resolved).presence
     )
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "Your ticket ##{@ticket.id} has been closed: \"#{@ticket.title}\""
+    )
     redirect_to @ticket, notice: "Ticket closed."
+  end
+
+  def cancel
+    @ticket.update!(
+      status:      "closed",
+      resolved_by: current_user,
+      resolved_at: Time.current
+    )
+    notify_staff_of_cancellation
+    redirect_to @ticket, notice: "Ticket cancelled."
   end
 
   private
@@ -143,13 +170,16 @@ class TicketsController < ApplicationController
   end
 
   def load_customer_home_data
-    @catalogue      = Ticket::CATALOGUE
-    all             = Ticket.where(customer: current_user).recent.includes(:customer)
-    @open_tickets   = all.reject { |t| %w[closed cancelled].include?(t.status) }
-    @closed_tickets = all.select { |t| %w[closed cancelled].include?(t.status) }
-    @all_count      = all.count
-    @active_tab     = params[:tab] == "closed" ? "closed" : "opened"
-    @listed_tickets = @active_tab == "closed" ? @closed_tickets : @open_tickets
+    @catalogue = Ticket::CATALOGUE
+    scope      = Ticket.where(customer: current_user)
+
+    @open_tickets_count   = scope.where.not(status: %w[closed cancelled]).count
+    @closed_tickets_count = scope.where(status: %w[closed cancelled]).count
+    @all_count            = @open_tickets_count + @closed_tickets_count
+    @active_tab           = params[:tab] == "closed" ? "closed" : "opened"
+
+    tab_scope       = @active_tab == "closed" ? scope.where(status: %w[closed cancelled]) : scope.where.not(status: %w[closed cancelled])
+    @listed_tickets = tab_scope.recent.includes(:customer).page(params[:page]).per(10)
   end
 
   def set_ticket
@@ -180,6 +210,20 @@ class TicketsController < ApplicationController
     )
   end
 
+  def notify_staff_of_cancellation
+    receivers = User.where(role: "manager").active.to_a
+    receivers << @ticket.assignee if @ticket.assignee.present?
+    receivers.uniq.reject { |user| user == current_user }.each do |staff|
+      TicketNotification.create!(
+        ticket:       @ticket,
+        responded_by: current_user,
+        receiver:     staff,
+        details:      "Ticket ##{@ticket.id} was cancelled by #{current_user.fullname}: \"#{@ticket.title}\"",
+        status:       "unread"
+      )
+    end
+  end
+
   def authorize_show!
     return if current_user.admin? || current_user.manager? || current_user.agent?
     unauthorized! unless @ticket.customer == current_user
@@ -199,6 +243,10 @@ class TicketsController < ApplicationController
            @ticket.customer == current_user
       unauthorized!
     end
+  end
+
+  def authorize_cancel!
+    unauthorized! unless current_user.admin? || @ticket.customer == current_user
   end
 
   def ticket_params

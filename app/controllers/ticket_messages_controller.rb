@@ -21,6 +21,12 @@ class TicketMessagesController < ApplicationController
     )
 
     if @message.save
+      if message_type == "agent_reply" && !@message.internal_note?
+        @ticket.notify_customer!(
+          responded_by: current_user,
+          details:      "#{current_user.fullname} replied to your ticket ##{@ticket.id}: \"#{@ticket.title}\""
+        )
+      end
       redirect_to ticket_path(@ticket), notice: "Reply added."
     else
       redirect_to ticket_path(@ticket), alert: "Could not add reply."

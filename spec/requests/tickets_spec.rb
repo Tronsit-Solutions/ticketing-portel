@@ -47,6 +47,28 @@ RSpec.describe "Tickets", type: :request do
         get tickets_path
         expect(response).to have_http_status(:ok)
       end
+
+      it "paginates open tickets, 10 per page" do
+        tickets = Array.new(12) { create(:ticket, :open, customer: customer) }.sort_by(&:created_at).reverse
+
+        get tickets_path
+        expect(response.body).to include(tickets[9].title)   # 10th most recent, on page 1
+        expect(response.body).not_to include(tickets[10].title) # 11th most recent, pushed to page 2
+        expect(response.body).to include("12") # open tab count
+
+        get tickets_path, params: { page: 2 }
+        expect(response.body).to include(tickets[10].title)
+        expect(response.body).to include(tickets[11].title)
+      end
+
+      it "paginates closed tickets separately via the closed tab" do
+        5.times { create(:ticket, :closed, customer: customer) }
+        3.times { create(:ticket, :open, customer: customer) }
+
+        get tickets_path, params: { tab: "closed" }
+        expect(response.body).to include("5") # closed tab count
+        expect(response.body).to include("3") # open tab count
+      end
     end
   end
 
@@ -153,11 +175,30 @@ RSpec.describe "Tickets", type: :request do
         expect(Ticket.last.customer).to eq(customer)
         expect(Ticket.last.created_by).to eq(agent)
       end
+
+      it "notifies staff of the new ticket" do
+        staff = create(:user, :manager)
+        expect {
+          post tickets_path, params: {
+            ticket: { ticket_type: "technical_support", title: "Agent Created", customer_id: customer.id, metadata: {} }
+          }
+        }.to change(TicketNotification, :count).by_at_least(1)
+        expect(TicketNotification.where(receiver: staff)).to be_present
+      end
+
+      it "notifies the customer their ticket was submitted on their behalf" do
+        post tickets_path, params: {
+          ticket: { ticket_type: "technical_support", title: "Agent Created", customer_id: customer.id, metadata: {} }
+        }
+        notification = TicketNotification.find_by(receiver: customer)
+        expect(notification).to be_present
+        expect(notification.responded_by).to eq(agent)
+      end
     end
   end
 
   describe "PATCH /tickets/:id/assign" do
-    let(:ticket) { create(:ticket, :open) }
+    let(:ticket) { create(:ticket, :open, customer: customer) }
 
     context "as admin" do
       before { sign_in admin }
@@ -173,6 +214,13 @@ RSpec.describe "Tickets", type: :request do
       it "redirects to ticket" do
         patch assign_ticket_path(ticket), params: { assignee_id: agent.id }
         expect(response).to redirect_to(ticket_path(ticket))
+      end
+
+      it "notifies the customer of the assignment" do
+        patch assign_ticket_path(ticket), params: { assignee_id: agent.id }
+        notification = TicketNotification.find_by(receiver: customer)
+        expect(notification).to be_present
+        expect(notification.responded_by).to eq(admin)
       end
     end
 
@@ -194,7 +242,7 @@ RSpec.describe "Tickets", type: :request do
   end
 
   describe "PATCH /tickets/:id/self_assign" do
-    let(:ticket) { create(:ticket, :open) }
+    let(:ticket) { create(:ticket, :open, customer: customer) }
 
     context "as agent" do
       before { sign_in agent }
@@ -210,6 +258,13 @@ RSpec.describe "Tickets", type: :request do
           patch self_assign_ticket_path(ticket)
         }.to change(TicketAssignment, :count).by(1)
       end
+
+      it "notifies the customer of the self-assignment" do
+        patch self_assign_ticket_path(ticket)
+        notification = TicketNotification.find_by(receiver: customer)
+        expect(notification).to be_present
+        expect(notification.responded_by).to eq(agent)
+      end
     end
 
     context "as customer" do
@@ -222,7 +277,7 @@ RSpec.describe "Tickets", type: :request do
   end
 
   describe "PATCH /tickets/:id/close" do
-    let(:assigned_ticket) { create(:ticket, :assigned, assignee: agent) }
+    let(:assigned_ticket) { create(:ticket, :assigned, assignee: agent, customer: customer) }
 
     context "as the assignee" do
       before { sign_in agent }
@@ -237,6 +292,13 @@ RSpec.describe "Tickets", type: :request do
         patch close_ticket_path(assigned_ticket)
         expect(response).to redirect_to(ticket_path(assigned_ticket))
       end
+
+      it "notifies the customer that their ticket was closed" do
+        patch close_ticket_path(assigned_ticket)
+        notification = TicketNotification.find_by(receiver: customer)
+        expect(notification).to be_present
+        expect(notification.responded_by).to eq(agent)
+      end
     end
 
     context "as the customer" do
@@ -246,12 +308,77 @@ RSpec.describe "Tickets", type: :request do
         patch close_ticket_path(my_ticket)
         expect(my_ticket.reload.status).to eq("closed")
       end
+
+      it "does not notify themselves when they close their own ticket" do
+        my_ticket = create(:ticket, customer: customer)
+        sign_in customer
+        expect {
+          patch close_ticket_path(my_ticket)
+        }.not_to change(TicketNotification, :count)
+      end
     end
 
     context "as another customer" do
       it "is unauthorized" do
         sign_in other
         patch close_ticket_path(assigned_ticket)
+        expect(response).to redirect_to(root_path)
+      end
+    end
+  end
+
+  describe "PATCH /tickets/:id/cancel" do
+    let(:manager)        { create(:user, :manager) }
+    let(:assigned_ticket) { create(:ticket, :assigned, assignee: agent, customer: customer) }
+
+    context "as the ticket's customer" do
+      before { sign_in customer }
+
+      it "cancels the ticket by marking it closed" do
+        patch cancel_ticket_path(assigned_ticket)
+        expect(assigned_ticket.reload.status).to eq("closed")
+        expect(assigned_ticket.reload.resolved_by).to eq(customer)
+      end
+
+      it "redirects to the ticket" do
+        patch cancel_ticket_path(assigned_ticket)
+        expect(response).to redirect_to(ticket_path(assigned_ticket))
+      end
+
+      it "notifies the assignee and managers" do
+        manager
+        patch cancel_ticket_path(assigned_ticket)
+        expect(TicketNotification.find_by(ticket: assigned_ticket, receiver: agent)).to be_present
+        expect(TicketNotification.find_by(ticket: assigned_ticket, receiver: manager)).to be_present
+      end
+
+      it "does not notify the customer themselves" do
+        patch cancel_ticket_path(assigned_ticket)
+        expect(TicketNotification.find_by(ticket: assigned_ticket, receiver: customer)).to be_nil
+      end
+    end
+
+    context "as admin" do
+      it "can cancel any ticket" do
+        sign_in admin
+        patch cancel_ticket_path(assigned_ticket)
+        expect(assigned_ticket.reload.status).to eq("closed")
+      end
+    end
+
+    context "as an unrelated customer" do
+      it "is unauthorized" do
+        sign_in other
+        patch cancel_ticket_path(assigned_ticket)
+        expect(response).to redirect_to(root_path)
+        expect(assigned_ticket.reload.status).not_to eq("closed")
+      end
+    end
+
+    context "as the assignee (agent, not the customer)" do
+      it "is unauthorized" do
+        sign_in agent
+        patch cancel_ticket_path(assigned_ticket)
         expect(response).to redirect_to(root_path)
       end
     end

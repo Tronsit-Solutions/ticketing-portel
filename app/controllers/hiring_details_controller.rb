@@ -1,5 +1,6 @@
 class HiringDetailsController < ApplicationController
   before_action :set_ticket, only: [:new, :create]
+  before_action :set_my_tickets_count, only: [:new, :create, :new_pending, :create_pending]
 
   def new
     if @ticket.hiring_detail.present?
@@ -48,7 +49,11 @@ class HiringDetailsController < ApplicationController
       @hiring_detail.save!
     end
     session.delete(:pending_ticket)
-    notify_staff_of_new_ticket(@ticket) if current_user.customer?
+    notify_staff_of_new_ticket(@ticket)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+    ) if @ticket.on_behalf?
     redirect_to @ticket, notice: "Ticket submitted successfully."
   rescue ActiveRecord::RecordInvalid
     flash.now[:alert] = (@ticket.errors.full_messages + @hiring_detail.errors.full_messages).to_sentence
@@ -65,6 +70,11 @@ class HiringDetailsController < ApplicationController
 
     @ticket.save!
     session.delete(:pending_ticket)
+    notify_staff_of_new_ticket(@ticket)
+    @ticket.notify_customer!(
+      responded_by: current_user,
+      details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
+    ) if @ticket.on_behalf?
     redirect_to @ticket, notice: "Ticket submitted successfully."
   end
 
@@ -75,6 +85,10 @@ class HiringDetailsController < ApplicationController
     unless @ticket.ticket_type == "hiring_departure"
       redirect_to @ticket, alert: "This ticket does not require hiring details."
     end
+  end
+
+  def set_my_tickets_count
+    @my_tickets_count = Ticket.where(customer: current_user).count if current_user.customer?
   end
 
   def notify_staff_of_new_ticket(ticket)
@@ -92,10 +106,11 @@ class HiringDetailsController < ApplicationController
   def hiring_detail_params
     params.require(:hiring_detail).permit(
       :start_date, :date_of_birth, :title_position, :is_provider,
+      :billing_provider_name, :provider_npi, :q5_q6_modifier_required, :q5_q6_modifier,
       :department, :gender, :cell_phone, :badge_number,
       :credentials_send_to, :existing_pc_user, :additional_info,
-      :pc_requirement, :microsoft_teams_department,
-      access_systems: [], distribution_groups: []
+      :pc_requirement,
+      access_systems: [], distribution_groups: [], microsoft_teams_department: []
     )
   end
 end

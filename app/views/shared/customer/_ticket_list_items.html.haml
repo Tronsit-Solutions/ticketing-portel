@@ -1,10 +1,10 @@
 .ticket-list-tabs
   = link_to tickets_path, class: "ticket-tab-link #{active_tab == 'opened' ? 'active' : ''}" do
     %span Opened
-    %span.tab-count= open_tickets.count
+    %span.tab-count= open_tickets_count
   = link_to tickets_path(tab: "closed"), class: "ticket-tab-link #{active_tab == 'closed' ? 'active' : ''}" do
     %span Closed
-    %span.tab-count= closed_tickets.count
+    %span.tab-count= closed_tickets_count
 
 - if listed_tickets.any?
   - listed_tickets.each do |ticket|

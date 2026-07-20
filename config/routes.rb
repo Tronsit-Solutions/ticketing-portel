@@ -42,6 +42,7 @@ Rails.application.routes.draw do
       patch :assign
       patch :self_assign
       patch :close
+      patch :cancel
     end
     resources :ticket_messages, only: [:create]
     resource  :hiring_detail,      only: [:new, :create]
