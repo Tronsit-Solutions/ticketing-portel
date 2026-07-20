@@ -25,7 +25,8 @@ class TicketsController < ApplicationController
       @tickets = Ticket.all.recent.includes(:customer, :assignee, :location)
       @tickets = @tickets.where(status: params[:status])           if params[:status].present?
       @tickets = @tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
-      @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present?
+      @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present? || params[:assignment] == "unassigned"
+      @tickets = @tickets.where(assignee_id: current_user.id)      if params[:assignment] == "self_assigned"
       @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
       if params[:search].present?
         term     = "%#{params[:search].strip}%"

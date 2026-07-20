@@ -80,7 +80,8 @@
             .row.g-2.align-items-end
               .col-md-5
                 = label_tag :assignee_id, "Assign to Agent", class: "form-label fw-bold"
-                = select_tag :assignee_id, options_from_collection_for_select(User.agents.active, :id, :fullname, @ticket.assignee_id), class: "form-select", prompt: "Select agent"
+                - assignee_options = current_user.manager? ? [["Myself (#{current_user.fullname})", current_user.id]] + User.agents.active.map { |a| [a.fullname, a.id] } : User.agents.active.map { |a| [a.fullname, a.id] }
+                = select_tag :assignee_id, options_for_select(assignee_options, @ticket.assignee_id), class: "form-select", prompt: "Select agent"
               .col-md-5
                 = label_tag :reason, "Reason (optional)", class: "form-label fw-bold"
                 = text_field_tag :reason, nil, class: "form-control", placeholder: "Reason for assignment"
