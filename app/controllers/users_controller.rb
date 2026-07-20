@@ -1,6 +1,8 @@
 class UsersController < ApplicationController
   before_action :require_admin!
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :deactivate]
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :deactivate, :reset_password]
+
+  RESET_PASSWORD = "123456".freeze
 
   def index
     @users = User.includes(:team).order(fullname: :asc, email: :asc)
@@ -58,6 +60,11 @@ class UsersController < ApplicationController
   def deactivate
     @user.update!(is_active: false)
     redirect_to users_path, notice: "#{@user.fullname} has been deactivated."
+  end
+
+  def reset_password
+    @user.update!(password: RESET_PASSWORD, password_confirmation: RESET_PASSWORD)
+    redirect_to user_path(@user), notice: "#{@user.fullname}'s password has been reset to the default password."
   end
 
   private

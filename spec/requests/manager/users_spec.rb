@@ -159,6 +159,18 @@ RSpec.describe "Manager::Users", type: :request do
       get manager_user_path(agent)
       expect(response).to have_http_status(:ok)
     end
+
+    it "shows a Reset Password button on a customer's profile" do
+      customer = create(:user, :customer)
+      get manager_user_path(customer)
+      expect(response.body).to include("Reset Password")
+      expect(response.body).to include(reset_password_manager_user_path(customer))
+    end
+
+    it "does not show a Reset Password button on an agent's profile" do
+      get manager_user_path(agent)
+      expect(response.body).not_to include("Reset Password")
+    end
   end
 
   context "when signed in as customer" do

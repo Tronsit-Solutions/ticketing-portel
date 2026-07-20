@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe TicketNotification, type: :model do
   describe "associations" do
-    it { is_expected.to belong_to(:ticket) }
+    it { is_expected.to belong_to(:ticket).optional }
     it { is_expected.to belong_to(:responded_by).optional }
     it { is_expected.to belong_to(:receiver).optional }
   end
@@ -12,6 +12,10 @@ RSpec.describe TicketNotification, type: :model do
 
     it "is valid with valid attributes" do
       expect(build(:ticket_notification)).to be_valid
+    end
+
+    it "is valid without a ticket" do
+      expect(build(:ticket_notification, ticket: nil)).to be_valid
     end
 
     it "is invalid with unknown status" do
