@@ -45,5 +45,5 @@
               - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
               %span{:class => "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
             %td= ticket.customer&.fullname || "-"
-            %td= ticket.created_at.strftime("%b %d, %Y")
+            %td= ticket.created_at.strftime("%b %d, %Y %I:%M %p")
             %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"

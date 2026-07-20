@@ -10,7 +10,13 @@ Rails.application.routes.draw do
 
   namespace :manager do
     root "dashboard#index"
-    resources :users, only: [:new, :create, :show, :edit, :update, :destroy]
+    resources :users, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
+      member do
+        patch :deactivate
+        patch :activate
+        patch :reset_password
+      end
+    end
   end
 
   namespace :agent do

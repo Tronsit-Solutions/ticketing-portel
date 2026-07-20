@@ -122,6 +122,36 @@ RSpec.describe "Tickets", type: :request do
         expect(response).to redirect_to(root_path)
       end
     end
+
+    context "when the ticket is closed" do
+      it "shows the closed date/time and resolver name next to the status pill, to admin" do
+        closed_ticket = create(:ticket, :assigned, assignee: agent, customer: customer)
+        sign_in admin
+        patch close_ticket_path(closed_ticket)
+
+        get ticket_path(closed_ticket)
+        expect(response.body).to include("closed on")
+        expect(response.body).to include("by #{admin.fullname}")
+        expect(response.body).to include("Closed By")
+      end
+
+      it "shows the closed date/time and resolver name next to the status pill, to manager" do
+        manager = create(:user, :manager)
+        closed_ticket = create(:ticket, :assigned, assignee: manager, customer: customer)
+        sign_in manager
+        patch close_ticket_path(closed_ticket)
+
+        get ticket_path(closed_ticket)
+        expect(response.body).to include("closed on")
+        expect(response.body).to include("by #{manager.fullname}")
+      end
+
+      it "does not show closed info for an open ticket" do
+        sign_in admin
+        get ticket_path(ticket)
+        expect(response.body).not_to include("closed on")
+      end
+    end
   end
 
   describe "GET /tickets/new" do

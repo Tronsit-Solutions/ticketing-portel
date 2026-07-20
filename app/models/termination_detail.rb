@@ -3,10 +3,10 @@ class TerminationDetail < ApplicationRecord
 
   TERMINATION_REASONS = [
     "Choose option",
-    "Voluntary Resignation",
-    "Involuntary Termination",
     "End of Contract",
+    "Involuntary Termination",
     "Retirement",
+    "Voluntary Resignation",
     "Other"
   ].freeze
 

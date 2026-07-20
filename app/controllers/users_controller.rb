@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   before_action :set_user, only: [:show, :edit, :update, :destroy, :deactivate]
 
   def index
-    @users = User.includes(:team).order(:fullname)
+    @users = User.includes(:team).order(fullname: :asc, email: :asc)
     @users = @users.where(role: params[:role])          if params[:role].present?
     @users = @users.where(is_active: params[:active])   if params[:active].present?
     if params[:search].present?

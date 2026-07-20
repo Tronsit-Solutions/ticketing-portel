@@ -3,7 +3,7 @@ class TicketMessagesController < ApplicationController
   before_action :authorize_message!
 
   def create
-    message_type = if current_user.admin? || current_user.agent?
+    message_type = if current_user.admin? || current_user.agent? || current_user.manager?
       "agent_reply"
     else
       "customer_reply"

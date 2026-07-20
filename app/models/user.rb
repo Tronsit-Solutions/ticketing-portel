@@ -26,4 +26,12 @@ class User < ApplicationRecord
   def manager?;  role == "manager"  end
   def customer?; role == "customer" end
 
+  def active_for_authentication?
+    super && is_active?
+  end
+
+  def inactive_message
+    is_active? ? super : :deactivated
+  end
+
 end

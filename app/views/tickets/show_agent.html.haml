@@ -10,7 +10,13 @@
       .card-body
         / Status + actions row
         .d-flex.justify-content-between.align-items-start.mb-3
-          %span{class: "badge bg-#{status_color[@ticket.status]}"}= @ticket.status.humanize
+          .d-flex.align-items-center.gap-2
+            %span{class: "badge bg-#{status_color[@ticket.status]}"}= @ticket.status.humanize
+            - if @ticket.status.in?(%w[closed cancelled]) && @ticket.resolved_at.present?
+              %small.text-muted{style: "font-size:12px;"}
+                closed on #{@ticket.resolved_at.strftime("%b %d, %Y %I:%M %p")}
+                - if @ticket.resolved_by.present?
+                  by #{@ticket.resolved_by.fullname}
           .d-flex.gap-2
             - if @ticket.status != "closed" && (current_user.admin? || @ticket.assignee == current_user)
               %button.btn.btn-sm.btn-outline-danger{"data-bs-toggle" => "modal", "data-bs-target" => "#closeTicketModal", type: "button"} Close
@@ -25,7 +31,7 @@
         - if @ticket.on_behalf?
           %span.badge.mt-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"}
             On Behalf — #{@ticket.created_by.fullname}
-        %small.text-muted.d-block.mb-3 \##{@ticket.id} &middot; Submitted #{@ticket.created_at.strftime("%b %d, %Y")}
+        %small.text-muted.d-block.mb-3 \##{@ticket.id} &middot; Submitted #{@ticket.created_at.strftime("%b %d, %Y %I:%M %p")}
 
         %hr.my-2
 
@@ -58,6 +64,10 @@
           .mb-2
             %small.text-muted Resolved At
             %div= @ticket.resolved_at.strftime("%b %d, %Y %I:%M %p")
+        - if @ticket.resolved_by.present?
+          .mb-2
+            %small.text-muted Closed By
+            %div= @ticket.resolved_by.fullname
 
         / Description / issue — only when present
         - details_val = @ticket.metadata["details"].presence || @ticket.metadata["description"].presence
@@ -80,7 +90,8 @@
             .row.g-2.align-items-end
               .col-md-5
                 = label_tag :assignee_id, "Assign to Agent", class: "form-label fw-bold"
-                - assignee_options = current_user.manager? ? [["Myself (#{current_user.fullname})", current_user.id]] + User.agents.active.map { |a| [a.fullname, a.id] } : User.agents.active.map { |a| [a.fullname, a.id] }
+                - agent_options = User.agents.active.order(:fullname).map { |a| [a.fullname, a.id] }
+                - assignee_options = current_user.manager? ? [["Myself (#{current_user.fullname})", current_user.id]] + agent_options : agent_options
                 = select_tag :assignee_id, options_for_select(assignee_options, @ticket.assignee_id), class: "form-select", prompt: "Select agent"
               .col-md-5
                 = label_tag :reason, "Reason (optional)", class: "form-label fw-bold"

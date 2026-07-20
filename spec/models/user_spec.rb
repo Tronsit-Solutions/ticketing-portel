@@ -66,4 +66,20 @@ RSpec.describe User, type: :model do
       expect(build(:user, :customer).admin?).to be false
     end
   end
+
+  describe "#active_for_authentication?" do
+    it "returns true for an active user" do
+      expect(build(:user, :customer, is_active: true).active_for_authentication?).to be true
+    end
+
+    it "returns false for a deactivated user" do
+      expect(build(:user, :customer, is_active: false).active_for_authentication?).to be false
+    end
+  end
+
+  describe "#inactive_message" do
+    it "returns :deactivated for a deactivated user" do
+      expect(build(:user, :customer, is_active: false).inactive_message).to eq(:deactivated)
+    end
+  end
 end

@@ -1,0 +1,105 @@
+.d-flex.justify-content-between.align-items-center.mb-4
+  %h4.mb-0{:style => "font-family: Poppins;"} Customers
+  = link_to new_manager_user_path(role: "customer"), class: "btn btn-primary btn-sm" do
+    + Add Customer
+
+/ Filters
+.card.border-0.shadow-sm.mb-4
+  .card-body.py-2
+    = form_with url: manager_users_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
+      .col-md-4
+        = label_tag :search, "Search", class: "form-label mb-1 fw-bold"
+        = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Search by name or email"
+      .col-md-3
+        = label_tag :active, "Status", class: "form-label mb-1 fw-bold"
+        = select_tag :active, options_for_select([["All", ""], ["Active", "true"], ["Inactive", "false"]], params[:active]), class: "form-select form-select-sm"
+      .col-md-2
+        = f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100"
+      .col-md-2
+        = link_to "Clear", manager_users_path, class: "btn btn-outline-secondary btn-sm w-100"
+
+/ Customers Table
+.card.border-0.shadow-sm
+  .card-body.p-0
+    - if @customers.any?
+      - name_direction = @sort == "name" && @direction == "asc" ? "desc" : "asc"
+      %table.table.table-hover.mb-0
+        %thead.table-light
+          %tr
+            %th
+              = link_to manager_users_path(params.permit(:search, :active).merge(sort: "name", direction: name_direction)), class: "text-dark text-decoration-none" do
+                Name
+                - if @sort == "name"
+                  %i.bi{class: @direction == "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"}
+            %th Email
+            %th Status
+            %th Joined
+            %th
+        %tbody
+          - @customers.each do |customer|
+            %tr
+              %td= customer.fullname
+              %td.text-muted{:style => "font-size:13px;"}= customer.email
+              %td
+                - if customer.is_active?
+                  %span.badge.bg-success Active
+                - else
+                  %span.badge.bg-secondary Inactive
+              %td{:style => "font-size:13px;"}= customer.created_at.strftime("%b %d, %Y")
+              %td.d-flex.gap-1
+                = link_to "View", manager_user_path(customer), class: "btn btn-sm btn-outline-secondary"
+                = link_to "Edit", edit_manager_user_path(customer), class: "btn btn-sm btn-outline-primary"
+                - if customer.is_active?
+                  %button.btn.btn-sm.btn-outline-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => deactivate_manager_user_path(customer), "data-action-message" => "Deactivate #{customer.fullname}?", "data-action-label" => "Deactivate", "data-action-class" => "btn-danger"} Deactivate
+                - else
+                  %button.btn.btn-sm.btn-outline-success{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => activate_manager_user_path(customer), "data-action-message" => "Activate #{customer.fullname}?", "data-action-label" => "Activate", "data-action-class" => "btn-success"} Activate
+                %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_manager_user_path(customer), "data-action-message" => "Reset #{customer.fullname}'s password to the default password?", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
+    - else
+      .text-center.text-muted.py-5
+        %i.bi.bi-people{:style => "font-size: 2rem;"}
+        %p.mt-2 No customers found.
+
+- if @customers.any?
+  .d-flex.justify-content-between.align-items-center.mt-3.px-1
+    %small.text-muted
+      Showing
+      %strong= @customers.offset_value + 1
+      –
+      %strong= [@customers.offset_value + @customers.limit_value, @customers.total_count].min
+      of
+      %strong= @customers.total_count
+      customers
+    = paginate @customers
+
+/ ── Confirm Action Modal (Deactivate / Activate / Reset Password) ──
+#confirmActionModal.modal.fade{"aria-labelledby" => "confirmActionModalLabel", "aria-hidden" => "true", tabindex: "-1"}
+  .modal-dialog.modal-dialog-centered
+    .modal-content
+      .modal-header.border-0.pb-0
+        %button.btn-close{"data-bs-dismiss" => "modal", "aria-label" => "Close", type: "button"}
+      %form#confirmActionForm{method: "post", action: ""}
+        = hidden_field_tag :_method, "patch"
+        = hidden_field_tag :authenticity_token, form_authenticity_token
+        .modal-body
+          .text-center.mb-3
+            %i.bi.bi-exclamation-triangle.text-warning{style: "font-size: 2.5rem;"}
+            %p.mt-3.mb-0.fw-semibold#confirmActionMessage
+        .modal-footer.border-0.pt-0.justify-content-center.gap-2
+          %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal", type: "button"} Cancel
+          %button#confirmActionSubmit.btn{type: "submit"} Confirm
+
+:javascript
+  document.getElementById('confirmActionModal').addEventListener('show.bs.modal', function(event) {
+    var trigger = event.relatedTarget;
+    var url = trigger.getAttribute('data-action-url');
+    var message = trigger.getAttribute('data-action-message');
+    var label = trigger.getAttribute('data-action-label');
+    var btnClass = trigger.getAttribute('data-action-class');
+
+    document.getElementById('confirmActionForm').setAttribute('action', url);
+    document.getElementById('confirmActionMessage').textContent = message;
+
+    var submitBtn = document.getElementById('confirmActionSubmit');
+    submitBtn.textContent = label;
+    submitBtn.className = 'btn ' + btnClass;
+  });

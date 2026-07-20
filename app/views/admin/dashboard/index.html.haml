@@ -107,7 +107,7 @@
                     = ticket.assignee.fullname
                   - else
                     %span.text-danger Unassigned
-                %td{style: "font-size:12px;color:#9ca3af;"}= ticket.created_at.strftime("%b %-d")
+                %td{style: "font-size:12px;color:#9ca3af;"}= ticket.created_at.strftime("%b %-d, %Y %-I:%M %p")
 
   / Right column
   .col-md-4
