@@ -163,9 +163,6 @@
         = link_to new_user_path do
           %i.bi.bi-person-plus-fill
           Add User
-        = link_to ticket_notifications_path do
-          %i.bi.bi-bell-fill
-          Notifications
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout

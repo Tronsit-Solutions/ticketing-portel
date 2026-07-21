@@ -163,10 +163,6 @@
         = link_to new_manager_user_path do
           %i.bi.bi-person-circle
           Create User
-        = link_to ticket_notifications_path do
-          %i.bi.bi-bell-fill
-          Notifications
-          = render "shared/notification_bell_badge", user: current_user, badge_class: "ms-auto", badge_style: nil, badge_id: "notif-bell-badge-sidebar"
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout
