@@ -80,6 +80,7 @@ class TicketsController < ApplicationController
       end
     elsif @ticket.save
       save_attachments(@ticket)
+      @ticket.auto_self_assign_for_agent!
       notify_staff_of_new_ticket
       @ticket.notify_customer!(
         responded_by: current_user,

@@ -49,6 +49,7 @@ class HiringDetailsController < ApplicationController
       @hiring_detail.save!
     end
     session.delete(:pending_ticket)
+    @ticket.auto_self_assign_for_agent!
     notify_staff_of_new_ticket(@ticket)
     @ticket.notify_customer!(
       responded_by: current_user,

@@ -250,6 +250,35 @@ RSpec.describe "Tickets", type: :request do
         expect(notification).to be_present
         expect(notification.responded_by).to eq(agent)
       end
+
+      it "auto self-assigns the ticket to the agent" do
+        post tickets_path, params: {
+          ticket: { ticket_type: "technical_support", title: "Agent Created", customer_id: customer.id, metadata: {} }
+        }
+        ticket = Ticket.last
+        expect(ticket.assignee).to eq(agent)
+        expect(ticket.assigned_by).to eq(agent)
+        expect(ticket.status).to eq("in_progress")
+        expect(ticket.ticket_assignments.last.assigned_to).to eq(agent)
+        expect(ticket.ticket_assignments.last.reason).to eq("Self-assigned")
+      end
+    end
+
+    context "as manager creating on behalf of customer" do
+      let(:manager) { create(:user, :manager) }
+
+      before { sign_in manager }
+
+      it "does not auto-assign the ticket" do
+        post tickets_path, params: {
+          ticket: { ticket_type: "technical_support", title: "Manager Created", customer_id: customer.id, metadata: {} }
+        }
+        ticket = Ticket.last
+        expect(ticket.created_by).to eq(manager)
+        expect(ticket.assignee).to be_nil
+        expect(ticket.status).to eq("open")
+        expect(ticket.ticket_assignments).to be_empty
+      end
     end
   end
 

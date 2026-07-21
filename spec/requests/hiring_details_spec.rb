@@ -104,5 +104,44 @@ RSpec.describe "HiringDetails", type: :request do
       expect(customer_notification).to be_present
       expect(customer_notification.responded_by).to eq(manager)
     end
+
+    it "does not auto-assign the ticket" do
+      post pending_hiring_detail_path, params: {
+        hiring_detail: {
+          start_date: 2.weeks.from_now.to_date, title_position: "Care Coordinator I",
+          department: "NYMAN", pc_requirement: "They Need A New Pc"
+        }
+      }
+      ticket = Ticket.last
+      expect(ticket.assignee).to be_nil
+      expect(ticket.status).to eq("open")
+    end
+  end
+
+  describe "agent creating a hiring ticket on behalf of a customer" do
+    let(:agent) { create(:user, :agent) }
+
+    before do
+      sign_in agent
+      post tickets_path, params: {
+        ticket: {
+          ticket_type: "hiring_departure", title: "New Hire", customer_id: customer.id,
+          metadata: { request_type: "Hire", full_name: "Jane Doe" }
+        }
+      }
+    end
+
+    it "auto self-assigns the ticket once the pending ticket is submitted" do
+      post pending_hiring_detail_path, params: {
+        hiring_detail: {
+          start_date: 2.weeks.from_now.to_date, title_position: "Care Coordinator I",
+          department: "NYMAN", pc_requirement: "They Need A New Pc"
+        }
+      }
+      ticket = Ticket.last
+      expect(ticket.assignee).to eq(agent)
+      expect(ticket.status).to eq("in_progress")
+      expect(ticket.ticket_assignments.last.assigned_to).to eq(agent)
+    end
   end
 end

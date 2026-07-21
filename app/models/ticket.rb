@@ -88,6 +88,24 @@ class Ticket < ApplicationRecord
     created_by.present?
   end
 
+  # Agents submitting a ticket on a customer's behalf are auto self-assigned;
+  # managers are not, since they typically triage rather than work tickets themselves.
+  def auto_self_assign_for_agent!
+    return unless on_behalf? && created_by.agent?
+
+    update!(
+      assignee:    created_by,
+      assigned_by: created_by,
+      assigned_at: Time.current,
+      status:      "in_progress"
+    )
+    ticket_assignments.create!(
+      assigned_to: created_by,
+      assigned_by: created_by,
+      reason:      "Self-assigned"
+    )
+  end
+
   def notify_customer!(details:, responded_by:)
     return if customer.blank? || customer == responded_by
 
