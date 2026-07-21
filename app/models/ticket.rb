@@ -64,6 +64,25 @@ class Ticket < ApplicationRecord
   scope :unassigned,  -> { where(assignee_id: nil) }
   scope :assigned,    -> { where.not(assignee_id: nil) }
   scope :recent,      -> { order(created_at: :desc) }
+  scope :hiring,      -> { where(ticket_type: "hiring_departure").where.not("metadata ->> 'request_type' = ?", "Termination") }
+  scope :departure,   -> { where(ticket_type: "hiring_departure").where("metadata ->> 'request_type' = ?", "Termination") }
+
+  def departure?
+    ticket_type == "hiring_departure" && metadata["request_type"] == "Termination"
+  end
+
+  def hiring?
+    ticket_type == "hiring_departure" && !departure?
+  end
+
+  # Display label for the Type column/filter — splits the single
+  # "hiring_departure" ticket_type into Hiring vs Departure.
+  def type_label
+    return "Departure" if departure?
+    return "Hiring"    if hiring?
+
+    ticket_type.humanize
+  end
 
   def on_behalf?
     created_by.present?

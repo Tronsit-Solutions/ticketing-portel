@@ -39,8 +39,8 @@
             %td= ticket.id
             %td= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
             %td
-              %span 
-              = ticket.ticket_type.humanize
+              %span
+              = ticket.type_label
             %td
               - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
               %span{:class => "badge bg-#{color[ticket.status]}"}= ticket.status.humanize

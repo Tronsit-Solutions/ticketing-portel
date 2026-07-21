@@ -76,7 +76,7 @@
                   %td.text-muted{style: "font-size:13px;"}= "#{ticket.id}"
                   %td= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
                   %td
-                    %span= ticket.ticket_type.humanize
+                    %span= ticket.type_label
                   %td
                     %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
                   %td= ticket.customer&.fullname || "-"

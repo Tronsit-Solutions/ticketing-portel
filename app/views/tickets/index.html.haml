@@ -22,7 +22,8 @@
         = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
       .col-md-2
         = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
-        = select_tag :ticket_type, options_for_select([["All Types", ""]] + Ticket::TICKET_TYPES.map { |t| [t.humanize, t] }.sort_by(&:first), params[:ticket_type]), class: "form-select form-select-sm"
+        - type_options = (Ticket::TICKET_TYPES - ["hiring_departure"]).map { |t| [t.humanize, t] } + [["Hiring", "hiring"], ["Departure", "departure"]]
+        = select_tag :ticket_type, options_for_select([["All Types", ""]] + type_options.sort_by(&:first), params[:ticket_type]), class: "form-select form-select-sm"
       - unless current_user.customer?
         .col-md-2
           = label_tag :assignment, "Assignment", class: "form-label mb-1 fw-bold"
@@ -61,7 +62,7 @@
                   %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
               %td
                 %span
-                  = ticket.ticket_type.humanize
+                  = ticket.type_label
               %td
                 - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
                 %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
