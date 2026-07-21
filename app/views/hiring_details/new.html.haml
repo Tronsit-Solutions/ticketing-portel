@@ -241,6 +241,6 @@
       .d-flex.align-items-center.gap-3.mt-4.pt-2
         = f.submit "Submit", class: "btn btn-submit"
         - if @ticket.new_record?
-          = button_to "Cancel", cancel_pending_hiring_detail_path, method: :delete, class: "btn btn-cancel"
+          = link_to "Cancel", cancel_pending_hiring_detail_path, data: { turbo_method: :delete }, class: "btn btn-cancel"
         - else
           = link_to "Skip", @ticket, class: "btn btn-cancel"
