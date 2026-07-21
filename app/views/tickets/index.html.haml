@@ -2,21 +2,27 @@
   %h4.mb-0{style: "font-family: Poppins;"}
     - if params[:unassigned].present? || params[:assignment] == "unassigned"
       Unassigned Tickets
-    - elsif params[:assignment] == "self_assigned"
-      Self Assigned Tickets
+    - elsif params[:assignment] == "self_assigned" || params[:assignee_id] == current_user.id.to_s
+      My Tickets
     - elsif params[:status].present?
       = params[:status].humanize
       Tickets
     - else
       All Tickets
+  - if current_user.agent?
+    = link_to catalogue_tickets_path, class: "btn btn-primary btn-sm" do
+      + Create On Behalf
 
 / Filters
-.card.border-0.shadow-sm.mb-4
+.card.filter-bar.border-0.shadow-sm.mb-4
   .card-body.py-2
     = form_with url: tickets_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
+      = hidden_field_tag :unassigned, params[:unassigned] if params[:unassigned].present?
+      = hidden_field_tag :assignee_id, params[:assignee_id] if params[:assignee_id].present?
+      = hidden_field_tag :assignment, params[:assignment] if params[:assignment].present?
       .col-md-3
         = label_tag :search, "Search", class: "form-label mb-1 fw-bold"
-        = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Search by title"
+        = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Search by title or ID"
       .col-md-2
         = label_tag :status, "Status", class: "form-label mb-1 fw-bold"
         = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
@@ -26,13 +32,13 @@
         = select_tag :ticket_type, options_for_select([["All Types", ""]] + type_options.sort_by(&:first), params[:ticket_type]), class: "form-select form-select-sm"
       - unless current_user.customer?
         .col-md-2
-          = label_tag :assignment, "Assignment", class: "form-label mb-1 fw-bold"
-          - assignment_value = params[:unassigned].present? ? "unassigned" : params[:assignment]
-          = select_tag :assignment, options_for_select([["All", ""], ["Unassigned only", "unassigned"], ["Self Assigned", "self_assigned"]], assignment_value), class: "form-select form-select-sm"
+          = label_tag :location_id, "Location", class: "form-label mb-1 fw-bold"
+          = select_tag :location_id, options_for_select([["All Locations", ""]] + @locations.map { |l| [l.name, l.id] }, params[:location_id]), class: "form-select form-select-sm"
       .col-md-2
         = f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100"
       .col-md-1
-        = link_to "Clear", tickets_path, class: "btn btn-outline-secondary btn-sm w-100"
+        - clear_params = params.slice(:unassigned, :assignee_id, :assignment).permit!
+        = link_to "Clear", tickets_path(clear_params), class: "btn btn-outline-secondary btn-sm w-100"
 
 / Tickets Table
 .card.border-0.shadow-sm
@@ -41,7 +47,7 @@
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
-            %th #
+            %th ID
             %th Title
             %th Type
             %th Status

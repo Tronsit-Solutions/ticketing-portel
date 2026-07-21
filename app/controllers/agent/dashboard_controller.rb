@@ -6,6 +6,6 @@ class Agent::DashboardController < ApplicationController
     @assigned_tickets   = current_user.assigned_tickets.count
     @unassigned_tickets = Ticket.unassigned.count
     @closed_tickets     = current_user.assigned_tickets.closed.count
-    @my_tickets         = current_user.assigned_tickets.recent.includes(:customer).limit(10)
+    @my_tickets         = current_user.assigned_tickets.recent.includes(:customer, :location).limit(10)
   end
 end

@@ -130,6 +130,7 @@
       .brand Agent Portal
       .nav-right
         = turbo_stream_from current_user, :ticket_notifications
+        = turbo_stream_from :unassigned_tickets
         %a.bell-wrap{:href => ticket_notifications_path}
           %i.bi.bi-bell-fill
           = render "shared/notification_bell_badge", user: current_user, badge_class: "position-absolute", badge_style: "top:-6px; right:-8px; font-size:9px; padding:2px 5px;"
@@ -151,21 +152,13 @@
         = link_to tickets_path(unassigned: true) do
           %i.bi.bi-inbox-fill
           Unassigned
+          = render "shared/unassigned_ticket_badge"
         = link_to tickets_path(assignee_id: current_user.id) do
           %i.bi.bi-person-check-fill
-          Assigned to Me
-        = link_to tickets_path(status: "closed") do
-          %i.bi.bi-check-circle-fill
-          Closed Tickets
-        = link_to catalogue_tickets_path do
-          %i.bi.bi-person-plus-fill
-          Create On Behalf
+          My Tickets
         = link_to agent_users_path do
           %i.bi.bi-people-fill
           Users
-        = link_to new_agent_user_path do
-          %i.bi.bi-person-plus-fill
-          Create User
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout

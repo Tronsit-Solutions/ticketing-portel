@@ -4,19 +4,28 @@
     + Add User
 
 / Filters
-.card.border-0.shadow-sm.mb-4
+.card.filter-bar.border-0.shadow-sm.mb-4
   .card-body.py-2
     = form_with url: agent_users_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
+      = hidden_field_tag :role, params[:role] if params[:role].present?
       .col-md-4
         = label_tag :search, "Search", class: "form-label mb-1 fw-bold"
         = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Search by name or email"
       .col-md-3
-        = label_tag :role, "Role", class: "form-label mb-1 fw-bold"
-        = select_tag :role, options_for_select([["All", ""], ["Agent", "agent"], ["Customer", "customer"]], params[:role]), class: "form-select form-select-sm"
+        = label_tag :status, "Status", class: "form-label mb-1 fw-bold"
+        = select_tag :status, options_for_select([["All", ""], ["Active", "true"], ["Inactive", "false"]], params[:status]), class: "form-select form-select-sm"
       .col-md-2
         = f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100"
-      .col-md-2
+      .col-md-1
         = link_to "Clear", agent_users_path, class: "btn btn-outline-secondary btn-sm w-100"
+      .col-md-2
+        .d-flex.gap-1.justify-content-end
+          - customer_params = request.query_parameters.except("role").merge(role: params[:role] == "customer" ? nil : "customer").compact
+          - agent_params    = request.query_parameters.except("role").merge(role: params[:role] == "agent" ? nil : "agent").compact
+          = link_to agent_users_path(customer_params), class: "btn btn-sm #{params[:role] == 'customer' ? 'btn-info text-dark' : 'btn-outline-info'}", title: "Customers" do
+            %i.bi.bi-person-fill
+          = link_to agent_users_path(agent_params), class: "btn btn-sm #{params[:role] == 'agent' ? 'btn-primary' : 'btn-outline-primary'}", title: "Agents" do
+            %i.bi.bi-person-badge-fill
 
 / Users Table
 .card.border-0.shadow-sm
@@ -29,7 +38,8 @@
             %th Email
             %th Role
             %th Status
-            %th Joined
+            %th Created
+            %th Actions
         %tbody
           - @users.each do |user|
             %tr
@@ -46,6 +56,10 @@
                 - else
                   %span.badge.bg-secondary Inactive
               %td{:style => "font-size:13px;"}= user.created_at.strftime("%b %d, %Y")
+              %td
+                .d-flex.gap-2.justify-content-center
+                  = link_to "View", agent_user_path(user), class: "btn btn-sm btn-outline-secondary"
+                  = link_to "Edit", edit_agent_user_path(user), class: "btn btn-sm btn-outline-primary"
     - else
       .text-center.text-muted.py-5
         %i.bi.bi-people{:style => "font-size: 2rem;"}

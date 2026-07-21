@@ -2,7 +2,7 @@
   %h4.mb-0{:style => "font-family: Poppins;"} Users
   = link_to "+ Add User", new_user_path, class: "btn btn-primary btn-sm"
 / Filters
-.card.border-0.shadow-sm.mb-4
+.card.filter-bar.border-0.shadow-sm.mb-4
   .card-body.py-2
     = form_with url: users_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
       .col-md-4
@@ -39,7 +39,7 @@
           %th Role
           %th Team
           %th Status
-          %th Joined
+          %th Created
           %th
       %tbody
         - @users.each do |user|

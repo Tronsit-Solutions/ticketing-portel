@@ -4,7 +4,7 @@
     + Add Customer
 
 / Filters
-.card.border-0.shadow-sm.mb-4
+.card.filter-bar.border-0.shadow-sm.mb-4
   .card-body.py-2
     = form_with url: manager_users_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
       .col-md-4
@@ -33,7 +33,7 @@
                   %i.bi{class: @direction == "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"}
             %th Email
             %th Status
-            %th Joined
+            %th Created
             %th
         %tbody
           - @customers.each do |customer|

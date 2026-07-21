@@ -1,0 +1,130 @@
+- role_color = { "admin" => "danger", "agent" => "success", "manager" => "primary", "customer" => "secondary" }
+
+.d-flex.justify-content-between.align-items-center.mb-4
+  %h5.mb-0.fw-bold= @user.fullname
+  = link_to "Back", agent_users_path, class: "btn btn-outline-secondary btn-sm"
+
+- if @user.agent?
+  .row.g-3
+
+    / ── Left: Profile card ──────────────────────────
+    .col-md-4
+      .card.border-0.shadow-sm
+        .card-header.bg-white.d-flex.justify-content-between.align-items-center
+          %span.fw-bold Profile
+          %span{class: "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
+        .card-body
+          .mb-2
+            %small.text-muted Email
+            %div= @user.email
+          .mb-2
+            %small.text-muted Team
+            %div= @user.team&.name || "-"
+          .mb-2
+            %small.text-muted Contact
+            %div= @user.contact_no || "-"
+          .mb-2
+            %small.text-muted Address
+            %div= @user.address || "-"
+          .mb-2
+            %small.text-muted Status
+            %div
+              - if @user.is_active?
+                %span.badge.bg-success Active
+              - else
+                %span.badge.bg-secondary Inactive
+          .mb-2
+            %small.text-muted Joined
+            %div= @user.created_at.strftime("%B %d, %Y")
+
+    / ── Right: Stats + Ticket history ──────────────
+    .col-md-8
+
+      / Stat cards
+      .row.g-2.mb-3
+        .col-4
+          .card.border-0.shadow-sm.text-center.py-3
+            .fs-4.fw-bold.text-warning= @total_count
+            %small.text-muted Total
+        .col-4
+          .card.border-0.shadow-sm.text-center.py-3
+            .fs-4.fw-bold.text-primary= @open_count
+            %small.text-muted Active
+        .col-4
+          .card.border-0.shadow-sm.text-center.py-3
+            .fs-4.fw-bold.text-success= @closed_count
+            %small.text-muted Closed
+
+      / Ticket history table
+      .card.border-0.shadow-sm
+        .card-header.bg-white.fw-bold Ticket History
+        .card-body.p-0
+        - if @assigned_tickets.any?
+          %table.table.table-hover.mb-0
+            %thead.table-light
+              %tr
+                %th #
+                %th Title
+                %th Type
+                %th Status
+                %th Customer
+                %th Assigned
+                %th
+            %tbody
+              - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+              - @assigned_tickets.each do |ticket|
+                %tr
+                  %td.text-muted{style: "font-size:13px;"}= "#{ticket.id}"
+                  %td= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
+                  %td
+                    %span= ticket.type_label
+                  %td
+                    %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
+                  %td= ticket.customer&.fullname || "-"
+                  %td{style: "font-size:13px;"}= ticket.assigned_at&.strftime("%b %d, %Y") || "-"
+                  %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
+
+          / Pagination controls
+          .card-footer.bg-white.border-top-0.d-flex.justify-content-between.align-items-center.py-3.px-3
+            .text-muted.small
+              = page_entries_info @assigned_tickets
+            .pagination-wrapper
+              = paginate @assigned_tickets
+        - else
+          .text-center.text-muted.py-5
+            %i.bi.bi-ticket-perforated{style: "font-size: 2rem;"}
+            %p.mt-2 No tickets found.
+
+- else
+  / ── Simple profile for customer ──────────────
+  .card.border-0.shadow-sm{style: "max-width: 680px;"}
+    .card-header.bg-white.d-flex.justify-content-between.align-items-center
+      %span.fw-bold= @user.fullname
+      %span{class: "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
+    .card-body
+      .row.mb-3
+        .col-md-4.text-muted Email
+        .col-md-8= @user.email
+      .row.mb-3
+        .col-md-4.text-muted Contact
+        .col-md-8= @user.contact_no || "-"
+      .row.mb-3
+        .col-md-4.text-muted Address
+        .col-md-8= @user.address || "-"
+      .row.mb-3
+        .col-md-4.text-muted Status
+        .col-md-8
+          - if @user.is_active?
+            %span.badge.bg-success Active
+          - else
+            %span.badge.bg-secondary Inactive
+      .row.mb-3
+        .col-md-4.text-muted Joined
+        .col-md-8= @user.created_at.strftime("%B %d, %Y")
+      %hr/
+      .row.mb-3
+        .col-md-4.text-muted Tickets Submitted
+        .col-md-8= @user.customer_tickets.count
+      .row.mb-3
+        .col-md-4.text-muted Open Tickets
+        .col-md-8= @user.customer_tickets.open.count

@@ -132,9 +132,21 @@ class Ticket < ApplicationRecord
   end
 
   # Callbacks
-  before_update :set_resolved_at, if: :status_changed_to_closed?
+  before_update        :set_resolved_at, if: :status_changed_to_closed?
+  after_create_commit  :broadcast_unassigned_badge, if: :unassigned?
+  after_update_commit  :broadcast_unassigned_badge, if: :saved_change_to_assignee_id?
 
   private
+
+  def unassigned?
+    assignee_id.nil?
+  end
+
+  def broadcast_unassigned_badge
+    broadcast_replace_to :unassigned_tickets,
+      target:  "unassigned-ticket-badge",
+      partial: "shared/unassigned_ticket_badge"
+  end
 
   def auto_title_for_bright_ideas
     if ticket_type == "bright_ideas" && title.blank?

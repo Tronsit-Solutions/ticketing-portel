@@ -1,0 +1,3 @@
+- count = Ticket.unassigned.count
+%span.badge.bg-danger.ms-auto#unassigned-ticket-badge{hidden: count.zero?}
+  = count

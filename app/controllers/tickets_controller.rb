@@ -22,7 +22,8 @@ class TicketsController < ApplicationController
       @active_panel = :my_tickets
       render :customer_home
     else
-      @tickets = Ticket.all.recent.includes(:customer, :assignee, :location)
+      @locations = Location.ordered
+      @tickets   = Ticket.all.recent.includes(:customer, :assignee, :location)
       @tickets = @tickets.where(status: params[:status])           if params[:status].present?
       if params[:ticket_type] == "hiring"
         @tickets = @tickets.hiring
@@ -34,9 +35,16 @@ class TicketsController < ApplicationController
       @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present? || params[:assignment] == "unassigned"
       @tickets = @tickets.where(assignee_id: current_user.id)      if params[:assignment] == "self_assigned"
       @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
+      @tickets = @tickets.where(location_id: params[:location_id]) if params[:location_id].present?
       if params[:search].present?
-        term     = "%#{params[:search].strip}%"
-        @tickets = @tickets.where("title ILIKE :term", term: term)
+        search_term = params[:search].strip
+        ticket_id   = search_term.delete_prefix("#")
+        if ticket_id.match?(/\A\d+\z/)
+          @tickets = @tickets.where(id: ticket_id)
+        else
+          term     = "%#{search_term}%"
+          @tickets = @tickets.where("title ILIKE :term", term: term)
+        end
       end
       @tickets = @tickets.page(params[:page]).per(25)
     end
