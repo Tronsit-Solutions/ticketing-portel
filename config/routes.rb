@@ -24,6 +24,7 @@ Rails.application.routes.draw do
 
   namespace :agent do
     root "dashboard#index"
+    resources :users, only: [:index, :new, :create]
   end
 
   namespace :customer do

@@ -1,0 +1,66 @@
+.d-flex.justify-content-between.align-items-center.mb-4
+  %h5.mb-0{:style => "font-family: Poppins;"} Create New User
+  = link_to "Back", agent_users_path, class: "btn btn-outline-secondary btn-sm"
+
+.row.g-4
+  / Left Sidebar - Tabs
+  .col-md-3
+    .card.border-0.shadow-sm.sticky-top{:style => "top: 80px;"}
+      .card-body.p-0
+        :css
+          .tab-btn:hover {
+            background-color: transparent !important;
+            color: inherit !important;
+          }
+        = link_to new_agent_user_path(role: "agent"), class: "btn btn-outline-primary w-100 text-start py-3 tab-btn", style: "border: 2px solid #{@role == 'agent' || @role.blank? ? '#1565c0' : '#e5e7eb'}; border-radius: 0; text-decoration: none; color: #{@role == 'agent' || @role.blank? ? '#1565c0' : '#6b7280'};" do
+          %i.bi.bi-person-badge{:style => "font-size: 20px; margin-right: 12px;"}
+          Create Agent
+        = link_to new_agent_user_path(role: "customer"), class: "btn btn-outline-primary w-100 text-start py-3 tab-btn", style: "border: 2px solid #{@role == 'customer' ? '#1565c0' : '#e5e7eb'}; #{@role == 'agent' || @role.blank? ? 'border-top: none;' : 'border-top: 1px solid #e5e7eb;'} border-radius: 0; text-decoration: none; color: #{@role == 'customer' ? '#1565c0' : '#6b7280'};" do
+          %i.bi.bi-person{:style => "font-size: 20px; margin-right: 12px;"}
+          Create Customer
+
+  / Right Content - Form
+  .col-md-9
+    .card.border-0.shadow-sm
+      .card-body.p-4
+        - if @role.blank? || @role == "agent"
+          %h5.mb-4{:style => "font-family: Poppins; color: #1565c0;"}
+            %i.bi.bi-person-badge
+            Create Agent
+        - else
+          %h5.mb-4{:style => "font-family: Poppins; color: #28a745;"}
+            %i.bi.bi-person
+            Create Customer
+
+        - @user = User.new(role: @role.presence || "agent", team_id: (current_user.team_id if @role.blank? || @role == "agent"))
+        = form_with model: @user, url: agent_users_path, method: :post, local: true do |f|
+          - if @user.errors.any?
+            .alert.alert-danger
+              %ul.mb-0
+                - @user.errors.full_messages.each do |msg|
+                  %li{:style => "font-size:13px;"}= msg
+          .mb-3
+            = f.label :fullname, "Full Name", class: "form-label fw-bold"
+            = f.text_field :fullname, class: "form-control", placeholder: "Enter full name"
+          .mb-3
+            = f.label :email, class: "form-label fw-bold"
+            = f.email_field :email, class: "form-control", placeholder: "Enter email address"
+          .mb-3
+            = f.label :password, class: "form-label fw-bold"
+            = f.password_field :password, class: "form-control", placeholder: "Enter password"
+          .mb-3
+            = f.label :password_confirmation, "Confirm Password", class: "form-label fw-bold"
+            = f.password_field :password_confirmation, class: "form-control", placeholder: "Confirm password"
+          .mb-3
+            = f.label :contact_no, "Contact Number", class: "form-label fw-bold"
+            = f.text_field :contact_no, class: "form-control", placeholder: "Enter contact number"
+          .mb-3
+            = f.label :address, class: "form-label fw-bold"
+            = f.text_area :address, rows: 3, class: "form-control", placeholder: "Enter address"
+          .form-check.mb-4
+            = f.check_box :is_active, class: "form-check-input"
+            = f.label :is_active, "Active account", class: "form-check-label"
+          = f.hidden_field :role, value: (@role.presence || "agent")
+          .d-flex.gap-2
+            = f.submit "Create #{(@role.presence || 'Agent').humanize}", class: "btn btn-primary"
+            = link_to "Cancel", agent_users_path, class: "btn btn-outline-secondary"

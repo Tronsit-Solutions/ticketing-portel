@@ -160,6 +160,12 @@
         = link_to catalogue_tickets_path do
           %i.bi.bi-person-plus-fill
           Create On Behalf
+        = link_to agent_users_path do
+          %i.bi.bi-people-fill
+          Users
+        = link_to new_agent_user_path do
+          %i.bi.bi-person-plus-fill
+          Create User
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout

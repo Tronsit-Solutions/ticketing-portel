@@ -1,0 +1,64 @@
+.d-flex.justify-content-between.align-items-center.mb-4
+  %h4.mb-0{:style => "font-family: Poppins;"} Users
+  = link_to new_agent_user_path, class: "btn btn-primary btn-sm" do
+    + Add User
+
+/ Filters
+.card.border-0.shadow-sm.mb-4
+  .card-body.py-2
+    = form_with url: agent_users_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
+      .col-md-4
+        = label_tag :search, "Search", class: "form-label mb-1 fw-bold"
+        = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Search by name or email"
+      .col-md-3
+        = label_tag :role, "Role", class: "form-label mb-1 fw-bold"
+        = select_tag :role, options_for_select([["All", ""], ["Agent", "agent"], ["Customer", "customer"]], params[:role]), class: "form-select form-select-sm"
+      .col-md-2
+        = f.submit "Filter", class: "btn btn-outline-primary btn-sm w-100"
+      .col-md-2
+        = link_to "Clear", agent_users_path, class: "btn btn-outline-secondary btn-sm w-100"
+
+/ Users Table
+.card.border-0.shadow-sm
+  .card-body.p-0
+    - if @users.any?
+      %table.table.table-hover.mb-0
+        %thead.table-light
+          %tr
+            %th Name
+            %th Email
+            %th Role
+            %th Status
+            %th Joined
+        %tbody
+          - @users.each do |user|
+            %tr
+              %td= user.fullname
+              %td.text-muted{:style => "font-size:13px;"}= user.email
+              %td
+                - if user.agent?
+                  %span.badge.bg-primary Agent
+                - else
+                  %span.badge.bg-info.text-dark Customer
+              %td
+                - if user.is_active?
+                  %span.badge.bg-success Active
+                - else
+                  %span.badge.bg-secondary Inactive
+              %td{:style => "font-size:13px;"}= user.created_at.strftime("%b %d, %Y")
+    - else
+      .text-center.text-muted.py-5
+        %i.bi.bi-people{:style => "font-size: 2rem;"}
+        %p.mt-2 No users found.
+
+- if @users.any?
+  .d-flex.justify-content-between.align-items-center.mt-3.px-1
+    %small.text-muted
+      Showing
+      %strong= @users.offset_value + 1
+      –
+      %strong= [@users.offset_value + @users.limit_value, @users.total_count].min
+      of
+      %strong= @users.total_count
+      users
+    = paginate @users
