@@ -235,7 +235,7 @@
         - if @ticket_assignments.any?
           - @ticket_assignments.each do |a|
             .px-3.py-2.border-bottom
-              %small.text-muted= a.created_at.strftime("%b %d, %Y")
+              %small.text-muted= a.created_at.strftime("%b %d, %Y at %-I:%M %p")
               %div{style: "font-size:13px;"}
                 - if a.assigned_from.present?
                   %span.text-danger= a.assigned_from.fullname
