@@ -60,22 +60,10 @@ class TerminationDetailsController < ApplicationController
     render :new, status: :unprocessable_entity
   end
 
-  # Staff-only shortcut: create the ticket without termination details, to
-  # be filled in later (matches the pre-existing "Skip" behavior for staff).
-  def skip_pending
-    unauthorized! and return unless current_user.admin? || current_user.agent? || current_user.manager?
-
-    @ticket = build_pending_ticket
-    return redirect_to new_ticket_path, alert: "Your ticket details expired. Please start again." unless @ticket
-
-    @ticket.save!
+  # Discards the pending ticket (never persisted) and its session state.
+  def cancel_pending
     session.delete(:pending_ticket)
-    notify_staff_of_new_ticket(@ticket)
-    @ticket.notify_customer!(
-      responded_by: current_user,
-      details:      "#{current_user.fullname} submitted ticket ##{@ticket.id} on your behalf: \"#{@ticket.title}\""
-    ) if @ticket.on_behalf?
-    redirect_to @ticket, notice: "Ticket submitted successfully."
+    redirect_to catalogue_tickets_path, notice: "Ticket creation cancelled."
   end
 
   private
