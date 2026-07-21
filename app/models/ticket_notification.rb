@@ -51,7 +51,7 @@ class TicketNotification < ApplicationRecord
       partial: "shared/notification_bell_badge",
       locals: { user: receiver, badge_class: badge_class, badge_style: badge_style }
 
-    if receiver.manager?
+    if receiver.manager? || receiver.agent?
       broadcast_replace_later_to [receiver, :ticket_notifications],
         target: "notif-bell-badge-sidebar",
         partial: "shared/notification_bell_badge",
