@@ -1,0 +1,11 @@
+%div{class: "mb-3 p-3 rounded #{message.internal_note? ? 'bg-warning bg-opacity-10' : 'bg-light'}"}
+  .d-flex.justify-content-between.mb-1
+    %strong= message.sender&.fullname || "System"
+    %small.text-muted
+      = message.created_at.strftime("%b %d, %Y %I:%M %p")
+      - if message.internal_note?
+        %span.badge.bg-warning.text-dark.ms-1 Internal Note
+  - if message.structured_data.present?
+    = render "shared/structured_message", data: message.structured_data
+  - else
+    %p.mb-0= message.details

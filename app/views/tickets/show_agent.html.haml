@@ -1,3 +1,5 @@
+= turbo_stream_from @ticket, :messages
+
 / ── Two-column layout ───────────────────────────────────────────
 .row.g-3
 
@@ -267,23 +269,12 @@
     / Conversation
     .card.border-0.shadow-sm.mb-3
       .card-header.bg-white.fw-bold Conversation
-      .card-body
-        - if @ticket_messages.any?
-          - @ticket_messages.each do |msg|
-            - next if msg.details.match?(/<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i)
-            %div{class: "mb-3 p-3 rounded #{msg.internal_note? ? 'bg-warning bg-opacity-10' : 'bg-light'}"}
-              .d-flex.justify-content-between.mb-1
-                %strong= msg.sender&.fullname || "System"
-                %small.text-muted
-                  = msg.created_at.strftime("%b %d, %Y %I:%M %p")
-                  - if msg.internal_note?
-                    %span.badge.bg-warning.text-dark.ms-1 Internal Note
-              - if msg.structured_data.present?
-                = render "shared/structured_message", data: msg.structured_data
-              - else
-                %p.mb-0= msg.details
+      .card-body#ticket_messages_agent
+        - visible_messages = @ticket_messages.reject { |msg| msg.details.match?(/<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i) }
+        - if visible_messages.any?
+          = render partial: "ticket_messages/message_agent", collection: visible_messages, as: :message
         - else
-          %p.text-muted.mb-0 No messages yet.
+          %p.text-muted.mb-0.no-messages-placeholder No messages yet.
 
     / Reply form
     - if @ticket.status != "closed"
