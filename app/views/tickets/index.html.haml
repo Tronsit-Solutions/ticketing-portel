@@ -11,7 +11,7 @@
       All Tickets
   - if current_user.agent?
     = link_to catalogue_tickets_path, class: "btn btn-primary btn-sm" do
-      + Create On Behalf
+      + Generate Ticket
 
 / Filters
 .card.filter-bar.border-0.shadow-sm.mb-4
@@ -47,8 +47,20 @@
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
-            %th ID
-            %th Title
+            %th
+              = link_to tickets_path(request.query_parameters.merge(sort: "id", direction: (@sort == "id" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
+                ID
+                - if @sort == "id"
+                  %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
+                - else
+                  %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
+            %th.text-center
+              = link_to tickets_path(request.query_parameters.merge(sort: "title", direction: (@sort == "title" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
+                Title
+                - if @sort == "title"
+                  %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
+                - else
+                  %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
             %th Type
             %th Status
             %th Location
@@ -62,10 +74,11 @@
             %tr
               %td.text-muted{style: "font-size:13px;"}
                 \#{ticket.id}
-              %td
-                = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
-                - if ticket.on_behalf?
-                  %span.badge.ms-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
+              %td.text-center
+                .d-flex.flex-column.align-items-center
+                  = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
+                  - if ticket.on_behalf?
+                    %span.badge.mt-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
               %td
                 %span
                   = ticket.type_label
@@ -80,7 +93,7 @@
                     = ticket.assignee.fullname
                   - else
                     %span.text-danger Unassigned
-                    - if current_user.agent?
+                    - if current_user.agent? && ticket.status != "cancelled"
                       = button_to "Grab", self_assign_ticket_path(ticket), method: :patch, class: "btn btn-xs btn-outline-success ms-1", style: "font-size:11px; padding: 1px 6px;"
               %td{style: "font-size:13px;"}= ticket.created_at.strftime("%b %d, %Y %I:%M %p")
               %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"

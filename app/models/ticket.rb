@@ -23,6 +23,11 @@ class Ticket < ApplicationRecord
 
   # Single source of truth — derived from CATALOGUE, never out of sync
   TICKET_TYPES = CATALOGUE.flat_map { |c| c[:children] || [c] }.map { |c| c[:type] }.freeze
+  TYPE_LABELS  = CATALOGUE.flat_map { |c| c[:children] || [c] }.each_with_object({}) { |c, h| h[c[:type]] = c[:label] }.freeze
+
+  # Ticket types whose creation form has no Title input — their title
+  # is derived from the ticket type instead of user input.
+  TITLELESS_TYPES = %w[bright_ideas great_work hr hiring_departure lms].freeze
 
   # Associations
   belongs_to :location,    optional: true
@@ -81,7 +86,7 @@ class Ticket < ApplicationRecord
     return "Departure" if departure?
     return "Hiring"    if hiring?
 
-    ticket_type.humanize
+    TYPE_LABELS[ticket_type] || ticket_type.humanize
   end
 
   def on_behalf?
@@ -149,22 +154,7 @@ class Ticket < ApplicationRecord
   end
 
   def auto_title_for_bright_ideas
-    if ticket_type == "bright_ideas" && title.blank?
-      idea_types = Array(metadata&.dig("idea_types")).reject(&:blank?)
-      self.title = idea_types.any? ? "Bright Idea: #{idea_types.join(', ')}" : "Bright Idea"
-    elsif ticket_type == "great_work" && title.blank?
-      work_types = Array(metadata&.dig("work_types")).reject(&:blank?)
-      self.title = work_types.any? ? "Great Work: #{work_types.join(', ')}" : "Great Work"
-    elsif ticket_type == "hr" && title.blank?
-      hr_types = Array(metadata&.dig("hr_types")).reject(&:blank?)
-      self.title = hr_types.any? ? "General HR: #{hr_types.first}" : "General HR"
-    elsif ticket_type == "lms" && title.blank?
-      self.title = "Password Reset for LMS"
-    elsif ticket_type == "hiring_departure" && title.blank?
-      request_type = metadata&.dig("request_type").presence || "Request"
-      full_name    = metadata&.dig("full_name").presence
-      self.title   = full_name ? "#{request_type}: #{full_name}" : request_type
-    end
+    self.title = type_label if TITLELESS_TYPES.include?(ticket_type) && title.blank?
   end
 
   def status_changed_to_closed?

@@ -367,6 +367,14 @@ RSpec.describe "Tickets", type: :request do
         expect(notification).to be_present
         expect(notification.responded_by).to eq(agent)
       end
+
+      it "does not allow grabbing a cancelled ticket" do
+        cancelled_ticket = create(:ticket, :cancelled, customer: customer)
+        patch self_assign_ticket_path(cancelled_ticket)
+        expect(cancelled_ticket.reload.assignee).to be_nil
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to eq("Cancelled tickets cannot be grabbed.")
+      end
     end
 
     context "as customer" do

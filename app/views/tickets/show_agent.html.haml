@@ -25,7 +25,7 @@
             - if (current_user.admin? || current_user.manager?) && @ticket.status != "closed"
               %button.btn.btn-sm.btn-outline-primary{"data-bs-toggle" => "collapse", "data-bs-target" => "#assignForm"}
                 = @ticket.assignee_id.nil? ? "Assign" : "Reassign"
-            - if current_user.agent? && @ticket.assignee_id.nil?
+            - if current_user.agent? && @ticket.assignee_id.nil? && @ticket.status != "cancelled"
               = button_to "Self Assign", self_assign_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-success"
 
         / Title

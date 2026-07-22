@@ -83,25 +83,29 @@ RSpec.describe Ticket, type: :model do
       it "auto-generates title for bright_ideas if blank" do
         ticket = build(:ticket, ticket_type: "bright_ideas", title: "", metadata: { "idea_types" => ["Workflow"] })
         ticket.valid?
-        expect(ticket.title).to eq("Bright Idea: Workflow")
-      end
-
-      it "uses fallback title when idea_types is empty" do
-        ticket = build(:ticket, ticket_type: "bright_ideas", title: "", metadata: {})
-        ticket.valid?
-        expect(ticket.title).to eq("Bright Idea")
+        expect(ticket.title).to eq("Bright Ideas")
       end
 
       it "auto-generates title for great_work if blank" do
         ticket = build(:ticket, ticket_type: "great_work", title: "", metadata: { "work_types" => ["Teamwork"] })
         ticket.valid?
-        expect(ticket.title).to eq("Great Work: Teamwork")
+        expect(ticket.title).to eq("Great Work")
       end
 
       it "auto-generates title for lms if blank" do
         ticket = build(:ticket, ticket_type: "lms", title: "")
         ticket.valid?
-        expect(ticket.title).to eq("Password Reset for LMS")
+        expect(ticket.title).to eq("LMS")
+      end
+
+      it "auto-generates title for hiring_departure based on request_type" do
+        hiring = build(:ticket, ticket_type: "hiring_departure", title: "", metadata: { "request_type" => "New Hire" })
+        hiring.valid?
+        expect(hiring.title).to eq("Hiring")
+
+        departure = build(:ticket, ticket_type: "hiring_departure", title: "", metadata: { "request_type" => "Termination" })
+        departure.valid?
+        expect(departure.title).to eq("Departure")
       end
 
       it "does not overwrite an existing title" do

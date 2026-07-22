@@ -23,7 +23,9 @@ class TicketsController < ApplicationController
       render :customer_home
     else
       @locations = Location.ordered
-      @tickets   = Ticket.all.recent.includes(:customer, :assignee, :location)
+      @sort      = %w[id title].include?(params[:sort]) ? params[:sort] : "id"
+      @direction = params[:direction] == "asc" ? "asc" : "desc"
+      @tickets   = Ticket.all.order(@sort => @direction).includes(:customer, :assignee, :location)
       @tickets = @tickets.where(status: params[:status])           if params[:status].present?
       if params[:ticket_type] == "hiring"
         @tickets = @tickets.hiring
@@ -251,6 +253,9 @@ class TicketsController < ApplicationController
 
   def authorize_self_assign!
     unauthorized! unless current_user.admin? || current_user.agent?
+    return unless @ticket.status == "cancelled"
+
+    redirect_back(fallback_location: root_path, alert: "Cancelled tickets cannot be grabbed.")
   end
 
   def authorize_close!
