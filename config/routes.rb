@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   resources :password_reset_requests, only: [:new, :create]
   namespace :admin do
     root "dashboard#index"
+    resources :reports, only: [:index], controller: "/reports"
   end
 
   namespace :manager do
@@ -20,6 +21,7 @@ Rails.application.routes.draw do
         patch :reset_password
       end
     end
+    resources :reports, only: [:index], controller: "/reports"
   end
 
   namespace :agent do
