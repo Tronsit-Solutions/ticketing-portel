@@ -71,7 +71,7 @@ class TerminationDetailsController < ApplicationController
 
   def set_ticket
     @ticket = Ticket.find(params[:ticket_id])
-    unless @ticket.ticket_type == "hiring_departure" && @ticket.metadata["request_type"] == "Termination"
+    unless @ticket.ticket_type == "departure"
       redirect_to @ticket, alert: "This ticket does not require termination details."
     end
   end

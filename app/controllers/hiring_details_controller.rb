@@ -71,7 +71,7 @@ class HiringDetailsController < ApplicationController
 
   def set_ticket
     @ticket = Ticket.find(params[:ticket_id])
-    unless @ticket.ticket_type == "hiring_departure"
+    unless @ticket.ticket_type == "hiring"
       redirect_to @ticket, alert: "This ticket does not require hiring details."
     end
   end

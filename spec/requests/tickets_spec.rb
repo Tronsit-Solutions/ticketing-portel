@@ -184,7 +184,7 @@ RSpec.describe "Tickets", type: :request do
         expect {
           post tickets_path, params: {
             ticket: {
-              ticket_type: "hiring_departure",
+              ticket_type: "hiring",
               title: "New Hire",
               metadata: { request_type: "Hire", full_name: "John Doe" }
             }
@@ -197,7 +197,7 @@ RSpec.describe "Tickets", type: :request do
         expect {
           post tickets_path, params: {
             ticket: {
-              ticket_type: "hiring_departure",
+              ticket_type: "hiring",
               title: "Termination",
               metadata: { request_type: "Termination", full_name: "Jane Doe" }
             }

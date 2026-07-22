@@ -28,8 +28,8 @@ namespace :migrate do
       "Bright Ideas"   => "bright_ideas",
       "Great Work"     => "great_work",
       "General HR"     => "hr",
-      "Hiring"         => "hiring_departure",
-      "Termination"    => "hiring_departure",
+      "Hiring"         => "hiring",
+      "Termination"    => "departure",
       "LMS"            => "lms",
     }.freeze
 
@@ -315,7 +315,7 @@ namespace :migrate do
       next if parsed.blank?
 
       # Parse structured fields from the HTML body and create detail records
-      if ticket_type == "hiring_departure"
+      if ticket_type.in?(%w[hiring departure])
         status = parsed["STATUS"].to_s.strip.downcase
 
         ticket = Ticket.find(ticket_id)

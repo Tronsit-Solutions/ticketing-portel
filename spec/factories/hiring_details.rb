@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :hiring_detail do
-    association :ticket, :hiring_departure
+    association :ticket, :hiring
     start_date      { 2.weeks.from_now.to_date }
     title_position  { "Certified Medical Assistant" }
     department      { "NYMAN" }

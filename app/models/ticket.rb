@@ -14,20 +14,26 @@ class Ticket < ApplicationRecord
       icon:  "bi-people",
       desc:  "HR inquiries, new hires, departures, and policy requests",
       children: [
-        { type: "hr",               label: "General HR",                   icon: "bi-people",      desc: "Human resources inquiries, policies, and requests"        },
-        { type: "hiring_departure", label: "New Team Member or Departure", icon: "bi-person-plus", desc: "Submit a request for a new hire or team member departure" },
+        { type: "hr",      label: "General HR",                   icon: "bi-people",      desc: "Human resources inquiries, policies, and requests"        },
+        { type: "hiring",  label: "New Team Member or Departure", icon: "bi-person-plus", desc: "Submit a request for a new hire or team member departure" },
       ]
     },
     { type: "lms",               label: "LMS",               icon: "bi-mortarboard",  desc: "Reset password request for LMS"                                       },
   ].freeze
 
-  # Single source of truth — derived from CATALOGUE, never out of sync
-  TICKET_TYPES = CATALOGUE.flat_map { |c| c[:children] || [c] }.map { |c| c[:type] }.freeze
-  TYPE_LABELS  = CATALOGUE.flat_map { |c| c[:children] || [c] }.each_with_object({}) { |c, h| h[c[:type]] = c[:label] }.freeze
+  # Single source of truth — derived from CATALOGUE, never out of sync.
+  # "departure" has no catalogue tile of its own — it shares the "hiring" tile/form
+  # (see TicketsController#create, which resolves the real stored type from the
+  # "Hiring or Termination?" dropdown) — so it's added in here explicitly.
+  TICKET_TYPES = CATALOGUE.flat_map { |c| c[:children] || [c] }.map { |c| c[:type] }.freeze + ["departure"]
+  TYPE_LABELS  = CATALOGUE.flat_map { |c| c[:children] || [c] }.each_with_object({}) { |c, h| h[c[:type]] = c[:label] }.merge(
+    "hiring"   => "Hiring",
+    "departure" => "Departure"
+  ).freeze
 
   # Ticket types whose creation form has no Title input — their title
   # is derived from the ticket type instead of user input.
-  TITLELESS_TYPES = %w[bright_ideas great_work hr hiring_departure lms].freeze
+  TITLELESS_TYPES = %w[bright_ideas great_work hr hiring departure lms].freeze
 
   # Associations
   belongs_to :location,    optional: true
@@ -69,23 +75,18 @@ class Ticket < ApplicationRecord
   scope :unassigned,  -> { where(assignee_id: nil) }
   scope :assigned,    -> { where.not(assignee_id: nil) }
   scope :recent,      -> { order(created_at: :desc) }
-  scope :hiring,      -> { where(ticket_type: "hiring_departure").where.not("metadata ->> 'request_type' = ?", "Termination") }
-  scope :departure,   -> { where(ticket_type: "hiring_departure").where("metadata ->> 'request_type' = ?", "Termination") }
+  scope :hiring,      -> { where(ticket_type: "hiring") }
+  scope :departure,   -> { where(ticket_type: "departure") }
 
   def departure?
-    ticket_type == "hiring_departure" && metadata["request_type"] == "Termination"
+    ticket_type == "departure"
   end
 
   def hiring?
-    ticket_type == "hiring_departure" && !departure?
+    ticket_type == "hiring"
   end
 
-  # Display label for the Type column/filter — splits the single
-  # "hiring_departure" ticket_type into Hiring vs Departure.
   def type_label
-    return "Departure" if departure?
-    return "Hiring"    if hiring?
-
     TYPE_LABELS[ticket_type] || ticket_type.humanize
   end
 

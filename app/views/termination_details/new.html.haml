@@ -122,7 +122,7 @@
     / Right — Form
     .right-panel
       .form-header
-        = link_to (@ticket.new_record? ? new_ticket_path(ticket_type: "hiring_departure") : @ticket), class: "form-header-back", "aria-label" => "Back" do
+        = link_to (@ticket.new_record? ? new_ticket_path(ticket_type: "hiring") : @ticket), class: "form-header-back", "aria-label" => "Back" do
           %i.bi.bi-arrow-left
         New Team Member or Departure
 
@@ -208,7 +208,7 @@
       margin-bottom: 20px;
     }
 
-  = link_to (@ticket.new_record? ? new_ticket_path(ticket_type: "hiring_departure") : @ticket), class: "form-back-link" do
+  = link_to (@ticket.new_record? ? new_ticket_path(ticket_type: "hiring") : @ticket), class: "form-back-link" do
     %i.bi.bi-arrow-left
     Back to ticket
 

@@ -27,7 +27,7 @@
         = select_tag :customer_id, options_for_select([["All Customers", ""]] + @customers.map { |c| ["#{c.fullname} (#{c.email})", c.id] }, params[:customer_id]), class: "form-select form-select-sm"
       .col-md-2
         = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
-        - type_options = (Ticket::TICKET_TYPES - ["hiring_departure"]).map { |t| [t.humanize, t] } + [["Hiring", "hiring"], ["Departure", "departure"]]
+        - type_options = Ticket::TICKET_TYPES.map { |t| [Ticket::TYPE_LABELS[t] || t.humanize, t] }
         = select_tag :ticket_type, options_for_select([["All Types", ""]] + type_options.sort_by(&:first), params[:ticket_type]), class: "form-select form-select-sm"
       - if active_filters
         .col-md-2.mt-3

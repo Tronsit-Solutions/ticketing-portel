@@ -23,13 +23,7 @@ class ReportsController < ApplicationController
     tickets = tickets.where(location_id: params[:location_id]) if params[:location_id].present?
     tickets = tickets.where(customer_id: params[:customer_id]) if params[:customer_id].present?
 
-    if params[:ticket_type] == "hiring"
-      tickets = tickets.hiring
-    elsif params[:ticket_type] == "departure"
-      tickets = tickets.departure
-    elsif params[:ticket_type].present?
-      tickets = tickets.where(ticket_type: params[:ticket_type])
-    end
+    tickets = tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
 
     if params[:start_date].present?
       tickets = tickets.where("tickets.created_at >= ?", Date.parse(params[:start_date]).beginning_of_day)

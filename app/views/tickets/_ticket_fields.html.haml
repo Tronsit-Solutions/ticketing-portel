@@ -7,11 +7,11 @@
 - lbl     = is_cust ? "cust-form-label"   : "form-label"
 - fld     = is_cust ? "cust-field"        : "mb-3"
 
-- hide_title_contact = %w[bright_ideas great_work hr hiring_departure].include?(ticket.ticket_type)
+- hide_title_contact = %w[bright_ideas great_work hr hiring departure].include?(ticket.ticket_type)
 - hide_title_only    = ticket.ticket_type == "lms"
 - show_location_only = ticket.ticket_type == "great_work"
-- hide_details       = %w[hr hiring_departure lms].include?(ticket.ticket_type)
-- hide_attachments   = %w[hiring_departure lms].include?(ticket.ticket_type)
+- hide_details       = %w[hr hiring departure lms].include?(ticket.ticket_type)
+- hide_attachments   = %w[hiring departure lms].include?(ticket.ticket_type)
 
 / Customer selector — staff only
 - if local_assigns.fetch(:show_customer_selector, false)

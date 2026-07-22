@@ -27,13 +27,7 @@ class TicketsController < ApplicationController
       @direction = params[:direction] == "asc" ? "asc" : "desc"
       @tickets   = Ticket.all.order(@sort => @direction).includes(:customer, :assignee, :location)
       @tickets = @tickets.where(status: params[:status])           if params[:status].present?
-      if params[:ticket_type] == "hiring"
-        @tickets = @tickets.hiring
-      elsif params[:ticket_type] == "departure"
-        @tickets = @tickets.departure
-      elsif params[:ticket_type].present?
-        @tickets = @tickets.where(ticket_type: params[:ticket_type])
-      end
+      @tickets = @tickets.where(ticket_type: params[:ticket_type])  if params[:ticket_type].present?
       @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present? || params[:assignment] == "unassigned"
       @tickets = @tickets.where(assignee_id: current_user.id)      if params[:assignment] == "self_assigned"
       @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
@@ -74,10 +68,14 @@ class TicketsController < ApplicationController
     @ticket = Ticket.new(ticket_params)
     apply_submitter!(@ticket)
 
-    if @ticket.ticket_type == "hiring_departure"
+    if @ticket.ticket_type == "hiring"
       if @ticket.valid?
-        session[:pending_ticket] = ticket_params.to_h.merge("customer_id" => params.dig(:ticket, :customer_id))
-        if @ticket.metadata["request_type"] == "Termination"
+        is_termination = @ticket.metadata["request_type"] == "Termination"
+        session[:pending_ticket] = ticket_params.to_h.merge(
+          "ticket_type" => is_termination ? "departure" : "hiring",
+          "customer_id" => params.dig(:ticket, :customer_id)
+        )
+        if is_termination
           redirect_to new_pending_termination_detail_path
         else
           redirect_to new_pending_hiring_detail_path

@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "HiringDetails", type: :request do
   let(:customer) { create(:user, :customer) }
-  let(:ticket)   { create(:ticket, :hiring_departure, customer: customer) }
+  let(:ticket)   { create(:ticket, :hiring, customer: customer) }
 
   before { sign_in customer }
 
@@ -18,7 +18,7 @@ RSpec.describe "HiringDetails", type: :request do
       expect(response).to redirect_to(ticket_path(ticket))
     end
 
-    it "redirects if ticket is not hiring_departure type" do
+    it "redirects if ticket is not hiring type" do
       other_ticket = create(:ticket, :technical_support, customer: customer)
       get new_ticket_hiring_detail_path(other_ticket)
       expect(response).to redirect_to(ticket_path(other_ticket))
@@ -81,7 +81,7 @@ RSpec.describe "HiringDetails", type: :request do
       sign_in manager
       post tickets_path, params: {
         ticket: {
-          ticket_type: "hiring_departure", title: "New Hire", customer_id: customer.id,
+          ticket_type: "hiring", title: "New Hire", customer_id: customer.id,
           metadata: { request_type: "Hire", full_name: "Jane Doe" }
         }
       }
@@ -125,7 +125,7 @@ RSpec.describe "HiringDetails", type: :request do
       sign_in agent
       post tickets_path, params: {
         ticket: {
-          ticket_type: "hiring_departure", title: "New Hire", customer_id: customer.id,
+          ticket_type: "hiring", title: "New Hire", customer_id: customer.id,
           metadata: { request_type: "Hire", full_name: "Jane Doe" }
         }
       }

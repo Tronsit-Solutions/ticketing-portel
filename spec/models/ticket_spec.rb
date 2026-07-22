@@ -98,14 +98,16 @@ RSpec.describe Ticket, type: :model do
         expect(ticket.title).to eq("LMS")
       end
 
-      it "auto-generates title for hiring_departure based on request_type" do
-        hiring = build(:ticket, ticket_type: "hiring_departure", title: "", metadata: { "request_type" => "New Hire" })
-        hiring.valid?
-        expect(hiring.title).to eq("Hiring")
+      it "auto-generates title for hiring if blank" do
+        ticket = build(:ticket, ticket_type: "hiring", title: "")
+        ticket.valid?
+        expect(ticket.title).to eq("Hiring")
+      end
 
-        departure = build(:ticket, ticket_type: "hiring_departure", title: "", metadata: { "request_type" => "Termination" })
-        departure.valid?
-        expect(departure.title).to eq("Departure")
+      it "auto-generates title for departure if blank" do
+        ticket = build(:ticket, ticket_type: "departure", title: "")
+        ticket.valid?
+        expect(ticket.title).to eq("Departure")
       end
 
       it "does not overwrite an existing title" do

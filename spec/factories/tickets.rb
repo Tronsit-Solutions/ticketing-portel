@@ -20,9 +20,13 @@ FactoryBot.define do
       ticket_type { "great_work" }
       title       { "Great Work: Team effort" }
     end
-    trait :hiring_departure do
-      ticket_type { "hiring_departure" }
-      title       { "New Hire: John Doe" }
+    trait :hiring do
+      ticket_type { "hiring" }
+      title       { "Hiring" }
+    end
+    trait :departure do
+      ticket_type { "departure" }
+      title       { "Departure" }
     end
 
     trait :open        do; status { "open" };        end

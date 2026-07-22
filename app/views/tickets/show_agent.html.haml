@@ -102,9 +102,8 @@
                 = f.submit "Assign", class: "btn btn-primary w-100"
 
     / Hiring / Termination Detail card
-    - if @ticket.ticket_type == "hiring_departure"
-      - request_type = @ticket.metadata["request_type"]
-      - if request_type == "Termination"
+    - if @ticket.ticket_type.in?(%w[hiring departure])
+      - if @ticket.departure?
         - td = @ticket.termination_detail
         .card.border-0.shadow-sm.mb-3
           .card-header.bg-white.d-flex.justify-content-between.align-items-center

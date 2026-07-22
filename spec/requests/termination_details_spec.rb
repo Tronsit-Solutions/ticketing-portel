@@ -2,9 +2,7 @@ require "rails_helper"
 
 RSpec.describe "TerminationDetails", type: :request do
   let(:customer) { create(:user, :customer) }
-  let(:ticket) do
-    create(:ticket, :hiring_departure, customer: customer, metadata: { "request_type" => "Termination" })
-  end
+  let(:ticket) { create(:ticket, :departure, customer: customer) }
 
   before { sign_in customer }
 
@@ -21,7 +19,7 @@ RSpec.describe "TerminationDetails", type: :request do
     end
 
     it "redirects if ticket is not a termination request" do
-      other = create(:ticket, :hiring_departure, customer: customer, metadata: { "request_type" => "Hire" })
+      other = create(:ticket, :hiring, customer: customer)
       get new_ticket_termination_detail_path(other)
       expect(response).to redirect_to(ticket_path(other))
     end

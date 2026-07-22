@@ -229,8 +229,7 @@
           %i.bi.bi-envelope-fill
           %span Tickets
           %span.sep /
-          - cat = Ticket::CATALOGUE.flat_map { |c| c[:children] || [c] }.find { |c| c[:type] == @ticket.ticket_type }
-          %span= cat ? cat[:label] : @ticket.ticket_type.humanize
+          %span= @ticket.type_label
           %span.sep |
           %span \##{@ticket.id}
           %span.sep
@@ -241,8 +240,8 @@
         - ticket_modal_data = [{ label: "Subject", value: @ticket.title }]
         - ticket_modal_data << { label: "Issue", value: @ticket.metadata["details"] } if @ticket.metadata["details"].present?
         - (@ticket.metadata.except("details") || {}).each { |k,v| ticket_modal_data << { label: k.humanize, value: v } if v.present? }
-        - if @ticket.ticket_type == "hiring_departure"
-          - if @ticket.metadata["request_type"] == "Termination" && (td = @ticket.termination_detail).present?
+        - if @ticket.ticket_type.in?(%w[hiring departure])
+          - if @ticket.departure? && (td = @ticket.termination_detail).present?
             - ticket_modal_data << { label: "Termination Reason", value: td.termination_reason }
             - ticket_modal_data << { label: "Termination Date", value: td.termination_date&.strftime("%b %d, %Y") }
             - ticket_modal_data << { label: "Time to Process", value: td.termination_time }
@@ -297,8 +296,8 @@
               %span.field-value= value
 
           / Hiring/Termination details inline display for customer
-          - if @ticket.ticket_type == "hiring_departure"
-            - if @ticket.metadata["request_type"] == "Termination"
+          - if @ticket.ticket_type.in?(%w[hiring departure])
+            - if @ticket.departure?
               - td = @ticket.termination_detail
               - if td.present?
                 - [["Termination Reason", td.termination_reason], ["Termination Date", td.termination_date&.strftime("%b %d, %Y")], ["Time to Process", td.termination_time], ["Email Address", td.email_address], ["Key Card", td.key_card], ["Email Forward Needed", td.email_forward_needed? ? "Yes" : "No"], ["Forward Email To", td.email_forwarded_to], ["Historical Email Access", td.historical_email_access? ? "Yes" : "No"], ["Additional Instructions", td.additional_instructions]].each do |label, value|
