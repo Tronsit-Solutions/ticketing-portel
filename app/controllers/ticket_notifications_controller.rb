@@ -1,6 +1,6 @@
 class TicketNotificationsController < ApplicationController
   def index
-    @notifications = TicketNotification.for_user(current_user).recent.includes(:ticket, :responded_by).page(params[:page]).per(25)
+    @notifications = TicketNotification.for_user(current_user).recent.includes(:ticket, :responded_by).page(params[:page]).per(10)
   end
 
   def mark_read
