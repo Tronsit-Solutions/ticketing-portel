@@ -5,6 +5,8 @@ class Manager::UsersController < ApplicationController
 
   RESET_PASSWORD = "123456".freeze
 
+  SORT_COLUMNS = { "name" => :fullname, "email" => :email }.freeze
+
   def index
     @customers = User.customers
     @customers = @customers.where(is_active: params[:active]) if params[:active].present?
@@ -13,29 +15,22 @@ class Manager::UsersController < ApplicationController
       @customers = @customers.where("fullname ILIKE :term OR email ILIKE :term", term: term)
     end
 
-    sort_column    = params[:sort] == "name" ? :fullname : :created_at
-    sort_direction = params[:direction] == "asc" ? :asc : :desc
-    @sort          = params[:sort]
-    @direction     = params[:direction].presence || "desc"
-    order_clause   = params[:sort].present? ? { sort_column => sort_direction } : { fullname: :asc, email: :asc }
-    @customers     = @customers.order(order_clause).page(params[:page]).per(25)
+    @sort      = SORT_COLUMNS.key?(params[:sort]) ? params[:sort] : "name"
+    @direction = params[:direction] == "desc" ? "desc" : "asc"
+    @customers = @customers.order(SORT_COLUMNS[@sort] => @direction).page(params[:page]).per(25)
   end
 
   def new
-    @role = params[:role]
+    @user = User.new(role: "customer")
   end
 
   def create
     @user = User.new(user_params)
-
-    if @user.role == "agent" && @user.team_id.blank?
-      @user.team_id = current_user.team_id
-    end
+    @user.role = "customer"
 
     if @user.save
-      redirect_to manager_root_path, notice: "#{@user.role.humanize} created successfully."
+      redirect_to manager_users_path, notice: "Customer created successfully."
     else
-      @role = @user.role
       flash.now[:alert] = @user.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end

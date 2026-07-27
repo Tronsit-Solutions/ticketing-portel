@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   namespace :admin do
     root "dashboard#index"
     resources :reports, only: [:index], controller: "/reports"
+    resources :teams, only: [:index, :new, :create]
   end
 
   namespace :manager do
@@ -22,6 +23,7 @@ Rails.application.routes.draw do
       end
     end
     resources :reports, only: [:index], controller: "/reports"
+    resources :teams, only: [:index, :new, :create]
   end
 
   namespace :agent do

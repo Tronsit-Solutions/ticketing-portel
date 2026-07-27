@@ -4,15 +4,20 @@ class UsersController < ApplicationController
 
   RESET_PASSWORD = "123456".freeze
 
+  SORT_COLUMNS = { "name" => :fullname, "email" => :email }.freeze
+
   def index
-    @users = User.includes(:team).order(fullname: :asc, email: :asc)
+    @users = User.includes(:team)
     @users = @users.where(role: params[:role])          if params[:role].present?
     @users = @users.where(is_active: params[:active])   if params[:active].present?
     if params[:search].present?
       term   = "%#{params[:search].strip}%"
       @users = @users.where("fullname ILIKE :term OR email ILIKE :term", term: term)
     end
-    @users = @users.page(params[:page]).per(25)
+
+    @sort  = SORT_COLUMNS.key?(params[:sort]) ? params[:sort] : "name"
+    @direction = params[:direction] == "desc" ? "desc" : "asc"
+    @users = @users.order(SORT_COLUMNS[@sort] => @direction).page(params[:page]).per(25)
   end
 
   def show

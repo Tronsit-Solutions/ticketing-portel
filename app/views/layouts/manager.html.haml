@@ -163,9 +163,9 @@
         = link_to manager_users_path do
           %i.bi.bi-people-fill
           Customers
-        = link_to new_manager_user_path do
-          %i.bi.bi-person-circle
-          Create User
+        = link_to manager_teams_path do
+          %i.bi.bi-person-badge-fill
+          Team
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout

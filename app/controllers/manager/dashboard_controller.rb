@@ -8,5 +8,10 @@ class Manager::DashboardController < ApplicationController
     @closed_tickets  = Ticket.closed.count
     @agents          = User.where(role: "agent", team_id: current_user.team_id)
                            .includes(:assigned_tickets)
+    @assigned_open_tickets = Ticket.open.assigned
+                                   .where(assignee_id: @agents.select(:id))
+                                   .recent
+                                   .includes(:customer, :assignee)
+                                   .limit(5)
   end
 end

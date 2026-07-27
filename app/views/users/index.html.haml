@@ -34,8 +34,20 @@
     %table.table.table-hover.mb-0
       %thead.table-light
         %tr
-          %th Name
-          %th Email
+          %th
+            = link_to users_path(request.query_parameters.merge(sort: "name", direction: (@sort == "name" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
+              Name
+              - if @sort == "name"
+                %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
+              - else
+                %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
+          %th
+            = link_to users_path(request.query_parameters.merge(sort: "email", direction: (@sort == "email" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
+              Email
+              - if @sort == "email"
+                %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
+              - else
+                %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
           %th Role
           %th Team
           %th Status
