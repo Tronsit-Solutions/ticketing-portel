@@ -8,6 +8,8 @@ class Manager::DashboardController < ApplicationController
     @closed_tickets  = Ticket.closed.count
     @agents          = User.where(role: "agent", team_id: current_user.team_id)
                            .includes(:assigned_tickets)
+    @top_agents      = @agents.sort_by { |agent| -agent.assigned_tickets.select { |t| t.status.in?(%w[open in_progress]) }.count }
+                              .first(4)
     @assigned_open_tickets = Ticket.open.assigned
                                    .where(assignee_id: @agents.select(:id))
                                    .recent

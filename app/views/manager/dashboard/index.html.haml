@@ -23,82 +23,94 @@
         .text-muted{style: "font-size:13px;"} Team Agents
         .fs-3.fw-bold.text-info= @agents.count
 
-/ ── Assigned Open Tickets ───────────────────────────
-.card.border-0.shadow-sm.mb-4
-  .card-header.bg-white.d-flex.justify-content-between.align-items-center
-    %span.fw-bold Assigned Open Tickets
-    = link_to "View All →", open_tickets_path, class: "btn btn-sm btn-outline-primary"
-  .card-body.p-0
-    - if @assigned_open_tickets.any?
-      %table.table.table-hover.mb-0
-        %thead.table-light
-          %tr
-            %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:40px;"} #
-            %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Title
-            %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Customer
-            %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Assignee
-            %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Date
-        %tbody
-          - @assigned_open_tickets.each do |ticket|
-            %tr
-              %td{style: "font-size:12px;color:#9ca3af;"}= ticket.id
-              %td
-                = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-semibold", style: "font-size:13px;"
-              %td{style: "font-size:13px;"}= ticket.customer&.fullname || "-"
-              %td{style: "font-size:13px;"}= ticket.assignee.fullname
-              %td{style: "font-size:12px;color:#9ca3af;"}= ticket.created_at.strftime("%b %-d, %Y %-I:%M %p")
-    - else
-      .px-3.py-3.text-muted{style: "font-size:13px;"} No assigned open tickets.
-
-/ ── Team Agents ─────────────────────────────────────
-%h5.mb-3.mt-2{style: "font-family: Poppins;"} Team Agents
-
+/ ── Top Agents + Assigned Open Tickets ──────────────
 .row.g-3
-  - @agents.each do |agent|
-    .col-md-4
-      = link_to manager_user_path(agent), class: "text-decoration-none" do
-        .agent-card
-          / Top row — avatar + name + status
-          .d-flex.align-items-center.gap-3.mb-3
-            .agent-avatar
-              = agent.fullname.split.map(&:first).join.upcase.first(2)
-            .flex-grow-1
-              .fw-bold.text-dark{style: "font-size:15px;"}= agent.fullname
-              %small.text-muted= agent.email
-            - if agent.is_active
-              %span.badge.bg-success.rounded-pill Active
-            - else
-              %span.badge.bg-secondary.rounded-pill Inactive
+  .col-lg-5
+    .card.border-0.shadow-sm.h-100
+      .card-header.bg-white.d-flex.justify-content-between.align-items-center
+        %span.fw-bold Top Agents
+        = link_to "View All", manager_teams_path, class: "btn btn-sm btn-outline-primary"
+      .card-body
+        - if @top_agents.any?
+          - @top_agents.each_with_index do |agent, index|
+            = link_to manager_user_path(agent), class: "text-decoration-none" do
+              .agent-row{class: ("mb-2" unless index == @top_agents.size - 1)}
+                .agent-avatar-sm
+                  = agent.fullname.split.map(&:first).join.upcase.first(2)
+                .flex-grow-1.min-width-0
+                  .d-flex.align-items-center.gap-2
+                    .fw-bold.text-dark.text-truncate{style: "font-size:14px;"}= agent.fullname
+                    - if agent.is_active
+                      %span.badge.bg-success.rounded-pill{style: "font-size:9px;"} Active
+                    - else
+                      %span.badge.bg-secondary.rounded-pill{style: "font-size:9px;"} Inactive
+                  %small.text-muted= agent.email
+                .d-flex.gap-1.flex-shrink-0
+                  .agent-stat-pill
+                    .agent-stat-pill-value.text-warning= agent.assigned_tickets.in_progress.count
+                    .agent-stat-pill-label In Progress
+                  .agent-stat-pill
+                    .agent-stat-pill-value.text-success= agent.assigned_tickets.closed.count
+                    .agent-stat-pill-label Closed
+        - else
+          .text-center.text-muted.py-4
+            %i.bi.bi-people{style: "font-size: 1.5rem;"}
+            %p.mt-2.mb-0{style: "font-size:13px;"} No agents on your team yet.
 
-          / Stat row
-          .d-flex.gap-2
-            .agent-stat.flex-fill.text-center
-              .agent-stat-value.text-warning= agent.assigned_tickets.in_progress.count
-              .agent-stat-label In Progress
-            .agent-stat.flex-fill.text-center
-              .agent-stat-value.text-success= agent.assigned_tickets.closed.count
-              .agent-stat-label Closed
+  .col-lg-7
+    .card.border-0.shadow-sm.h-100
+      .card-header.bg-white.d-flex.justify-content-between.align-items-center
+        %span.fw-bold Assigned Open Tickets
+        = link_to "View All →", open_tickets_path, class: "btn btn-sm btn-outline-primary"
+      .card-body.p-0
+        - if @assigned_open_tickets.any?
+          %table.table.table-hover.mb-0
+            %thead.table-light
+              %tr
+                %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:40px;"} #
+                %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Title
+                %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Customer
+                %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Assignee
+                %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Date
+            %tbody
+              - @assigned_open_tickets.each do |ticket|
+                %tr
+                  %td{style: "font-size:12px;color:#9ca3af;"}= ticket.id
+                  %td
+                    = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-semibold", style: "font-size:13px;"
+                  %td{style: "font-size:13px;"}= ticket.customer&.fullname || "-"
+                  %td{style: "font-size:13px;"}= ticket.assignee.fullname
+                  %td{style: "font-size:12px;color:#9ca3af;"}= ticket.created_at.strftime("%b %-d, %Y %-I:%M %p")
+        - else
+          .text-center.text-muted.py-4
+            %i.bi.bi-ticket-perforated{style: "font-size: 1.5rem;"}
+            %p.mt-2.mb-0{style: "font-size:13px;"} No assigned open tickets.
 
 :css
-  .agent-card {
+  .min-width-0 {
+    min-width: 0;
+  }
+  .agent-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     background: #ffffff;
     border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 20px;
-    transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+    border-radius: 12px;
+    padding: 12px 14px;
+    transition: box-shadow 0.15s, border-color 0.15s;
   }
-  .agent-card:hover {
-    box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+  .agent-row:hover {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
     border-color: #1565c0;
-    transform: translateY(-2px);
   }
-  .agent-avatar {
-    width: 48px;
-    height: 48px;
+  .agent-avatar-sm {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: linear-gradient(135deg, #1565c0, #1e88e5);
     color: #fff;
-    font-size: 17px;
+    font-size: 14px;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -106,19 +118,22 @@
     flex-shrink: 0;
     letter-spacing: 1px;
   }
-  .agent-stat {
+  .agent-stat-pill {
     background: #f8f9fa;
-    border-radius: 10px;
-    padding: 10px 6px;
+    border-radius: 8px;
+    padding: 6px 10px;
+    text-align: center;
+    min-width: 62px;
   }
-  .agent-stat-value {
-    font-size: 20px;
+  .agent-stat-pill-value {
+    font-size: 16px;
     font-weight: 700;
     line-height: 1;
   }
-  .agent-stat-label {
-    font-size: 11px;
+  .agent-stat-pill-label {
+    font-size: 9px;
     color: #9ca3af;
-    margin-top: 3px;
+    margin-top: 2px;
     font-weight: 500;
+    white-space: nowrap;
   }
