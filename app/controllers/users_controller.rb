@@ -20,14 +20,24 @@ class UsersController < ApplicationController
     @users = @users.order(SORT_COLUMNS[@sort] => @direction).page(params[:page]).per(25)
   end
 
+  TICKET_SORT_COLUMNS = { "id" => "tickets.id", "title" => "tickets.title", "status" => "tickets.status", "customer" => "users.fullname" }.freeze
+
   def show
     if @user.agent? || @user.manager?
-      @assigned_tickets = @user.assigned_tickets.recent.includes(:customer, :location)
+      @assigned_tickets = @user.assigned_tickets.includes(:customer, :location)
       @open_count       = @user.assigned_tickets.open.count + @user.assigned_tickets.in_progress.count
       @closed_count     = @user.assigned_tickets.closed.count
       @total_count      = @user.assigned_tickets.count
 
       @assigned_tickets = @assigned_tickets.where(status: params[:status]) if params[:status].present?
+
+      @ticket_sort      = TICKET_SORT_COLUMNS.key?(params[:ticket_sort]) ? params[:ticket_sort] : nil
+      @ticket_direction = params[:ticket_direction] == "desc" ? "desc" : "asc"
+      if @ticket_sort
+        @assigned_tickets = @assigned_tickets.left_joins(:customer).order(TICKET_SORT_COLUMNS[@ticket_sort] => @ticket_direction)
+      else
+        @assigned_tickets = @assigned_tickets.recent
+      end
       @assigned_tickets = @assigned_tickets.page(params[:page]).per(7)
     end
   end

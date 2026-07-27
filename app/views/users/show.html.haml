@@ -93,13 +93,14 @@
             %table.table.table-hover.mb-0
               %thead.table-light
                 %tr
-                  %th #
-                  %th Title
+                  %th= sortable_column_link(:user_path, "#", "id", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th= sortable_column_link(:user_path, "Title", "title", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
                   %th Type
-                  %th Status
-                  %th Customer
+                  %th= sortable_column_link(:user_path, "Status", "status", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th= sortable_column_link(:user_path, "Customer", "customer", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
                   %th Location
                   %th Created
+                  %th Resolved In
                   %th
               %tbody
                 - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
@@ -114,6 +115,7 @@
                     %td= ticket.customer&.fullname || "-"
                     %td= ticket.location&.name || "-"
                     %td{style: "font-size:13px;"}= ticket.created_at&.strftime("%b %d, %Y %I:%M %p") || "-"
+                    %td{style: "font-size:13px;"}= ticket.resolution_duration || "-"
                     %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
             .card-footer.bg-white
               = page_entries_info @assigned_tickets

@@ -94,6 +94,23 @@ class Ticket < ApplicationRecord
     created_by.present?
   end
 
+  def resolution_duration
+    return nil unless status == "closed" && assigned_at.present? && resolved_at.present?
+
+    seconds = (resolved_at - assigned_at).to_i
+    return nil if seconds.negative?
+
+    if seconds < 60
+      "#{seconds}s"
+    elsif seconds < 3600
+      "#{seconds / 60}m"
+    elsif seconds < 86_400
+      "#{seconds / 3600}h #{(seconds % 3600) / 60}m"
+    else
+      "#{seconds / 86_400}d #{(seconds % 86_400) / 3600}h"
+    end
+  end
+
   # Agents submitting a ticket on a customer's behalf are auto self-assigned;
   # managers are not, since they typically triage rather than work tickets themselves.
   def auto_self_assign_for_agent!
