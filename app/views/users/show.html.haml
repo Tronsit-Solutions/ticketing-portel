@@ -1,58 +1,76 @@
 - role_color = { "admin" => "danger", "agent" => "success", "manager" => "primary", "customer" => "secondary" }
 
-.d-flex.justify-content-between.align-items-center.mb-4
-  %h5.mb-0.fw-bold= @user.fullname
-  .d-flex.gap-2
-    = link_to "Edit", edit_user_path(@user), class: "btn btn-sm btn-outline-primary"
-    = link_to "Back", users_path, class: "btn btn-sm btn-outline-secondary"
-
 - if @user.agent? || @user.manager?
+  / ── Profile header banner ──────────────────────────
+  .card.border-0.shadow-sm.mb-3
+    .card-body.p-4
+      .d-flex.align-items-center.gap-3
+        .rounded-circle.d-flex.align-items-center.justify-content-center.flex-shrink-0{style: "width:64px; height:64px; background:#e7f1ff; color:#1565c0; font-size:24px; font-weight:700;"}
+          = @user.fullname.first.upcase
+        .flex-grow-1
+          %h4.mb-1.fw-bold= "#{@user.fullname}'s Profile"
+          .d-flex.align-items-center.gap-2
+            %span{class: "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
+            - if @user.is_active?
+              %span.badge.bg-success-subtle.text-success.border.border-success-subtle Active
+            - else
+              %span.badge.bg-secondary-subtle.text-secondary.border.border-secondary-subtle Inactive
+            %span.text-muted.small
+              %i.bi.bi-calendar3.me-1
+              Joined= " #{@user.created_at.strftime('%B %d, %Y')}"
+        %button.btn.btn-outline-primary.btn-sm{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "##{dom_id(@user, :edit)}"}
+          %i.bi.bi-pencil-square.me-1
+          Edit
+        = link_to users_path, class: "btn btn-outline-secondary btn-sm" do
+          %i.bi.bi-arrow-left.me-1
+          Back
+
   .row.g-3
 
-    / ── Left: Profile card ──────────────────────────
+    / ── Left: Profile details ───────────────────────
     .col-md-4
-
       .card.border-0.shadow-sm.mb-3
-        .card-header.bg-white.d-flex.justify-content-between.align-items-center
-          %span.fw-bold Profile
-          %span{class: "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
+        .card-header.bg-white.fw-bold
+          %i.bi.bi-person-lines-fill.me-2.text-primary
+          Details
         .card-body
-          .mb-2
-            %small.text-muted Email
-            %div= @user.email
-          .mb-2
-            %small.text-muted Team
-            %div= @user.team&.name || "-"
-          .mb-2
-            %small.text-muted Contact
-            %div= @user.contact_no || "-"
-          .mb-2
-            %small.text-muted Address
-            %div= @user.address || "-"
-          .mb-2
-            %small.text-muted Status
-            %div
-              - if @user.is_active?
-                %span.badge.bg-success Active
-              - else
-                %span.badge.bg-secondary Inactive
-          .mb-2
-            %small.text-muted Joined
-            %div= @user.created_at.strftime("%B %d, %Y")
+          .d-flex.align-items-start.gap-2.mb-3
+            %i.bi.bi-envelope-fill.text-muted.mt-1
+            .flex-grow-1
+              %small.text-muted.d-block Email
+              %div.fw-semibold= @user.email
+          .d-flex.align-items-start.gap-2.mb-3
+            %i.bi.bi-people-fill.text-muted.mt-1
+            .flex-grow-1
+              %small.text-muted.d-block Team
+              %div.fw-semibold= @user.team&.name || "—"
+          .d-flex.align-items-start.gap-2.mb-3
+            %i.bi.bi-telephone-fill.text-muted.mt-1
+            .flex-grow-1
+              %small.text-muted.d-block Contact
+              %div.fw-semibold= @user.contact_no.presence || "—"
+          .d-flex.align-items-start.gap-2
+            %i.bi.bi-geo-alt-fill.text-muted.mt-1
+            .flex-grow-1
+              %small.text-muted.d-block Address
+              %div.fw-semibold= @user.address.presence || "—"
 
       / Stat cards
       .row.g-2
         .col-6
           .card.border-0.shadow-sm.text-center.py-3
-            .fs-4.fw-bold.text-warning= @total_count
+            %i.bi.bi-ticket-perforated-fill.text-warning.mb-1{style: "font-size:18px;"}
+            .fs-4.fw-bold= @total_count
             %small.text-muted Total
         .col-6
           .card.border-0.shadow-sm.text-center.py-3
-            .fs-4.fw-bold.text-primary= @open_count
+            %i.bi.bi-hourglass-split.text-primary.mb-1{style: "font-size:18px;"}
+            .fs-4.fw-bold= @open_count
             %small.text-muted Active
         .col-12
           .card.border-0.shadow-sm.text-center.py-3
-            .fs-4.fw-bold.text-success= @closed_count
+            %i.bi.bi-check-circle-fill.text-success.mb-1{style: "font-size:18px;"}
+            .fs-4.fw-bold= @closed_count
             %small.text-muted Closed
 
     / ── Right: Ticket history ───────────────────────
@@ -60,7 +78,9 @@
 
       .card.border-0.shadow-sm
         .card-header.bg-white.d-flex.justify-content-between.align-items-center
-          %span.fw-bold Ticket History
+          %span.fw-bold
+            %i.bi.bi-clock-history.me-2.text-primary
+            Ticket History
           .d-flex.gap-1
             = link_to "All",         user_path(@user),                   class: "btn btn-sm #{params[:status].blank? ? 'btn-primary' : 'btn-outline-secondary'}"
             = link_to "Open",        user_path(@user, status: "open"),        class: "btn btn-sm #{params[:status] == 'open' ? 'btn-primary' : 'btn-outline-secondary'}"
@@ -73,13 +93,14 @@
             %table.table.table-hover.mb-0
               %thead.table-light
                 %tr
-                  %th #
-                  %th Title
+                  %th= sortable_column_link(:user_path, "#", "id", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th= sortable_column_link(:user_path, "Title", "title", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
                   %th Type
-                  %th Status
-                  %th Customer
+                  %th= sortable_column_link(:user_path, "Status", "status", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th= sortable_column_link(:user_path, "Customer", "customer", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
                   %th Location
-                  %th Assigned
+                  %th Created
+                  %th Resolved In
                   %th
               %tbody
                 - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
@@ -93,7 +114,8 @@
                       %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
                     %td= ticket.customer&.fullname || "-"
                     %td= ticket.location&.name || "-"
-                    %td{style: "font-size:13px;"}= ticket.assigned_at&.strftime("%b %d, %Y") || "-"
+                    %td{style: "font-size:13px;"}= ticket.created_at&.strftime("%b %d, %Y %I:%M %p") || "-"
+                    %td{style: "font-size:13px;"}= ticket.resolution_duration || "-"
                     %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
             .card-footer.bg-white
               = page_entries_info @assigned_tickets
@@ -104,8 +126,16 @@
               %i.bi.bi-ticket-perforated{style: "font-size: 2rem;"}
               %p.mt-2 No tickets found.
 
+  = render "shared/user_edit_modal", user: @user, url: user_path(@user), include_role_team: true
+
 - else
   / ── Simple profile for admin/customer ──────────────
+  .d-flex.justify-content-between.align-items-center.mb-4
+    %h5.mb-0.fw-bold= @user.fullname
+    .d-flex.gap-2
+      %button.btn.btn-sm.btn-outline-primary{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "##{dom_id(@user, :edit)}"} Edit
+      = link_to "Back", users_path, class: "btn btn-sm btn-outline-secondary"
+
   .card.border-0.shadow-sm{style: "max-width: 680px;"}
     .card-header.bg-white.d-flex.justify-content-between.align-items-center
       %span.fw-bold= @user.fullname
@@ -144,6 +174,8 @@
         .row.mb-3
           .col-md-4.text-muted Open Tickets
           .col-md-8= @user.customer_tickets.open.count
+
+  = render "shared/user_edit_modal", user: @user, url: user_path(@user), include_role_team: true
 
   - if @user.customer?
     / ── Confirm Action Modal (Reset Password) ──

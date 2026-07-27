@@ -1,9 +1,11 @@
 class Manager::UsersController < ApplicationController
   before_action :require_admin_or_manager!
-  before_action :set_user, only: [:edit, :update, :destroy, :deactivate, :activate, :reset_password]
+  before_action :set_user, only: [:update, :destroy, :deactivate, :activate, :reset_password]
   layout "manager"
 
   RESET_PASSWORD = "123456".freeze
+
+  SORT_COLUMNS = { "name" => :fullname, "email" => :email }.freeze
 
   def index
     @customers = User.customers
@@ -13,53 +15,53 @@ class Manager::UsersController < ApplicationController
       @customers = @customers.where("fullname ILIKE :term OR email ILIKE :term", term: term)
     end
 
-    sort_column    = params[:sort] == "name" ? :fullname : :created_at
-    sort_direction = params[:direction] == "asc" ? :asc : :desc
-    @sort          = params[:sort]
-    @direction     = params[:direction].presence || "desc"
-    order_clause   = params[:sort].present? ? { sort_column => sort_direction } : { fullname: :asc, email: :asc }
-    @customers     = @customers.order(order_clause).page(params[:page]).per(25)
+    @sort      = SORT_COLUMNS.key?(params[:sort]) ? params[:sort] : "name"
+    @direction = params[:direction] == "desc" ? "desc" : "asc"
+    @customers = @customers.order(SORT_COLUMNS[@sort] => @direction).page(params[:page]).per(25)
   end
 
   def new
-    @role = params[:role]
+    @user = User.new(role: "customer")
   end
 
   def create
     @user = User.new(user_params)
-
-    if @user.role == "agent" && @user.team_id.blank?
-      @user.team_id = current_user.team_id
-    end
+    @user.role = "customer"
 
     if @user.save
-      redirect_to manager_root_path, notice: "#{@user.role.humanize} created successfully."
+      redirect_to manager_users_path, notice: "Customer created successfully."
     else
-      @role = @user.role
       flash.now[:alert] = @user.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end
 
+  TICKET_SORT_COLUMNS = { "id" => "tickets.id", "title" => "tickets.title", "status" => "tickets.status", "customer" => "users.fullname" }.freeze
+
   def show
     @user = User.find(params[:id])
-    @assigned_tickets = @user.assigned_tickets.recent.includes(:customer, :location)
+    @assigned_tickets = @user.assigned_tickets.includes(:customer, :location)
     @open_count       = @user.assigned_tickets.open.count + @user.assigned_tickets.in_progress.count
     @closed_count     = @user.assigned_tickets.closed.count
     @total_count      = @user.assigned_tickets.count
 
     @assigned_tickets = @assigned_tickets.where(status: params[:status]) if params[:status].present?
-    @assigned_tickets = @assigned_tickets.page(params[:page]).per(25)
-  end
 
-  def edit; end
+    @ticket_sort      = TICKET_SORT_COLUMNS.key?(params[:ticket_sort]) ? params[:ticket_sort] : nil
+    @ticket_direction = params[:ticket_direction] == "desc" ? "desc" : "asc"
+    if @ticket_sort
+      @assigned_tickets = @assigned_tickets.left_joins(:customer).order(TICKET_SORT_COLUMNS[@ticket_sort] => @ticket_direction)
+    else
+      @assigned_tickets = @assigned_tickets.recent
+    end
+    @assigned_tickets = @assigned_tickets.page(params[:page]).per(7)
+  end
 
   def update
     if @user.update(user_params_without_password)
-      redirect_to manager_user_path(@user), notice: "Customer updated successfully."
+      redirect_to manager_user_path(@user), notice: "#{@user.role.humanize} updated successfully."
     else
-      flash.now[:alert] = @user.errors.full_messages.to_sentence
-      render :edit, status: :unprocessable_entity
+      redirect_back fallback_location: manager_user_path(@user), alert: @user.errors.full_messages.to_sentence
     end
   end
 

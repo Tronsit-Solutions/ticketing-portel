@@ -148,24 +148,21 @@
         = link_to tickets_path do
           %i.bi.bi-ticket-perforated-fill
           All Tickets
-        = link_to tickets_path(status: "open") do
+        = link_to open_tickets_path do
           %i.bi.bi-bookmark-fill
           Open
         -# = link_to tickets_path(assignee_id: current_user.id) do
           %i.bi.bi-person-check-fill
           Assigned to Me
-        = link_to catalogue_tickets_path do
-          %i.bi.bi-person-plus-fill
-          Create On Behalf
         = link_to manager_reports_path do
           %i.bi.bi-file-earmark-bar-graph-fill
           Reports
         = link_to manager_users_path do
           %i.bi.bi-people-fill
           Customers
-        = link_to new_manager_user_path do
-          %i.bi.bi-person-circle
-          Create User
+        = link_to manager_teams_path do
+          %i.bi.bi-person-badge-fill
+          Team
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout

@@ -1,6 +1,6 @@
 .d-flex.justify-content-between.align-items-center.mb-4
   %h4.mb-0{:style => "font-family: Poppins;"} Customers
-  = link_to new_manager_user_path(role: "customer"), class: "btn btn-primary btn-sm" do
+  = link_to new_manager_user_path, class: "btn btn-primary btn-sm" do
     + Add Customer
 
 / Filters
@@ -22,16 +22,23 @@
 .card.border-0.shadow-sm
   .card-body.p-0
     - if @customers.any?
-      - name_direction = @sort == "name" && @direction == "asc" ? "desc" : "asc"
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
             %th
-              = link_to manager_users_path(params.permit(:search, :active).merge(sort: "name", direction: name_direction)), class: "text-dark text-decoration-none" do
+              = link_to manager_users_path(request.query_parameters.merge(sort: "name", direction: (@sort == "name" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
                 Name
                 - if @sort == "name"
-                  %i.bi{class: @direction == "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"}
-            %th Email
+                  %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
+                - else
+                  %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
+            %th
+              = link_to manager_users_path(request.query_parameters.merge(sort: "email", direction: (@sort == "email" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
+                Email
+                - if @sort == "email"
+                  %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
+                - else
+                  %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
             %th Status
             %th Created
             %th
@@ -48,7 +55,7 @@
               %td{:style => "font-size:13px;"}= customer.created_at.strftime("%b %d, %Y")
               %td.d-flex.gap-1
                 = link_to "View", manager_user_path(customer), class: "btn btn-sm btn-outline-secondary"
-                = link_to "Edit", edit_manager_user_path(customer), class: "btn btn-sm btn-outline-primary"
+                %button.btn.btn-sm.btn-outline-primary{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "##{dom_id(customer, :edit)}"} Edit
                 - if customer.is_active?
                   %button.btn.btn-sm.btn-outline-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => deactivate_manager_user_path(customer), "data-action-message" => "Deactivate #{customer.fullname}?", "data-action-label" => "Deactivate", "data-action-class" => "btn-danger"} Deactivate
                 - else
@@ -58,6 +65,9 @@
       .text-center.text-muted.py-5
         %i.bi.bi-people{:style => "font-size: 2rem;"}
         %p.mt-2 No customers found.
+
+- @customers.each do |customer|
+  = render "shared/user_edit_modal", user: customer, url: manager_user_path(customer)
 
 - if @customers.any?
   .d-flex.justify-content-between.align-items-center.mt-3.px-1

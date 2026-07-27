@@ -148,7 +148,7 @@
         = link_to tickets_path do
           %i.bi.bi-ticket-perforated-fill
           All Tickets
-        = link_to tickets_path(status: "open") do
+        = link_to open_tickets_path do
           %i.bi.bi-bookmark-fill
           Open
         = link_to tickets_path(unassigned: true) do
@@ -163,9 +163,9 @@
         = link_to users_path do
           %i.bi.bi-people-fill
           All Users
-        = link_to new_user_path do
-          %i.bi.bi-person-plus-fill
-          Add User
+        = link_to admin_teams_path do
+          %i.bi.bi-person-badge-fill
+          Team
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout

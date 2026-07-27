@@ -22,26 +22,20 @@ class TicketsController < ApplicationController
       @active_panel = :my_tickets
       render :customer_home
     else
-      @locations = Location.ordered
-      @sort      = %w[id title].include?(params[:sort]) ? params[:sort] : "id"
-      @direction = params[:direction] == "asc" ? "asc" : "desc"
-      @tickets   = Ticket.all.order(@sort => @direction).includes(:customer, :assignee, :location)
-      @tickets = @tickets.where(status: params[:status])           if params[:status].present?
-      @tickets = @tickets.where(ticket_type: params[:ticket_type])  if params[:ticket_type].present?
-      @tickets = @tickets.where(assignee_id: nil)                  if params[:unassigned].present? || params[:assignment] == "unassigned"
-      @tickets = @tickets.where(assignee_id: current_user.id)      if params[:assignment] == "self_assigned"
-      @tickets = @tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
-      @tickets = @tickets.where(location_id: params[:location_id]) if params[:location_id].present?
-      if params[:search].present?
-        search_term = params[:search].strip
-        ticket_id   = search_term.delete_prefix("#")
-        if ticket_id.match?(/\A\d+\z/)
-          @tickets = @tickets.where(id: ticket_id)
-        else
-          term     = "%#{search_term}%"
-          @tickets = @tickets.where("title ILIKE :term", term: term)
-        end
-      end
+      @tickets = filtered_tickets
+      @tickets = @tickets.where(status: params[:status]) if params[:status].present?
+      @tickets = @tickets.page(params[:page]).per(25)
+    end
+  end
+
+  def open
+    if current_user.customer?
+      load_customer_home_data
+      @active_panel = :my_tickets
+      render :customer_home
+    else
+      @tickets = filtered_tickets.where(status: %w[open in_progress])
+      @tickets = @tickets.where(status: params[:status]) if params[:status].in?(%w[open in_progress])
       @tickets = @tickets.page(params[:page]).per(25)
     end
   end
@@ -183,6 +177,30 @@ class TicketsController < ApplicationController
     else
       ticket.customer = current_user
     end
+  end
+
+  def filtered_tickets
+    @locations = Location.ordered
+    @sort      = %w[id title].include?(params[:sort]) ? params[:sort] : "id"
+    @direction = params[:direction] == "asc" ? "asc" : "desc"
+
+    tickets = Ticket.all.order(@sort => @direction).includes(:customer, :assignee, :location)
+    tickets = tickets.where(ticket_type: params[:ticket_type])  if params[:ticket_type].present?
+    tickets = tickets.where(assignee_id: nil)                  if params[:unassigned].present? || params[:assignment] == "unassigned"
+    tickets = tickets.where(assignee_id: current_user.id)      if params[:assignment] == "self_assigned"
+    tickets = tickets.where(assignee_id: params[:assignee_id]) if params[:assignee_id].present?
+    tickets = tickets.where(location_id: params[:location_id]) if params[:location_id].present?
+    if params[:search].present?
+      search_term = params[:search].strip
+      ticket_id   = search_term.delete_prefix("#")
+      if ticket_id.match?(/\A\d+\z/)
+        tickets = tickets.where(id: ticket_id)
+      else
+        term    = "%#{search_term}%"
+        tickets = tickets.where("title ILIKE :term", term: term)
+      end
+    end
+    tickets
   end
 
   def load_customer_home_data

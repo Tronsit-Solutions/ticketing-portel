@@ -1,10 +1,10 @@
 .d-flex.justify-content-between.align-items-center.mb-4
-  %h5.mb-0{:style => "font-family: Poppins;"} Create Customer
-  = link_to "Back", manager_users_path, class: "btn btn-outline-secondary btn-sm"
+  %h5.mb-0{:style => "font-family: Poppins;"} Create Agent
+  = link_to "Back", admin_teams_path, class: "btn btn-outline-secondary btn-sm"
 
 .card.border-0.shadow-sm
   .card-body.p-4
-    = form_with model: @user, url: manager_users_path, method: :post, local: true do |f|
+    = form_with model: @user, url: admin_teams_path, method: :post, local: true do |f|
       - if @user.errors.any?
         .alert.alert-danger
           %ul.mb-0
@@ -31,7 +31,6 @@
       .form-check.mb-4
         = f.check_box :is_active, class: "form-check-input"
         = f.label :is_active, "Active account", class: "form-check-label"
-      = f.hidden_field :role, value: "customer"
       .d-flex.gap-2
-        = f.submit "Create Customer", class: "btn btn-primary"
-        = link_to "Cancel", manager_users_path, class: "btn btn-outline-secondary"
+        = f.submit "Create Agent", class: "btn btn-primary"
+        = link_to "Cancel", admin_teams_path, class: "btn btn-outline-secondary"
