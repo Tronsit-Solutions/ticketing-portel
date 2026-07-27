@@ -148,7 +148,7 @@
         = link_to tickets_path do
           %i.bi.bi-ticket-perforated-fill
           All Tickets
-        = link_to tickets_path(status: "open") do
+        = link_to open_tickets_path do
           %i.bi.bi-bookmark-fill
           Open
         = link_to tickets_path(unassigned: true) do

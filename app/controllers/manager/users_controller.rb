@@ -1,6 +1,6 @@
 class Manager::UsersController < ApplicationController
   before_action :require_admin_or_manager!
-  before_action :set_user, only: [:edit, :update, :destroy, :deactivate, :activate, :reset_password]
+  before_action :set_user, only: [:update, :destroy, :deactivate, :activate, :reset_password]
   layout "manager"
 
   RESET_PASSWORD = "123456".freeze
@@ -44,17 +44,14 @@ class Manager::UsersController < ApplicationController
     @total_count      = @user.assigned_tickets.count
 
     @assigned_tickets = @assigned_tickets.where(status: params[:status]) if params[:status].present?
-    @assigned_tickets = @assigned_tickets.page(params[:page]).per(25)
+    @assigned_tickets = @assigned_tickets.page(params[:page]).per(7)
   end
-
-  def edit; end
 
   def update
     if @user.update(user_params_without_password)
-      redirect_to manager_user_path(@user), notice: "Customer updated successfully."
+      redirect_to manager_user_path(@user), notice: "#{@user.role.humanize} updated successfully."
     else
-      flash.now[:alert] = @user.errors.full_messages.to_sentence
-      render :edit, status: :unprocessable_entity
+      redirect_back fallback_location: manager_user_path(@user), alert: @user.errors.full_messages.to_sentence
     end
   end
 

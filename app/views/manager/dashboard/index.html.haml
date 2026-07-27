@@ -27,7 +27,7 @@
 .card.border-0.shadow-sm.mb-4
   .card-header.bg-white.d-flex.justify-content-between.align-items-center
     %span.fw-bold Assigned Open Tickets
-    = link_to "View All →", tickets_path(status: "open"), class: "btn btn-sm btn-outline-primary"
+    = link_to "View All →", open_tickets_path, class: "btn btn-sm btn-outline-primary"
   .card-body.p-0
     - if @assigned_open_tickets.any?
       %table.table.table-hover.mb-0

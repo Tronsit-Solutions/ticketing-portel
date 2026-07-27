@@ -55,7 +55,7 @@
               %td{:style => "font-size:13px;"}= customer.created_at.strftime("%b %d, %Y")
               %td.d-flex.gap-1
                 = link_to "View", manager_user_path(customer), class: "btn btn-sm btn-outline-secondary"
-                = link_to "Edit", edit_manager_user_path(customer), class: "btn btn-sm btn-outline-primary"
+                %button.btn.btn-sm.btn-outline-primary{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "##{dom_id(customer, :edit)}"} Edit
                 - if customer.is_active?
                   %button.btn.btn-sm.btn-outline-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => deactivate_manager_user_path(customer), "data-action-message" => "Deactivate #{customer.fullname}?", "data-action-label" => "Deactivate", "data-action-class" => "btn-danger"} Deactivate
                 - else
@@ -65,6 +65,9 @@
       .text-center.text-muted.py-5
         %i.bi.bi-people{:style => "font-size: 2rem;"}
         %p.mt-2 No customers found.
+
+- @customers.each do |customer|
+  = render "shared/user_edit_modal", user: customer, url: manager_user_path(customer)
 
 - if @customers.any?
   .d-flex.justify-content-between.align-items-center.mt-3.px-1

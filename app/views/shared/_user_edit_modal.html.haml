@@ -1,0 +1,41 @@
+- title = user.agent? ? "Edit Agent" : (user.customer? ? "Edit Customer" : "Edit #{user.role.humanize}")
+- include_role_team = local_assigns.fetch(:include_role_team, false)
+- modal_id = dom_id(user, :edit)
+%div.modal.fade{id: modal_id, "aria-labelledby" => "#{modal_id}Label", "aria-hidden" => "true", tabindex: "-1"}
+  .modal-dialog.modal-dialog-centered
+    .modal-content
+      .modal-header
+        %h5.modal-title{id: "#{modal_id}Label"}= title
+        %button.btn-close{"data-bs-dismiss" => "modal", "aria-label" => "Close", type: "button"}
+      = form_with model: user, url: url, method: :patch, local: true do |f|
+        .modal-body
+          - if user.errors.any?
+            .alert.alert-danger
+              %ul.mb-0
+                - user.errors.full_messages.each do |msg|
+                  %li{:style => "font-size:13px;"}= msg
+          .mb-3
+            = f.label :fullname, "Full Name", class: "form-label fw-bold"
+            = f.text_field :fullname, class: "form-control", placeholder: "Full name"
+          .mb-3
+            = f.label :email, class: "form-label fw-bold"
+            = f.email_field :email, class: "form-control", placeholder: "Email address"
+          - if include_role_team
+            .mb-3
+              = f.label :role, class: "form-label fw-bold"
+              = f.select :role, User::ROLES.map { |r| [r.humanize, r] }.sort_by(&:first), {}, class: "form-select"
+            .mb-3
+              = f.label :team_id, "Team", class: "form-label fw-bold"
+              = f.collection_select :team_id, Team.ordered, :id, :name, { include_blank: "None" }, class: "form-select"
+          .mb-3
+            = f.label :contact_no, "Contact Number", class: "form-label fw-bold"
+            = f.text_field :contact_no, class: "form-control", placeholder: "Contact number"
+          .mb-3
+            = f.label :address, class: "form-label fw-bold"
+            = f.text_area :address, rows: 2, class: "form-control", placeholder: "Address"
+          .form-check.mb-2
+            = f.check_box :is_active, class: "form-check-input"
+            = f.label :is_active, "Active account", class: "form-check-label"
+        .modal-footer
+          %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal", type: "button"} Cancel
+          = f.submit "Save Changes", class: "btn btn-primary"

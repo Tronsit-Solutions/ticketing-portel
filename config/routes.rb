@@ -15,7 +15,7 @@ Rails.application.routes.draw do
 
   namespace :manager do
     root "dashboard#index"
-    resources :users, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
+    resources :users, only: [:index, :new, :create, :show, :update, :destroy] do
       member do
         patch :deactivate
         patch :activate
@@ -51,6 +51,7 @@ Rails.application.routes.draw do
   resources :tickets, only: [:index, :show, :new, :create] do
     collection do
       get :catalogue
+      get :open
     end
     member do
       patch :assign
@@ -77,7 +78,7 @@ Rails.application.routes.draw do
       get   :unread_count
     end
   end
-  resources :users, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
+  resources :users, only: [:index, :show, :new, :create, :update, :destroy] do
     member do
       patch :deactivate
       patch :reset_password
