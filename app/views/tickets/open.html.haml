@@ -1,6 +1,6 @@
 .d-flex.justify-content-between.align-items-center.mb-4
   %h4.mb-0{style: "font-family: Poppins;"} Open Tickets
-  - if current_user.agent?
+  - unless current_user.customer?
     = link_to catalogue_tickets_path, class: "btn btn-primary btn-sm" do
       + Generate Ticket
 

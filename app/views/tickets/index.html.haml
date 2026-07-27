@@ -9,7 +9,7 @@
       Tickets
     - else
       All Tickets
-  - if current_user.agent?
+  - unless current_user.customer?
     = link_to catalogue_tickets_path, class: "btn btn-primary btn-sm" do
       + Generate Ticket
 
