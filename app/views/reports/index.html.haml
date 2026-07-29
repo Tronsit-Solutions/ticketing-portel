@@ -42,13 +42,12 @@
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
-            %th{style: "width: 9%;"} Ticket ID
-            %th{style: "width: 10%;"} Status
-            %th{style: "width: 17%;"} Created Date/Time
-            %th{style: "width: 22%;"} Customer (email)
-            %th{style: "width: 16%;"} Assignee
-            %th{style: "width: 14%;"} Location
-            %th{style: "width: 12%;"} Ticket Type
+            %th{style: "width: 10%;"} Ticket ID
+            %th{style: "width: 12%;"} Status
+            %th{style: "width: 20%;"} Created Date/Time
+            %th{style: "width: 26%;"} Customer (email)
+            %th{style: "width: 18%;"} Location
+            %th{style: "width: 14%;"} Ticket Type
         %tbody
           - @tickets.each do |ticket|
             %tr
@@ -61,12 +60,6 @@
               %td
                 %span.tooltip-wrap{data: {tooltip: ticket.customer&.email}}
                   %span.text-truncate-cell= ticket.customer&.email || "-"
-              %td
-                - if ticket.assignee.present?
-                  %span.tooltip-wrap{data: {tooltip: ticket.assignee.fullname}}
-                    %span.text-truncate-cell= ticket.assignee.fullname
-                - else
-                  %span.text-danger Unassigned
               %td
                 %span.tooltip-wrap{data: {tooltip: ticket.location&.name}}
                   %span.text-truncate-cell= ticket.location&.name || "-"

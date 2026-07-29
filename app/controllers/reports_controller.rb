@@ -18,7 +18,7 @@ class ReportsController < ApplicationController
   private
 
   def filtered_tickets
-    tickets = Ticket.all.recent.includes(:customer, :assignee, :location)
+    tickets = Ticket.all.recent.includes(:customer, :location)
     tickets = tickets.where(status: params[:status])           if params[:status].present?
     tickets = tickets.where(location_id: params[:location_id]) if params[:location_id].present?
     tickets = tickets.where(customer_id: params[:customer_id]) if params[:customer_id].present?
@@ -39,14 +39,13 @@ class ReportsController < ApplicationController
 
   def tickets_csv(tickets)
     CSV.generate(headers: true) do |csv|
-      csv << ["Ticket ID", "Status", "Created Date/Time", "Customer (email)", "Assignee", "Location", "Ticket Type"]
+      csv << ["Ticket ID", "Status", "Created Date/Time", "Customer (email)", "Location", "Ticket Type"]
       tickets.find_each do |ticket|
         csv << [
           ticket.id,
           ticket.status.humanize,
           ticket.created_at.strftime("%b %d, %Y %I:%M %p"),
           ticket.customer&.email,
-          ticket.assignee&.fullname || "Unassigned",
           ticket.location&.name,
           ticket.type_label
         ]
