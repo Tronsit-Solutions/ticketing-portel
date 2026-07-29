@@ -93,27 +93,33 @@
             %table.table.table-hover.mb-0
               %thead.table-light
                 %tr
-                  %th= sortable_column_link(:user_path, "#", "id", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
-                  %th= sortable_column_link(:user_path, "Title", "title", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
-                  %th Type
-                  %th= sortable_column_link(:user_path, "Status", "status", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
-                  %th= sortable_column_link(:user_path, "Customer", "customer", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
-                  %th Location
-                  %th Created
-                  %th Resolved In
-                  %th
+                  %th{style: "width: 5%;"}= sortable_column_link(:user_path, "#", "id", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th{style: "width: 20%;"}= sortable_column_link(:user_path, "Title", "title", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th{style: "width: 9%;"} Type
+                  %th{style: "width: 9%;"}= sortable_column_link(:user_path, "Status", "status", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th{style: "width: 13%;"}= sortable_column_link(:user_path, "Customer", "customer", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
+                  %th{style: "width: 11%;"} Location
+                  %th{style: "width: 14%;"} Created
+                  %th{style: "width: 11%;"} Resolved In
+                  %th{style: "width: 8%;"}
               %tbody
                 - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
                 - @assigned_tickets.each do |ticket|
                   %tr
                     %td.text-muted{style: "font-size:13px;"}= "##{ticket.id}"
-                    %td= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-bold"
+                    %td
+                      %span.tooltip-wrap{data: {tooltip: ticket.title}}
+                        = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-bold text-truncate-cell"
                     %td
                       %span.badge.bg-secondary= ticket.type_label
                     %td
                       %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
-                    %td= ticket.customer&.fullname || "-"
-                    %td= ticket.location&.name || "-"
+                    %td
+                      %span.tooltip-wrap{data: {tooltip: ticket.customer&.fullname}}
+                        %span.text-truncate-cell= ticket.customer&.fullname || "-"
+                    %td
+                      %span.tooltip-wrap{data: {tooltip: ticket.location&.name}}
+                        %span.text-truncate-cell= ticket.location&.name || "-"
                     %td{style: "font-size:13px;"}= ticket.created_at&.strftime("%b %d, %Y %I:%M %p") || "-"
                     %td{style: "font-size:13px;"}= ticket.resolution_duration || "-"
                     %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"

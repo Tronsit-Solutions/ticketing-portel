@@ -25,28 +25,32 @@
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
-            %th
+            %th{style: "width: 22%;"}
               = link_to manager_users_path(request.query_parameters.merge(sort: "name", direction: (@sort == "name" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
                 Name
                 - if @sort == "name"
                   %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
                 - else
                   %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
-            %th
+            %th{style: "width: 25%;"}
               = link_to manager_users_path(request.query_parameters.merge(sort: "email", direction: (@sort == "email" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
                 Email
                 - if @sort == "email"
                   %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
                 - else
                   %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
-            %th Status
-            %th Created
-            %th
+            %th{style: "width: 10%;"} Status
+            %th{style: "width: 13%;"} Created
+            %th{style: "width: 30%;"}
         %tbody
           - @customers.each do |customer|
             %tr
-              %td= customer.fullname
-              %td.text-muted{:style => "font-size:13px;"}= customer.email
+              %td
+                %span.tooltip-wrap{data: {tooltip: customer.fullname}}
+                  %span.text-truncate-cell= customer.fullname
+              %td.text-muted{:style => "font-size:13px;"}
+                %span.tooltip-wrap{data: {tooltip: customer.email}}
+                  %span.text-truncate-cell= customer.email
               %td
                 - if customer.is_active?
                   %span.badge.bg-success Active
@@ -56,11 +60,11 @@
               %td.d-flex.gap-1
                 = link_to "View", manager_user_path(customer), class: "btn btn-sm btn-outline-secondary"
                 %button.btn.btn-sm.btn-outline-primary{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "##{dom_id(customer, :edit)}"} Edit
+                %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_manager_user_path(customer), "data-action-message" => "Reset #{customer.fullname}'s password to the default password?", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
                 - if customer.is_active?
                   %button.btn.btn-sm.btn-outline-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => deactivate_manager_user_path(customer), "data-action-message" => "Deactivate #{customer.fullname}?", "data-action-label" => "Deactivate", "data-action-class" => "btn-danger"} Deactivate
                 - else
                   %button.btn.btn-sm.btn-outline-success{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => activate_manager_user_path(customer), "data-action-message" => "Activate #{customer.fullname}?", "data-action-label" => "Activate", "data-action-class" => "btn-success"} Activate
-                %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_manager_user_path(customer), "data-action-message" => "Reset #{customer.fullname}'s password to the default password?", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
     - else
       .text-center.text-muted.py-5
         %i.bi.bi-people{:style => "font-size: 2rem;"}

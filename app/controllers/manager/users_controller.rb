@@ -59,7 +59,7 @@ class Manager::UsersController < ApplicationController
 
   def update
     if @user.update(user_params_without_password)
-      redirect_to manager_user_path(@user), notice: "#{@user.role.humanize} updated successfully."
+      redirect_back fallback_location: manager_user_path(@user), notice: "#{@user.role.humanize} updated successfully."
     else
       redirect_back fallback_location: manager_user_path(@user), alert: @user.errors.full_messages.to_sentence
     end
@@ -72,17 +72,17 @@ class Manager::UsersController < ApplicationController
 
   def deactivate
     @user.update!(is_active: false)
-    redirect_to manager_users_path, notice: "#{@user.fullname} has been deactivated."
+    redirect_back fallback_location: manager_users_path, notice: "#{@user.fullname} has been deactivated."
   end
 
   def activate
     @user.update!(is_active: true)
-    redirect_to manager_users_path, notice: "#{@user.fullname} has been activated."
+    redirect_back fallback_location: manager_users_path, notice: "#{@user.fullname} has been activated."
   end
 
   def reset_password
     @user.update!(password: RESET_PASSWORD, password_confirmation: RESET_PASSWORD)
-    redirect_to manager_users_path, notice: "#{@user.fullname}'s password has been reset to the default password."
+    redirect_back fallback_location: manager_users_path, notice: "#{@user.fullname}'s password has been reset to the default password."
   end
 
   private

@@ -63,24 +63,28 @@
           %table.table.table-hover.mb-0
             %thead.table-light
               %tr
-                %th #
-                %th Title
-                %th Type
-                %th Status
-                %th Customer
-                %th Assigned
-                %th
+                %th{style: "width: 6%;"} #
+                %th{style: "width: 26%;"} Title
+                %th{style: "width: 12%;"} Type
+                %th{style: "width: 11%;"} Status
+                %th{style: "width: 18%;"} Customer
+                %th{style: "width: 14%;"} Assigned
+                %th{style: "width: 13%;"}
             %tbody
               - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
               - @assigned_tickets.each do |ticket|
                 %tr
                   %td.text-muted{style: "font-size:13px;"}= "#{ticket.id}"
-                  %td= link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
+                  %td
+                    %span.tooltip-wrap{data: {tooltip: ticket.title}}
+                      = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none text-truncate-cell"
                   %td
                     %span= ticket.type_label
                   %td
                     %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
-                  %td= ticket.customer&.fullname || "-"
+                  %td
+                    %span.tooltip-wrap{data: {tooltip: ticket.customer&.fullname}}
+                      %span.text-truncate-cell= ticket.customer&.fullname || "-"
                   %td{style: "font-size:13px;"}= ticket.assigned_at&.strftime("%b %d, %Y") || "-"
                   %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
 

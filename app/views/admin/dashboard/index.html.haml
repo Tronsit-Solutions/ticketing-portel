@@ -86,25 +86,29 @@
         %table.table.table-hover.mb-0
           %thead.table-light
             %tr
-              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:40px;"} #
-              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Title
-              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Status
-              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Customer
-              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Assignee
-              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;"} Date
+              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:6%;"} #
+              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:28%;"} Title
+              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:14%;"} Status
+              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:18%;"} Customer
+              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:18%;"} Assignee
+              %th{style: "font-size:11px;text-transform:uppercase;letter-spacing:.05em;width:16%;"} Date
           %tbody
             - @recent_tickets.each do |ticket|
               %tr
                 %td{style: "font-size:12px;color:#9ca3af;"}= ticket.id
                 %td
-                  = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-semibold", style: "font-size:13px;"
+                  %span.tooltip-wrap{data: {tooltip: ticket.title}}
+                    = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-semibold text-truncate-cell", style: "font-size:13px;"
                 %td
                   - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
                   %span{class: "badge bg-#{color[ticket.status]}", style: "font-size:11px;"}= ticket.status.humanize
-                %td{style: "font-size:13px;"}= ticket.customer&.fullname || "-"
+                %td{style: "font-size:13px;"}
+                  %span.tooltip-wrap{data: {tooltip: ticket.customer&.fullname}}
+                    %span.text-truncate-cell= ticket.customer&.fullname || "-"
                 %td{style: "font-size:13px;"}
                   - if ticket.assignee
-                    = ticket.assignee.fullname
+                    %span.tooltip-wrap{data: {tooltip: ticket.assignee.fullname}}
+                      %span.text-truncate-cell= ticket.assignee.fullname
                   - else
                     %span.text-danger Unassigned
                 %td{style: "font-size:12px;color:#9ca3af;"}= ticket.created_at.strftime("%b %-d, %Y %-I:%M %p")

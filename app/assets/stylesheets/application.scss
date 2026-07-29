@@ -25,6 +25,8 @@
 
 // Tables — clean, breathable, consistent
 .table {
+  table-layout: fixed;
+
   thead th {
     text-align: center;
     font-size: 12px;
@@ -35,6 +37,8 @@
     border-bottom-width: 1px;
     padding: 0.85rem 1rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   tbody td {
@@ -60,6 +64,76 @@
     font-weight: 500;
     font-size: 11.5px;
     padding: 0.4em 0.7em;
+  }
+
+  // Truncates long free-text cell content (names, titles, emails) instead of
+  // letting it wrap or stretch the column, which is what shifted the grid on sort.
+  .text-truncate-cell {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Custom tooltip — wraps a .text-truncate-cell so the tooltip bubble
+// (positioned via ::after on this wrapper) isn't clipped by the truncated
+// element's own overflow:hidden, which trapped it invisibly on the same node.
+.tooltip-wrap {
+  position: relative;
+  display: block;
+  min-width: 0;
+
+  &:not([data-tooltip]),
+  &[data-tooltip=""] {
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+
+  &::before,
+  &::after {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%) translateY(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  &::after {
+    content: attr(data-tooltip);
+    background-color: #212529;
+    color: #f8f9fa;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: normal;
+    max-width: 320px;
+    width: max-content;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  }
+
+  &::before {
+    content: "";
+    bottom: 100%;
+    border: 5px solid transparent;
+    border-top-color: #212529;
+    margin-bottom: -2px;
+  }
+
+  &:hover::before,
+  &:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
   }
 }
 

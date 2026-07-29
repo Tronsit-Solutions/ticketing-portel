@@ -58,7 +58,7 @@ class UsersController < ApplicationController
 
   def update
     if @user.update(user_params_without_password)
-      redirect_to user_path(@user), notice: "User updated successfully."
+      redirect_back fallback_location: user_path(@user), notice: "User updated successfully."
     else
       redirect_back fallback_location: user_path(@user), alert: @user.errors.full_messages.to_sentence
     end

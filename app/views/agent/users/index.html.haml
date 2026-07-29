@@ -34,17 +34,21 @@
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
-            %th Name
-            %th Email
-            %th Role
-            %th Status
-            %th Created
-            %th Actions
+            %th{style: "width: 22%;"} Name
+            %th{style: "width: 26%;"} Email
+            %th{style: "width: 12%;"} Role
+            %th{style: "width: 10%;"} Status
+            %th{style: "width: 13%;"} Created
+            %th{style: "width: 17%;"} Actions
         %tbody
           - @users.each do |user|
             %tr
-              %td= user.fullname
-              %td.text-muted{:style => "font-size:13px;"}= user.email
+              %td
+                %span.tooltip-wrap{data: {tooltip: user.fullname}}
+                  %span.text-truncate-cell= user.fullname
+              %td.text-muted{:style => "font-size:13px;"}
+                %span.tooltip-wrap{data: {tooltip: user.email}}
+                  %span.text-truncate-cell= user.email
               %td
                 - if user.agent?
                   %span.badge.bg-primary Agent

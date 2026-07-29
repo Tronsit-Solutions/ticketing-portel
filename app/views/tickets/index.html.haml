@@ -47,37 +47,38 @@
       %table.table.table-hover.mb-0
         %thead.table-light
           %tr
-            %th
+            %th{style: "width: 6%;"}
               = link_to tickets_path(request.query_parameters.merge(sort: "id", direction: (@sort == "id" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
                 ID
                 - if @sort == "id"
                   %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
                 - else
                   %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
-            %th.text-center
+            %th.text-center{style: "width: #{current_user.customer? ? 18 : 13}%;"}
               = link_to tickets_path(request.query_parameters.merge(sort: "title", direction: (@sort == "title" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
                 Title
                 - if @sort == "title"
                   %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
                 - else
                   %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
-            %th Type
-            %th Status
-            %th Location
+            %th{style: "width: 9%;"} Type
+            %th{style: "width: 9%;"} Status
+            %th{style: "width: #{current_user.customer? ? 14 : 11}%;"} Location
             - unless current_user.customer?
-              %th Customer
-              %th Assignee
-            %th Created
-            %th Resolved In
-            %th
+              %th{style: "width: 12%;"} Customer
+              %th{style: "width: 12%;"} Assignee
+            %th{style: "width: 14%;"} Created
+            %th{style: "width: 10%;"} Resolved In
+            %th{style: "width: #{current_user.customer? ? 16 : 8}%;"}
         %tbody
           - @tickets.each do |ticket|
             %tr
               %td.text-muted{style: "font-size:13px;"}
                 \#{ticket.id}
               %td.text-center
-                .d-flex.flex-column.align-items-center
-                  = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none"
+                .d-flex.flex-column.align-items-center{style: "min-width: 0;"}
+                  %span.tooltip-wrap{style: "max-width: 100%;", data: {tooltip: ticket.title}}
+                    = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none text-truncate-cell"
                   - if ticket.on_behalf?
                     %span.badge.mt-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"} On Behalf
               %td
@@ -86,12 +87,17 @@
               %td
                 - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
                 %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
-              %td= ticket.location&.name || "-"
+              %td
+                %span.tooltip-wrap{data: {tooltip: ticket.location&.name}}
+                  %span.text-truncate-cell= ticket.location&.name || "-"
               - unless current_user.customer?
-                %td= ticket.customer&.fullname || "-"
+                %td
+                  %span.tooltip-wrap{data: {tooltip: ticket.customer&.fullname}}
+                    %span.text-truncate-cell= ticket.customer&.fullname || "-"
                 %td
                   - if ticket.assignee.present?
-                    = ticket.assignee.fullname
+                    %span.tooltip-wrap{data: {tooltip: ticket.assignee.fullname}}
+                      %span.text-truncate-cell= ticket.assignee.fullname
                   - else
                     %span.text-danger Unassigned
                     - if current_user.agent? && ticket.status != "cancelled"

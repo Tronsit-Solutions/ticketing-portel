@@ -34,36 +34,39 @@
     %table.table.table-hover.mb-0
       %thead.table-light
         %tr
-          %th
+          %th{style: "width: 17%;"}
             = link_to users_path(request.query_parameters.merge(sort: "name", direction: (@sort == "name" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
               Name
               - if @sort == "name"
                 %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
               - else
                 %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
-          %th
+          %th{style: "width: 20%;"}
             = link_to users_path(request.query_parameters.merge(sort: "email", direction: (@sort == "email" && @direction == "asc") ? "desc" : "asc")), class: "text-dark text-decoration-none" do
               Email
               - if @sort == "email"
                 %i.bi{class: @direction == "asc" ? "bi-arrow-up" : "bi-arrow-down"}
               - else
                 %i.bi.bi-arrow-down-up.text-muted{style: "font-size:11px;"}
-          %th Role
-          %th Team
-          %th Status
-          %th Created
-          %th
+          %th{style: "width: 10%;"} Role
+          %th{style: "width: 12%;"} Team
+          %th{style: "width: 9%;"} Status
+          %th{style: "width: 12%;"} Created
+          %th{style: "width: 20%;"}
       %tbody
         - @users.each do |user|
           %tr
             %td
-              = user.fullname
+              %span.tooltip-wrap{data: {tooltip: user.fullname}}
+                %span.text-truncate-cell= user.fullname
             %td.text-muted{:style => "font-size:13px;"}
-              = user.email
+              %span.tooltip-wrap{data: {tooltip: user.email}}
+                %span.text-truncate-cell= user.email
             %td.text-muted{:style => "font-size:13px;"}
               = user.role.humanize
             %td.text-muted{:style => "font-size:13px;"}
-              = user.team&.name || "-"
+              %span.tooltip-wrap{data: {tooltip: user.team&.name}}
+                %span.text-truncate-cell= user.team&.name || "-"
             %td
               - if user.is_active?
                 %span.badge.bg-success Active
