@@ -95,10 +95,11 @@ class Ticket < ApplicationRecord
   end
 
   def resolution_duration
-    return nil unless status == "closed" && assigned_at.present? && resolved_at.present?
+    return "Pending" unless status == "closed"
+    return "N/A" unless assigned_at.present? && resolved_at.present?
 
     seconds = (resolved_at - assigned_at).to_i
-    return nil if seconds.negative?
+    return "N/A" if seconds.negative?
 
     if seconds < 60
       "#{seconds}s"

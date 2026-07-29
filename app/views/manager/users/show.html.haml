@@ -92,7 +92,7 @@
                 %th{style: "width: 11%;"}= sortable_column_link(:manager_user_path, "Status", "status", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
                 %th{style: "width: 16%;"}= sortable_column_link(:manager_user_path, "Customer", "customer", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: request.query_parameters.merge(id: @user.id))
                 %th{style: "width: 14%;"} Created
-                %th{style: "width: 10%;"} Resolved In
+                %th{style: "width: 10%;"} Resolution Time
                 %th{style: "width: 8%;"}
             %tbody
               - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
@@ -110,7 +110,7 @@
                     %span.tooltip-wrap{data: {tooltip: ticket.customer&.fullname}}
                       %span.text-truncate-cell= ticket.customer&.fullname || "-"
                   %td{style: "font-size:13px;"}= ticket.created_at&.strftime("%b %d, %Y %I:%M %p") || "-"
-                  %td{style: "font-size:13px;"}= ticket.resolution_duration || "-"
+                  %td{style: "font-size:13px;"}= ticket.resolution_duration
                   %td= link_to "View", ticket_path(ticket), class: "btn btn-sm btn-outline-secondary"
 
           / Pagination controls
