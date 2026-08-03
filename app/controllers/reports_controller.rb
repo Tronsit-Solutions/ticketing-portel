@@ -1,8 +1,14 @@
 require "csv"
 
 class ReportsController < ApplicationController
-  before_action :require_admin_or_manager!
-  layout ->(controller) { controller.current_user.admin? ? "admin" : "manager" }
+  before_action :require_staff!
+  layout ->(controller) do
+    case controller.current_user.role
+    when "admin" then "admin"
+    when "agent" then "agent"
+    else "manager"
+    end
+  end
 
   def index
     @report = params[:report] == "agents" ? "agents" : "tickets"

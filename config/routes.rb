@@ -29,6 +29,7 @@ Rails.application.routes.draw do
   namespace :agent do
     root "dashboard#index"
     resources :users, only: [:index, :new, :create, :show, :edit, :update]
+    resources :reports, only: [:index], controller: "/reports"
   end
 
   namespace :customer do
