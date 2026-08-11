@@ -1,20 +1,8 @@
 .col-12
   = label_tag "ticket[metadata][issue]", "Issue", class: "form-label fw-bold"
   = select_tag "ticket[metadata][issue]", |
-    options_for_select([                  |
-      ["Select an issue category", ""],   |
-      "Patient",                          |
-      "Clinical",                         |
-      "Reports",                          |
-      "Document",                         |
-      "Radiology",                        |
-      "Ad-hoc reporting/IZENDA",          |
-      "Billing Tasks",                    |
-      "Settings",                         |
-      "Scheduler",                        |
-      "Provider Notes",                   |
-      "KIOSK",                            |
-      "Bugs/Glitches",                    |
-      "Other"                             |
-    ], ticket.metadata&.dig("issue")),    |
-    class: "form-select"                  |
+    options_for_select(                   |
+      DropdownOption.for(DropdownOption::EHR_CHANGE_ISSUE).pluck(:label, :value), |
+      ticket.metadata&.dig("issue")       |
+    ),                                     |
+    class: "form-select", prompt: "Select an issue category"

@@ -1,0 +1,22 @@
+- if dropdown_option.errors.any?
+  .alert.alert-danger
+    %ul.mb-0
+      - dropdown_option.errors.full_messages.each do |msg|
+        %li{:style => "font-size:13px;"}= msg
+.mb-3
+  = f.label :category, class: "form-label fw-bold"
+  - if dropdown_option.persisted?
+    = f.select :category, options_for_select(DropdownOption::CATEGORY_LABELS.map { |value, label| [label, value] }, dropdown_option.category), {}, class: "form-select", disabled: true
+    %small.text-muted Category cannot be changed after creation.
+  - else
+    = f.select :category, options_for_select(DropdownOption::CATEGORY_LABELS.map { |value, label| [label, value] }, dropdown_option.category), {}, class: "form-select"
+.mb-3
+  = f.label :label, class: "form-label fw-bold"
+  = f.text_field :label, class: "form-control", placeholder: "Display text shown to users"
+.mb-3
+  = f.label :value, class: "form-label fw-bold"
+  = f.text_field :value, class: "form-control", placeholder: "Leave blank to reuse label"
+  %small.text-muted Stored value referenced by tickets. Leave blank to reuse the label above.
+.mb-1
+  = f.label :position, class: "form-label fw-bold"
+  = f.number_field :position, class: "form-control", value: dropdown_option.position || 0

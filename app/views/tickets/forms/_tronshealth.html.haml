@@ -1,3 +1,3 @@
 %div{class: fld}
   %label{class: lbl} Issue
-  = select_tag "ticket[metadata][issue]", options_for_select([["Select an issue category", ""], "Bugs/Glitches", "Clinical", "Check-In App", "Documents", "Patients", ["Provider Notes", "Provider Note"], "Schedular", "Settings", "Others"], ticket.metadata&.dig("issue")), class: sel
+  = select_tag "ticket[metadata][issue]", options_for_select(DropdownOption.for(DropdownOption::TRONSHEALTH_ISSUE).pluck(:label, :value), ticket.metadata&.dig("issue")), class: sel, prompt: "Select an issue category"

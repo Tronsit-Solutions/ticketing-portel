@@ -4,12 +4,7 @@
     %span{style: "color:#e02020;"} *
   - idea_types = Array(ticket.metadata&.dig("idea_types"))
   .mt-2
-    %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
-      %input{type: "checkbox", name: "ticket[metadata][idea_types][]", value: "Practice Flow", checked: idea_types.include?("Practice Flow"), style: "width:16px; height:16px; cursor:pointer;"}
-      Practice Flow
-    %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
-      %input{type: "checkbox", name: "ticket[metadata][idea_types][]", value: "Paperwork/Form", checked: idea_types.include?("Paperwork/Form"), style: "width:16px; height:16px; cursor:pointer;"}
-      Paperwork/Form
-    %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
-      %input{type: "checkbox", name: "ticket[metadata][idea_types][]", value: "Service Improvement", checked: idea_types.include?("Service Improvement"), style: "width:16px; height:16px; cursor:pointer;"}
-      Service Improvement
+    - DropdownOption.for(DropdownOption::IDEA_TYPES).each do |option|
+      %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
+        %input{type: "checkbox", name: "ticket[metadata][idea_types][]", value: option.value, checked: idea_types.include?(option.value), style: "width:16px; height:16px; cursor:pointer;"}
+        = option.label

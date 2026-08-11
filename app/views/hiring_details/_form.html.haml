@@ -85,7 +85,7 @@
 
 %div{class: field_wrap}
   = f.label :title_position, "Title/Position :", class: label_class
-  = f.select :title_position, options_for_select(HiringDetail::TITLE_OPTIONS, hiring_detail.title_position), {}, class: select_class
+  = f.select :title_position, options_for_select(DropdownOption.for(DropdownOption::HIRING_TITLE_POSITION).pluck(:label, :value), hiring_detail.title_position), { prompt: "Select Option" }, class: select_class
 
 %div{class: field_wrap, data: {controller: "provider-fields", action: "provider-fields#toggle"}}
   = f.label :is_provider, "Is this user a provider ?", class: label_class
@@ -110,14 +110,14 @@
 
 %div{class: field_wrap}
   = f.label :department, "Please select their Department :", class: label_class
-  = f.select :department, options_for_select(HiringDetail::DEPARTMENT_OPTIONS, hiring_detail.department), {}, class: select_class
+  = f.select :department, options_for_select(DropdownOption.for(DropdownOption::HIRING_DEPARTMENT).pluck(:label, :value), hiring_detail.department), { prompt: "Select Option" }, class: select_class
 
 %div{class: field_wrap}
   %label{class: label_class} What Access/Systems Are Needed ?
-  - HiringDetail::ACCESS_SYSTEMS.each do |system|
+  - DropdownOption.for(DropdownOption::HIRING_ACCESS_SYSTEMS).each do |system|
     .form-check
-      = check_box_tag "hiring_detail[access_systems][]", system, Array(hiring_detail.access_systems).include?(system), id: "access_#{system.parameterize}", class: "form-check-input"
-      = label_tag "access_#{system.parameterize}", system, class: "form-check-label"
+      = check_box_tag "hiring_detail[access_systems][]", system.value, Array(hiring_detail.access_systems).include?(system.value), id: "access_#{system.value.parameterize}", class: "form-check-input"
+      = label_tag "access_#{system.value.parameterize}", system.label, class: "form-check-label"
 
 %div{class: field_wrap}
   %label{class: label_class} Gender:
@@ -138,10 +138,10 @@
 
 %div{class: field_wrap}
   %label{class: label_class} What Distribution Groups should the new team mate be added to if any?
-  - HiringDetail::DISTRIBUTION_GROUPS.each do |group|
+  - DropdownOption.for(DropdownOption::HIRING_DISTRIBUTION_GROUPS).each do |group|
     .form-check
-      = check_box_tag "hiring_detail[distribution_groups][]", group, Array(hiring_detail.distribution_groups).include?(group), id: "dist_#{group.parameterize}", class: "form-check-input"
-      = label_tag "dist_#{group.parameterize}", group, class: "form-check-label"
+      = check_box_tag "hiring_detail[distribution_groups][]", group.value, Array(hiring_detail.distribution_groups).include?(group.value), id: "dist_#{group.value.parameterize}", class: "form-check-input"
+      = label_tag "dist_#{group.value.parameterize}", group.label, class: "form-check-label"
 
 %div{class: field_wrap, data: {controller: "multi-select-summary"}}
   = f.label :microsoft_teams_department, "What Microsoft Teams should the member be a part of ?", class: label_class

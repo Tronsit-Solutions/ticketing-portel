@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_22_181903) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_11_174709) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_22_181903) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "dropdown_options", force: :cascade do |t|
+    t.string "category", null: false
+    t.string "label", null: false
+    t.string "value"
+    t.integer "position", default: 0, null: false
+    t.boolean "is_active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category", "is_active"], name: "index_dropdown_options_on_category_and_is_active"
+    t.index ["category", "value"], name: "index_dropdown_options_on_category_and_value", unique: true
+    t.index ["category"], name: "index_dropdown_options_on_category"
   end
 
   create_table "hiring_details", force: :cascade do |t|

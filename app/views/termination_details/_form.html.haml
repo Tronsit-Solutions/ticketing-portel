@@ -5,7 +5,7 @@
 
 %div{class: field_wrap}
   = f.label :termination_reason, "Termination Reason", class: label_class
-  = f.select :termination_reason, options_for_select(TerminationDetail::TERMINATION_REASONS, termination_detail.termination_reason), {}, class: select_class
+  = f.select :termination_reason, options_for_select(DropdownOption.for(DropdownOption::TERMINATION_REASON).pluck(:label, :value), termination_detail.termination_reason), { prompt: "Choose option" }, class: select_class
 
 %div{class: field_wrap}
   = f.label :termination_date, "Termination Date", class: label_class

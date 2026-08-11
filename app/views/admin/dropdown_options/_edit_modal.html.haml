@@ -1,0 +1,13 @@
+- modal_id = dom_id(dropdown_option, :edit)
+%div.modal.fade{id: modal_id, "aria-labelledby" => "#{modal_id}Label", "aria-hidden" => "true", tabindex: "-1"}
+  .modal-dialog.modal-dialog-centered
+    .modal-content
+      .modal-header
+        %h5.modal-title{id: "#{modal_id}Label"} Edit Dropdown Option
+        %button.btn-close{"data-bs-dismiss" => "modal", "aria-label" => "Close", type: "button"}
+      = form_with model: dropdown_option, url: admin_dropdown_option_path(dropdown_option), method: :patch, local: true do |f|
+        .modal-body
+          = render "form_fields", f: f, dropdown_option: dropdown_option
+        .modal-footer
+          %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal", type: "button"} Cancel
+          = f.submit "Save Changes", class: "btn btn-primary"
