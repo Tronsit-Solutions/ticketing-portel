@@ -1,0 +1,12 @@
+#newDropdownOptionModal.modal.fade{"aria-labelledby" => "newDropdownOptionModalLabel", "aria-hidden" => "true", tabindex: "-1"}
+  .modal-dialog.modal-dialog-centered
+    .modal-content
+      .modal-header
+        %h5.modal-title{id: "newDropdownOptionModalLabel"} Add Dropdown Option
+        %button.btn-close{"data-bs-dismiss" => "modal", "aria-label" => "Close", type: "button"}
+      = form_with model: @new_dropdown_option, url: admin_dropdown_options_path, method: :post, local: true do |f|
+        .modal-body
+          = render "form_fields", f: f, dropdown_option: @new_dropdown_option
+        .modal-footer
+          %button.btn.btn-outline-secondary{"data-bs-dismiss" => "modal", type: "button"} Cancel
+          = f.submit "Add Option", class: "btn btn-primary"

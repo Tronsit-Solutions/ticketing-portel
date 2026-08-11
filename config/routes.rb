@@ -11,6 +11,11 @@ Rails.application.routes.draw do
     root "dashboard#index"
     resources :reports, only: [:index], controller: "/reports"
     resources :teams, only: [:index, :new, :create]
+    resources :dropdown_options, only: [:index, :create, :update] do
+      member do
+        patch :toggle_active
+      end
+    end
   end
 
   namespace :manager do

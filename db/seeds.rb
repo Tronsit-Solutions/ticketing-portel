@@ -18,6 +18,7 @@ Ticket.destroy_all
 User.destroy_all
 Team.destroy_all
 Location.destroy_all
+DropdownOption.destroy_all
 
 puts "Seeding locations..."
 locations = [
@@ -27,6 +28,8 @@ locations = [
   { name: "West Branch",    abbreviation: "WB", state: "Washington" },
 ]
 locations.each { |l| Location.create!(l) }
+
+Rake::Task["dropdown_options:seed"].invoke
 
 puts "Seeding teams..."
 teams = [

@@ -4,9 +4,7 @@
     %span{style: "color:#e02020;"} *
   - work_types = Array(ticket.metadata&.dig("work_types"))
   .mt-2
-    %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
-      %input{type: "checkbox", name: "ticket[metadata][work_types][]", value: "Great Work by a Team Member", checked: work_types.include?("Great Work by a Team Member"), style: "width:16px; height:16px; cursor:pointer;"}
-      Great Work by a Team Member
-    %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
-      %input{type: "checkbox", name: "ticket[metadata][work_types][]", value: "Positive Patient Feedback", checked: work_types.include?("Positive Patient Feedback"), style: "width:16px; height:16px; cursor:pointer;"}
-      Positive Patient Feedback
+    - DropdownOption.for(DropdownOption::WORK_TYPES).each do |option|
+      %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
+        %input{type: "checkbox", name: "ticket[metadata][work_types][]", value: option.value, checked: work_types.include?(option.value), style: "width:16px; height:16px; cursor:pointer;"}
+        = option.label

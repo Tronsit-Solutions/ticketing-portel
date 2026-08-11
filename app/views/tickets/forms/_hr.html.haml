@@ -3,9 +3,9 @@
     What Kind of HR Assistance do you need ?
     %span{style: "color:#e02020;"} *
   - hr_types = Array(ticket.metadata&.dig("hr_types"))
-  - hr_options = ["Benefits", "Compliance Question or Concern", "Legal Question or Concern", "Payroll Question or Request", "Personal Question or Concern", "Timesheet Question", "Health, dental & vision benefits", "401K program", "Goodly educational program", "Please include anonymous complaints", "Please include Issues & Incidents", "Replacement request for Key cards and deactivation of lost and/or stolen cards"]
+  - hr_options = DropdownOption.for(DropdownOption::HR_TYPES)
   .mt-2
     - hr_options.each do |option|
       %label{style: "display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:10px; cursor:pointer;"}
-        %input{type: "checkbox", name: "ticket[metadata][hr_types][]", value: option, checked: hr_types.include?(option), style: "width:16px; height:16px; cursor:pointer; flex-shrink:0;"}
-        = option
+        %input{type: "checkbox", name: "ticket[metadata][hr_types][]", value: option.value, checked: hr_types.include?(option.value), style: "width:16px; height:16px; cursor:pointer; flex-shrink:0;"}
+        = option.label
