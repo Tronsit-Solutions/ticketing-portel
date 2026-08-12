@@ -1,4 +1,5 @@
 class Ticket < ApplicationRecord
+  include Auditable
 
   STATUSES = %w[open in_progress closed cancelled].freeze
 
@@ -92,6 +93,14 @@ class Ticket < ApplicationRecord
 
   def on_behalf?
     created_by.present?
+  end
+
+  def audit_label
+    "##{id} #{title}"
+  end
+
+  def audit_category
+    AuditLog::TICKETS
   end
 
   def resolution_duration

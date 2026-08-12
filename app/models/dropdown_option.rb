@@ -1,4 +1,6 @@
 class DropdownOption < ApplicationRecord
+  include Auditable
+
   # Ticket Forms
   HR_TYPES             = "hr_types"
   IDEA_TYPES           = "idea_types"
@@ -53,6 +55,14 @@ class DropdownOption < ApplicationRecord
 
   def self.for(category)
     active.ordered.where(category: category)
+  end
+
+  def audit_label
+    "#{CATEGORY_LABELS[category] || category}: #{label}"
+  end
+
+  def audit_category
+    AuditLog::SETTINGS
   end
 
   private

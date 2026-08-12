@@ -2,10 +2,16 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :authenticate_user!
+  before_action :set_current_attributes
 
   layout :set_layout
 
   private
+
+  def set_current_attributes
+    Current.user    = current_user
+    Current.request = request
+  end
 
   # ── Role guards ────────────────────────────────────────────────────────────
 
