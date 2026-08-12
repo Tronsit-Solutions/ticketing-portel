@@ -1,0 +1,81 @@
+:css
+  .al-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .al-detail-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .al-kv-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f1f3;
+    font-size: 13.5px;
+  }
+  .al-kv-row:last-child { border-bottom: none; }
+  .al-kv-label { width: 160px; flex-shrink: 0; color: #6b7280; font-weight: 600; }
+  .al-kv-value { color: #1f2937; word-break: break-word; }
+  .al-diff-pre {
+    background: #f8f9fb;
+    border: 1px solid #eef0f3;
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 12.5px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+
+= link_to admin_audit_logs_path, class: "btn btn-sm btn-outline-secondary mb-3" do
+  %i.bi.bi-arrow-left
+  Back to Activity Logs
+
+.card.border-0.shadow-sm
+  .card-body.p-4
+    .al-detail-header
+      .al-detail-icon{style: "background:rgba(var(--bs-#{@log.badge_color}-rgb, 108,117,125),0.12); color: var(--bs-#{@log.badge_color});"}
+        %i.bi{class: @log.icon}
+      %div
+        %h5.mb-1= @log.description
+        %span.badge.me-1{class: "bg-#{@log.badge_color}"}= @log.action_label
+        %span.badge.bg-light.text-dark.border= @log.category_label
+
+    .al-kv-row
+      .al-kv-label Actor
+      .al-kv-value
+        = @log.actor_name
+        - if @log.actor_role.present?
+          %span.text-muted (#{@log.actor_role.capitalize})
+    - if @log.auditable_label.present?
+      .al-kv-row
+        .al-kv-label Resource
+        .al-kv-value
+          = @log.auditable_label
+          - if @log.auditable_type.present?
+            %span.text-muted= " · #{@log.auditable_type}"
+    .al-kv-row
+      .al-kv-label Timestamp
+      .al-kv-value= @log.created_at.strftime("%B %d, %Y at %I:%M:%S %p")
+    - if @log.ip_address.present?
+      .al-kv-row
+        .al-kv-label IP Address
+        .al-kv-value= @log.ip_address
+    - if @log.user_agent.present?
+      .al-kv-row
+        .al-kv-label User Agent
+        .al-kv-value.text-muted{style: "font-size:12px;"}= @log.user_agent
+
+    - if @log.changed_data.present?
+      %h6.mt-4.mb-2 Data
+      %pre.al-diff-pre= JSON.pretty_generate(@log.changed_data)

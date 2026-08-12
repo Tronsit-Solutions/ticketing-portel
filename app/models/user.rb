@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  include Auditable
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable,
@@ -32,6 +34,14 @@ class User < ApplicationRecord
 
   def inactive_message
     is_active? ? super : :deactivated
+  end
+
+  def audit_label
+    fullname.presence || email
+  end
+
+  def audit_category
+    AuditLog::USERS
   end
 
 end

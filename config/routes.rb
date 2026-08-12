@@ -16,6 +16,7 @@ Rails.application.routes.draw do
         patch :toggle_active
       end
     end
+    resources :audit_logs, only: [:index, :show]
   end
 
   namespace :manager do

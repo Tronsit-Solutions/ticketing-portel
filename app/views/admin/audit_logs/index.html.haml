@@ -1,0 +1,208 @@
+:css
+  .al-stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 900px) {
+    .al-stat-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  .al-stat-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #eef0f3;
+  }
+  .al-stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .al-stat-icon.bg-total  { background: #e8edfb; color: #3b5bdb; }
+  .al-stat-icon.bg-today  { background: #e6f7ee; color: #1a9e5f; }
+  .al-stat-icon.bg-logins { background: #eaf3fc; color: #1565c0; }
+  .al-stat-icon.bg-failed { background: #fdecec; color: #d9364a; }
+  .al-stat-value { font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.1; }
+  .al-stat-label { font-size: 12.5px; color: #6b7280; font-weight: 500; margin-top: 2px; }
+
+  .al-category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .al-category-tabs a {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #dde2ea;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    background: #ffffff;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .al-category-tabs a:hover:not(.active) { border-color: #1565c0; color: #1565c0; }
+  .al-category-tabs a.active { background: #1565c0; border-color: #1565c0; color: #ffffff; }
+
+  .al-timeline-row td { vertical-align: middle; }
+  .al-actor-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #eef1f6;
+    color: #1565c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .al-action-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .al-desc { font-size: 13.5px; color: #1f2937; }
+  .al-meta { font-size: 11.5px; color: #9aa2b1; }
+  .al-empty { padding: 60px 20px; text-align: center; color: #9aa2b1; }
+  .al-empty i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.5; }
+
+.d-flex.justify-content-between.align-items-center.mb-4
+  %h4.mb-0{:style => "font-family: Poppins;"} Activity Logs
+  %span.text-muted{style: "font-size:13px;"} Full audit trail of actions across the application
+
+.al-stat-row
+  .al-stat-card
+    .al-stat-icon.bg-total
+      %i.bi.bi-clock-history
+    .flex-grow-1
+      .al-stat-value= number_with_delimiter(@stats[:total])
+      .al-stat-label Total Events
+  .al-stat-card
+    .al-stat-icon.bg-today
+      %i.bi.bi-calendar-check-fill
+    .flex-grow-1
+      .al-stat-value= number_with_delimiter(@stats[:today])
+      .al-stat-label Today
+  .al-stat-card
+    .al-stat-icon.bg-logins
+      %i.bi.bi-box-arrow-in-right
+    .flex-grow-1
+      .al-stat-value= number_with_delimiter(@stats[:logins])
+      .al-stat-label Successful Logins
+  .al-stat-card
+    .al-stat-icon.bg-failed
+      %i.bi.bi-shield-exclamation
+    .flex-grow-1
+      .al-stat-value= number_with_delimiter(@stats[:failed])
+      .al-stat-label Failed Sign-ins
+
+.al-category-tabs
+  = link_to admin_audit_logs_path(request.query_parameters.except(:category, :page)), class: "#{'active' unless params[:category].present?}" do
+    %i.bi.bi-grid-fill
+    All
+  - AuditLog::CATEGORIES.each do |category|
+    = link_to admin_audit_logs_path(request.query_parameters.merge(category: category).except(:page)), class: "#{'active' if params[:category] == category}" do
+      %i.bi{class: category == AuditLog::AUTH ? "bi-shield-lock-fill" : category == AuditLog::TICKETS ? "bi-ticket-perforated-fill" : category == AuditLog::USERS ? "bi-people-fill" : category == AuditLog::TEAMS ? "bi-person-badge-fill" : "bi-gear-fill"}
+      = AuditLog::CATEGORY_LABELS[category]
+
+.card.border-0.shadow-sm.mb-4
+  .card-body
+    = form_with url: admin_audit_logs_path, method: :get, local: true, class: "row g-2 align-items-end" do |f|
+      - if params[:category].present?
+        = hidden_field_tag :category, params[:category]
+      .col-md-3
+        %label.form-label.small.text-muted.mb-1 Search
+        = text_field_tag :search, params[:search], class: "form-control form-control-sm", placeholder: "Description, actor, resource…"
+      .col-md-2
+        %label.form-label.small.text-muted.mb-1 Action
+        = select_tag :action_type, options_for_select([["All Actions", ""]] + AuditLog::ACTIONS.map { |a| [AuditLog::ACTION_LABELS[a], a] }, params[:action_type]), class: "form-select form-select-sm"
+      .col-md-2
+        %label.form-label.small.text-muted.mb-1 User
+        = select_tag :actor_id, options_for_select([["All Users", ""]] + @actors.map { |u| [u.fullname, u.id] }, params[:actor_id]), class: "form-select form-select-sm"
+      .col-md-2
+        %label.form-label.small.text-muted.mb-1 From
+        = date_field_tag :from, params[:from], class: "form-control form-control-sm"
+      .col-md-2
+        %label.form-label.small.text-muted.mb-1 To
+        = date_field_tag :to, params[:to], class: "form-control form-control-sm"
+      .col-md-1.d-flex.gap-1
+        = f.submit "Filter", class: "btn btn-primary btn-sm w-100"
+    - if params[:search].present? || params[:action_type].present? || params[:actor_id].present? || params[:from].present? || params[:to].present?
+      .mt-2
+        = link_to admin_audit_logs_path(category: params[:category]), class: "btn btn-outline-secondary btn-sm" do
+          %i.bi.bi-x-circle
+          Clear filters
+
+.card.border-0.shadow-sm
+  .card-body.p-0
+    - if @logs.any?
+      %table.table.table-hover.mb-0
+        %thead.table-light
+          %tr
+            %th Event
+            %th Actor
+            %th Category
+            %th{style: "width:180px;"} When
+            %th{style: "width:70px;"}
+        %tbody
+          - @logs.each do |log|
+            %tr.al-timeline-row
+              %td
+                .d-flex.align-items-center.gap-2
+                  .al-action-icon{style: "background:rgba(var(--bs-#{log.badge_color}-rgb, 108,117,125),0.12); color: var(--bs-#{log.badge_color});"}
+                    %i.bi{class: log.icon}
+                  .flex-grow-1
+                    .al-desc= log.description
+                    %span.badge{class: "bg-#{log.badge_color} bg-opacity-75", style: "font-size:10.5px;"}= log.action_label
+              %td
+                .d-flex.align-items-center.gap-2
+                  .al-actor-avatar= log.actor_name.first.upcase
+                  %div
+                    %div{style: "font-size:13px; font-weight:600; color:#1f2937;"}= log.actor_name
+                    - if log.actor_role.present?
+                      %div.al-meta= log.actor_role.capitalize
+              %td
+                %span.badge.bg-light.text-dark.border{style: "font-size:11.5px;"}= log.category_label
+              %td
+                %div{style: "font-size:12.5px; color:#374151;"}= log.created_at.strftime("%b %d, %Y")
+                %div.al-meta= log.created_at.strftime("%I:%M %p")
+              %td
+                = link_to admin_audit_log_path(log), class: "btn btn-sm btn-outline-primary" do
+                  %i.bi.bi-eye
+    - else
+      .al-empty
+        %i.bi.bi-inbox
+        No activity found for the selected filters.
+
+- if @logs.respond_to?(:total_count) && @logs.any?
+  .d-flex.justify-content-between.align-items-center.mt-3.px-1
+    %small.text-muted
+      Showing
+      %strong= @logs.offset_value + 1
+      –
+      %strong= [@logs.offset_value + @logs.limit_value, @logs.total_count].min
+      of
+      %strong= @logs.total_count
+      events
+    = paginate @logs
