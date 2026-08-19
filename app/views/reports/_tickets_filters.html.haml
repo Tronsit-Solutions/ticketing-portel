@@ -1,0 +1,32 @@
+- active_filters = params.slice(:start_date, :end_date, :status, :location_id, :customer_id, :ticket_type).values.any?(&:present?)
+.card.filter-bar.border-0.shadow-sm.mb-4
+  .card-body.py-2
+    = form_with url: request.path, method: :get, local: true, class: "row g-2 align-items-end", data: { controller: "auto-submit", action: "change->auto-submit#submit" } do |f|
+      - if params[:report] == "agent_detail"
+        = hidden_field_tag :report, "agent_detail"
+        = hidden_field_tag :agent_id, params[:agent_id]
+      .col-md-2
+        = label_tag :start_date, "Start Date", class: "form-label mb-1 fw-bold"
+        = date_field_tag :start_date, params[:start_date], class: "form-control form-control-sm"
+      .col-md-2
+        = label_tag :end_date, "End Date", class: "form-label mb-1 fw-bold"
+        = date_field_tag :end_date, params[:end_date], class: "form-control form-control-sm"
+      .col-md-2
+        = label_tag :status, "Status", class: "form-label mb-1 fw-bold"
+        = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
+      .col-md-2
+        = label_tag :location_id, "Location", class: "form-label mb-1 fw-bold"
+        = select_tag :location_id, options_for_select([["All Locations", ""]] + @locations.map { |l| [l.name, l.id] }, params[:location_id]), class: "form-select form-select-sm"
+      .col-md-2
+        = label_tag :customer_id, "Customer", class: "form-label mb-1 fw-bold"
+        = select_tag :customer_id, options_for_select([["All Customers", ""]] + @customers.map { |c| ["#{c.fullname} (#{c.email})", c.id] }, params[:customer_id]), class: "form-select form-select-sm"
+      .col-md-2
+        = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
+        - type_options = Ticket::TICKET_TYPES.map { |t| [Ticket::TYPE_LABELS[t] || t.humanize, t] }
+        = select_tag :ticket_type, options_for_select([["All Types", ""]] + type_options.sort_by(&:first), params[:ticket_type]), class: "form-select form-select-sm"
+      - if active_filters
+        .col-md-2.mt-3
+          - clear_url = params[:report] == "agent_detail" ? "#{request.path}?report=agent_detail&agent_id=#{params[:agent_id]}" : request.path
+          = link_to clear_url, class: "btn btn-outline-secondary btn-sm w-100" do
+            %i.bi.bi-x-circle.me-1
+            Clear Filters

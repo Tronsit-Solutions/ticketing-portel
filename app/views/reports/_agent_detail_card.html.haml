@@ -1,0 +1,28 @@
+- stats = agent.ticket_stats
+.card.border-0.shadow-sm.mb-4
+  .card-body
+    %h6.fw-bold.mb-3 Agent Details
+    .table-responsive
+      %table.table.table-borderless.mb-0
+        %tbody
+          %tr
+            %td.text-muted{style: "width: 16%;"} Name
+            %td.fw-bold= agent.fullname
+            %td.text-muted{style: "width: 16%;"} Email
+            %td= agent.email
+          %tr
+            %td.text-muted Team
+            %td= agent.team&.name || "-"
+            %td.text-muted Status
+            %td
+              %span{class: "badge bg-#{agent.is_active? ? "success" : "secondary"}"}= agent.is_active? ? "Active" : "Inactive"
+          %tr
+            %td.text-muted Joining Date
+            %td= agent.created_at.strftime("%b %d, %Y")
+            %td.text-muted Total Assigned
+            %td= stats[:total]
+          %tr
+            %td.text-muted Open / In Progress
+            %td= stats[:open]
+            %td.text-muted Closed
+            %td= stats[:closed]

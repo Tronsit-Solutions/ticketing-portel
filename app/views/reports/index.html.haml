@@ -1,6 +1,11 @@
 .d-flex.justify-content-between.align-items-center.mb-4
   %h4.mb-0{style: "font-family: Poppins;"}
-    = @report == "agents" ? "Agent Reports" : "Ticket Reports"
+    - if @report == "agent_detail"
+      = "#{@agent.fullname}'s Report"
+    - elsif @report == "agents"
+      Agent Reports
+    - else
+      Ticket Reports
   = link_to "#{request.path}.csv?#{request.query_parameters.to_query}", class: "btn btn-success btn-sm" do
     %i.bi.bi-download.me-1
     Download CSV
@@ -11,8 +16,20 @@
     = link_to "Tickets", request.path, class: "nav-link #{"active" if @report == "tickets"}"
   %li.nav-item
     = link_to "Agents", "#{request.path}?report=agents", class: "nav-link #{"active" if @report == "agents"}"
+  - if @report == "agent_detail"
+    %li.nav-item
+      %span.nav-link.active= @agent.fullname
 
-- if @report == "agents"
+- if @report == "agent_detail"
+  = link_to "#{request.path}?report=agents", class: "d-inline-flex align-items-center text-decoration-none mb-3" do
+    %i.bi.bi-arrow-left.me-1
+    Back to Agents
+
+  = render "agent_detail_card", agent: @agent
+  = render "tickets_filters"
+  = render "tickets_table"
+
+- elsif @report == "agents"
   / Filters
   - active_filters = params.slice(:team_id, :agent_status, :search, :joined_start_date, :joined_end_date).values.any?(&:present?)
   .card.filter-bar.border-0.shadow-sm.mb-4
@@ -47,13 +64,14 @@
         %table.table.table-hover.mb-0
           %thead.table-light
             %tr
-              %th.text-center{style: "width: 22%;"} Agent
-              %th{style: "width: 16%;"} Team
-              %th{style: "width: 10%;"} Status
-              %th{style: "width: 16%;"} Joining Date
-              %th{style: "width: 12%;"} Open
-              %th{style: "width: 12%;"} Closed
-              %th{style: "width: 12%;"} Total
+              %th.text-center{style: "width: 20%;"} Agent
+              %th{style: "width: 15%;"} Team
+              %th{style: "width: 9%;"} Status
+              %th{style: "width: 15%;"} Joining Date
+              %th{style: "width: 10%;"} Open
+              %th{style: "width: 10%;"} Closed
+              %th{style: "width: 10%;"} Total
+              %th.text-center{style: "width: 11%;"} Report
           %tbody
             - @agents.each do |agent|
               %tr
@@ -64,9 +82,13 @@
                 %td
                   %span{class: "badge bg-#{agent.is_active? ? "success" : "secondary"}"}= agent.is_active? ? "Active" : "Inactive"
                 %td{style: "font-size:13px;"}= agent.created_at.strftime("%b %d, %Y")
-                %td= agent.assigned_tickets.open.count + agent.assigned_tickets.in_progress.count
-                %td= agent.assigned_tickets.closed.count
-                %td= agent.assigned_tickets.count
+                - stats = agent.ticket_stats
+                %td= stats[:open]
+                %td= stats[:closed]
+                %td= stats[:total]
+                %td.text-center
+                  = link_to "#{request.path}?report=agent_detail&agent_id=#{agent.id}", class: "btn btn-outline-primary btn-sm", title: "View #{agent.fullname}'s report" do
+                    %i.bi.bi-eye
       - else
         .text-center.text-muted.py-5
           %i.bi.bi-file-earmark-bar-graph{style: "font-size: 2rem;"}
@@ -85,86 +107,5 @@
       = paginate @agents
 
 - else
-  / Filters
-  - active_filters = params.slice(:start_date, :end_date, :status, :location_id, :customer_id, :ticket_type).values.any?(&:present?)
-  .card.filter-bar.border-0.shadow-sm.mb-4
-    .card-body.py-2
-      = form_with url: request.path, method: :get, local: true, class: "row g-2 align-items-end", data: { controller: "auto-submit", action: "change->auto-submit#submit" } do |f|
-        .col-md-2
-          = label_tag :start_date, "Start Date", class: "form-label mb-1 fw-bold"
-          = date_field_tag :start_date, params[:start_date], class: "form-control form-control-sm"
-        .col-md-2
-          = label_tag :end_date, "End Date", class: "form-label mb-1 fw-bold"
-          = date_field_tag :end_date, params[:end_date], class: "form-control form-control-sm"
-        .col-md-2
-          = label_tag :status, "Status", class: "form-label mb-1 fw-bold"
-          = select_tag :status, options_for_select([["All", ""], ["Open", "open"], ["In Progress", "in_progress"], ["Closed", "closed"], ["Cancelled", "cancelled"]], params[:status]), class: "form-select form-select-sm"
-        .col-md-2
-          = label_tag :location_id, "Location", class: "form-label mb-1 fw-bold"
-          = select_tag :location_id, options_for_select([["All Locations", ""]] + @locations.map { |l| [l.name, l.id] }, params[:location_id]), class: "form-select form-select-sm"
-        .col-md-2
-          = label_tag :customer_id, "Customer", class: "form-label mb-1 fw-bold"
-          = select_tag :customer_id, options_for_select([["All Customers", ""]] + @customers.map { |c| ["#{c.fullname} (#{c.email})", c.id] }, params[:customer_id]), class: "form-select form-select-sm"
-        .col-md-2
-          = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
-          - type_options = Ticket::TICKET_TYPES.map { |t| [Ticket::TYPE_LABELS[t] || t.humanize, t] }
-          = select_tag :ticket_type, options_for_select([["All Types", ""]] + type_options.sort_by(&:first), params[:ticket_type]), class: "form-select form-select-sm"
-        - if active_filters
-          .col-md-2.mt-3
-            = link_to request.path, class: "btn btn-outline-secondary btn-sm w-100" do
-              %i.bi.bi-x-circle.me-1
-              Clear Filters
-
-  / Report Table
-  .card.border-0.shadow-sm
-    .card-body.p-0
-      - if @tickets.any?
-        %table.table.table-hover.mb-0
-          %thead.table-light
-            %tr
-              %th{style: "width: 6%;"} Ticket ID
-              %th{style: "width: 14%;"} Title
-              %th{style: "width: 16%;"} Description
-              %th{style: "width: 9%;"} Status
-              %th{style: "width: 14%;"} Created Date/Time
-              %th{style: "width: 17%;"} Customer (email)
-              %th{style: "width: 13%;"} Location
-              %th{style: "width: 11%;"} Ticket Type
-          %tbody
-            - @tickets.each do |ticket|
-              %tr
-                %td.text-muted{style: "font-size:13px;"}
-                  \#{ticket.id}
-                %td
-                  %span.tooltip-wrap{data: {tooltip: ticket.title}}
-                    %span.text-truncate-cell= ticket.title
-                %td
-                  %span.tooltip-wrap{data: {tooltip: ticket.details}}
-                    %span.text-truncate-cell= ticket.details.presence || "-"
-                %td
-                  - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
-                  %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
-                %td{style: "font-size:13px;"}= ticket.created_at.strftime("%b %d, %Y %I:%M %p")
-                %td
-                  %span.tooltip-wrap{data: {tooltip: ticket.customer&.email}}
-                    %span.text-truncate-cell= ticket.customer&.email || "-"
-                %td
-                  %span.tooltip-wrap{data: {tooltip: ticket.location&.name}}
-                    %span.text-truncate-cell= ticket.location&.name || "-"
-                %td= ticket.type_label
-      - else
-        .text-center.text-muted.py-5
-          %i.bi.bi-file-earmark-bar-graph{style: "font-size: 2rem;"}
-          %p.mt-2 No tickets found for the selected filters.
-
-  - if @tickets.total_pages > 1
-    .d-flex.justify-content-between.align-items-center.mt-3.px-1
-      %small.text-muted
-        Showing
-        %strong= @tickets.offset_value + 1
-        –
-        %strong= [@tickets.offset_value + @tickets.limit_value, @tickets.total_count].min
-        of
-        %strong= @tickets.total_count
-        tickets
-      = paginate @tickets
+  = render "tickets_filters"
+  = render "tickets_table"

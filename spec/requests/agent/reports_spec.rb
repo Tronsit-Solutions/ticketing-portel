@@ -45,4 +45,14 @@ RSpec.describe "Agent::Reports", type: :request do
       expect(response.body).to include("Alice Agent")
     end
   end
+
+  describe "GET /agent/reports?report=agent_detail" do
+    it "returns 200 and renders the selected agent's details and tickets" do
+      sign_in agent
+      get agent_reports_path(report: "agent_detail", agent_id: other_agent.id)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Alice Agent")
+      expect(response.body).to include(other_agent.email)
+    end
+  end
 end
