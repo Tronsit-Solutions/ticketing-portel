@@ -79,10 +79,12 @@ class ReportsController < ApplicationController
 
   def tickets_csv(tickets)
     CSV.generate(headers: true) do |csv|
-      csv << ["Ticket ID", "Status", "Created Date/Time", "Customer (email)", "Location", "Ticket Type"]
+      csv << ["Ticket ID", "Title", "Description", "Status", "Created Date/Time", "Customer (email)", "Location", "Ticket Type"]
       tickets.find_each do |ticket|
         csv << [
           ticket.id,
+          ticket.title,
+          ticket.details,
           ticket.status.humanize,
           ticket.created_at.strftime("%b %d, %Y %I:%M %p"),
           ticket.customer&.email,

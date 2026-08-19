@@ -122,17 +122,25 @@
         %table.table.table-hover.mb-0
           %thead.table-light
             %tr
-              %th{style: "width: 10%;"} Ticket ID
-              %th{style: "width: 12%;"} Status
-              %th{style: "width: 20%;"} Created Date/Time
-              %th{style: "width: 26%;"} Customer (email)
-              %th{style: "width: 18%;"} Location
-              %th{style: "width: 14%;"} Ticket Type
+              %th{style: "width: 6%;"} Ticket ID
+              %th{style: "width: 14%;"} Title
+              %th{style: "width: 16%;"} Description
+              %th{style: "width: 9%;"} Status
+              %th{style: "width: 14%;"} Created Date/Time
+              %th{style: "width: 17%;"} Customer (email)
+              %th{style: "width: 13%;"} Location
+              %th{style: "width: 11%;"} Ticket Type
           %tbody
             - @tickets.each do |ticket|
               %tr
                 %td.text-muted{style: "font-size:13px;"}
                   \#{ticket.id}
+                %td
+                  %span.tooltip-wrap{data: {tooltip: ticket.title}}
+                    %span.text-truncate-cell= ticket.title
+                %td
+                  %span.tooltip-wrap{data: {tooltip: ticket.details}}
+                    %span.text-truncate-cell= ticket.details.presence || "-"
                 %td
                   - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
                   %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize

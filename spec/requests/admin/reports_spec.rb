@@ -17,6 +17,22 @@ RSpec.describe "Admin::Reports", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Ticket Reports")
     end
+
+    it "shows the ticket title and description" do
+      ticket = create(:ticket, assignee: agent, title: "VPN not connecting")
+      ticket.update!(details: "Cannot connect to the VPN since this morning.")
+
+      get admin_reports_path
+      expect(response.body).to include("VPN not connecting")
+      expect(response.body).to include("Cannot connect to the VPN since this morning.")
+    end
+
+    it "shows a dash when the ticket has no description" do
+      create(:ticket, assignee: agent, title: "No details ticket")
+
+      get admin_reports_path
+      expect(response.body).to include("No details ticket")
+    end
   end
 
   describe "GET /admin/reports?report=agents" do
