@@ -17,6 +17,22 @@ RSpec.describe "Admin::Reports", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Ticket Reports")
     end
+
+    it "shows the ticket title and description" do
+      ticket = create(:ticket, assignee: agent, title: "VPN not connecting")
+      ticket.update!(details: "Cannot connect to the VPN since this morning.")
+
+      get admin_reports_path
+      expect(response.body).to include("VPN not connecting")
+      expect(response.body).to include("Cannot connect to the VPN since this morning.")
+    end
+
+    it "shows a dash when the ticket has no description" do
+      create(:ticket, assignee: agent, title: "No details ticket")
+
+      get admin_reports_path
+      expect(response.body).to include("No details ticket")
+    end
   end
 
   describe "GET /admin/reports?report=agents" do
@@ -75,6 +91,62 @@ RSpec.describe "Admin::Reports", type: :request do
       expect(response.media_type).to eq("text/csv")
       expect(response.body).to include("Agent,Email,Team,Status,Joining Date,Open,Closed,Total")
       expect(response.body).to include("Alice Agent")
+    end
+  end
+
+  describe "GET /admin/reports?report=agent_detail" do
+    it "returns 200 and renders the agent's details and their tickets" do
+      ticket = create(:ticket, assignee: agent, title: "VPN not connecting")
+
+      get admin_reports_path(report: "agent_detail", agent_id: agent.id)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Alice Agent&#39;s Report")
+      expect(response.body).to include("Alice Agent")
+      expect(response.body).to include(agent.email)
+      expect(response.body).to include(team.name)
+      expect(response.body).to include("VPN not connecting")
+    end
+
+    it "only shows tickets assigned to that agent" do
+      other_agent = create(:user, :agent, fullname: "Other Agent")
+      create(:ticket, assignee: other_agent, title: "Not mine")
+
+      get admin_reports_path(report: "agent_detail", agent_id: agent.id)
+      expect(response.body).not_to include("Not mine")
+    end
+
+    it "filters the agent's tickets by status" do
+      create(:ticket, assignee: agent, title: "Open one", status: "open")
+      create(:ticket, assignee: agent, title: "Closed one", status: "closed")
+
+      get admin_reports_path(report: "agent_detail", agent_id: agent.id, status: "closed")
+      expect(response.body).to include("Closed one")
+      expect(response.body).not_to include("Open one")
+    end
+
+    it "redirects with an alert when the agent does not exist" do
+      get admin_reports_path(report: "agent_detail", agent_id: -1)
+      expect(response).to redirect_to(admin_reports_path(report: "agents"))
+    end
+
+    it "redirects when the given user is not an agent" do
+      customer = create(:user, :customer)
+      get admin_reports_path(report: "agent_detail", agent_id: customer.id)
+      expect(response).to redirect_to(admin_reports_path(report: "agents"))
+    end
+  end
+
+  describe "GET /admin/reports.csv?report=agent_detail" do
+    it "streams a CSV with the agent's details followed by their tickets" do
+      create(:ticket, assignee: agent, title: "VPN not connecting")
+
+      get admin_reports_path(format: :csv, report: "agent_detail", agent_id: agent.id)
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("text/csv")
+      expect(response.body).to include("Agent Details")
+      expect(response.body).to include("Alice Agent")
+      expect(response.body).to include("Tickets")
+      expect(response.body).to include("VPN not connecting")
     end
   end
 end

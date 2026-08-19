@@ -10,30 +10,58 @@ class ReportsController < ApplicationController
     end
   end
 
+  REPORTS = %w[tickets agents agent_detail].freeze
+  TICKETS_CSV_HEADERS = ["Ticket ID", "Title", "Description", "Status", "Created Date/Time", "Customer (email)", "Location", "Ticket Type"].freeze
+
   def index
-    @report = params[:report] == "agents" ? "agents" : "tickets"
+    @report = REPORTS.include?(params[:report]) ? params[:report] : "tickets"
 
-    if @report == "agents"
-      @teams  = Team.ordered
-      @agents = filtered_agents
-
-      respond_to do |format|
-        format.html { @agents = @agents.page(params[:page]).per(25) }
-        format.csv  { send_data agents_csv(@agents), filename: "agents-report-#{Date.current}.csv" }
-      end
-    else
-      @locations = Location.ordered
-      @customers = User.customers.active.order(:fullname)
-      @tickets   = filtered_tickets
-
-      respond_to do |format|
-        format.html { @tickets = @tickets.page(params[:page]).per(25) }
-        format.csv  { send_data tickets_csv(@tickets), filename: "tickets-report-#{Date.current}.csv" }
-      end
+    case @report
+    when "agents"        then index_agents
+    when "agent_detail"  then index_agent_detail
+    else                      index_tickets
     end
   end
 
   private
+
+  def index_tickets
+    @locations = Location.ordered
+    @customers = User.customers.active.order(:fullname)
+    @tickets   = filtered_tickets
+
+    respond_to do |format|
+      format.html { @tickets = @tickets.page(params[:page]).per(25) }
+      format.csv  { send_data tickets_csv(@tickets), filename: "tickets-report-#{Date.current}.csv" }
+    end
+  end
+
+  def index_agents
+    @teams  = Team.ordered
+    @agents = filtered_agents
+
+    respond_to do |format|
+      format.html { @agents = @agents.page(params[:page]).per(25) }
+      format.csv  { send_data agents_csv(@agents), filename: "agents-report-#{Date.current}.csv" }
+    end
+  end
+
+  def index_agent_detail
+    @agent = User.agents.find(params[:agent_id])
+    @locations = Location.ordered
+    @customers = User.customers.active.order(:fullname)
+    @tickets   = filtered_tickets.where(assignee_id: @agent.id)
+
+    respond_to do |format|
+      format.html { @tickets = @tickets.page(params[:page]).per(25) }
+      format.csv do
+        filename = "agent-report-#{@agent.fullname.parameterize}-#{Date.current}.csv"
+        send_data agent_detail_csv(@agent, @tickets), filename: filename
+      end
+    end
+  rescue ActiveRecord::RecordNotFound
+    redirect_to url_for(only_path: true, format: nil, report: "agents"), alert: "Agent not found."
+  end
 
   def filtered_agents
     agents = User.agents.includes(:team)
@@ -77,38 +105,56 @@ class ReportsController < ApplicationController
     tickets
   end
 
+  def ticket_csv_row(ticket)
+    [
+      ticket.id,
+      ticket.title,
+      ticket.details,
+      ticket.status.humanize,
+      ticket.created_at.strftime("%b %d, %Y %I:%M %p"),
+      ticket.customer&.email,
+      ticket.location&.name,
+      ticket.type_label
+    ]
+  end
+
   def tickets_csv(tickets)
     CSV.generate(headers: true) do |csv|
-      csv << ["Ticket ID", "Status", "Created Date/Time", "Customer (email)", "Location", "Ticket Type"]
-      tickets.find_each do |ticket|
-        csv << [
-          ticket.id,
-          ticket.status.humanize,
-          ticket.created_at.strftime("%b %d, %Y %I:%M %p"),
-          ticket.customer&.email,
-          ticket.location&.name,
-          ticket.type_label
-        ]
-      end
+      csv << TICKETS_CSV_HEADERS
+      tickets.find_each { |ticket| csv << ticket_csv_row(ticket) }
     end
+  end
+
+  def agent_csv_row(agent)
+    stats = agent.ticket_stats
+    [
+      agent.fullname,
+      agent.email,
+      agent.team&.name,
+      agent.is_active? ? "Active" : "Inactive",
+      agent.created_at.strftime("%b %d, %Y"),
+      stats[:open],
+      stats[:closed],
+      stats[:total]
+    ]
   end
 
   def agents_csv(agents)
     CSV.generate(headers: true) do |csv|
       csv << ["Agent", "Email", "Team", "Status", "Joining Date", "Open", "Closed", "Total"]
-      agents.find_each do |agent|
-        assigned = agent.assigned_tickets
-        csv << [
-          agent.fullname,
-          agent.email,
-          agent.team&.name,
-          agent.is_active? ? "Active" : "Inactive",
-          agent.created_at.strftime("%b %d, %Y"),
-          assigned.open.count + assigned.in_progress.count,
-          assigned.closed.count,
-          assigned.count
-        ]
-      end
+      agents.find_each { |agent| csv << agent_csv_row(agent) }
+    end
+  end
+
+  def agent_detail_csv(agent, tickets)
+    CSV.generate(headers: true) do |csv|
+      csv << ["Agent Details"]
+      csv << ["Agent", "Email", "Team", "Status", "Joining Date", "Open", "Closed", "Total"]
+      csv << agent_csv_row(agent)
+      csv << []
+      csv << ["Tickets"]
+      csv << TICKETS_CSV_HEADERS
+      tickets.find_each { |ticket| csv << ticket_csv_row(ticket) }
     end
   end
 end

@@ -170,7 +170,7 @@ class TicketsController < ApplicationController
   private
 
   def apply_submitter!(ticket)
-    if current_user.agent? || current_user.manager?
+    if current_user.agent? || current_user.manager? || current_user.admin?
       ticket.customer   = User.find(params[:ticket][:customer_id])
       ticket.created_by = current_user
       ticket.status     = "open"

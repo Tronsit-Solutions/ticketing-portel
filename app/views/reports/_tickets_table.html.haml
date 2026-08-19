@@ -1,0 +1,52 @@
+.card.border-0.shadow-sm
+  .card-body.p-0
+    - if @tickets.any?
+      %table.table.table-hover.mb-0
+        %thead.table-light
+          %tr
+            %th{style: "width: 6%;"} Ticket ID
+            %th{style: "width: 14%;"} Title
+            %th{style: "width: 16%;"} Description
+            %th{style: "width: 9%;"} Status
+            %th{style: "width: 14%;"} Created Date/Time
+            %th{style: "width: 17%;"} Customer (email)
+            %th{style: "width: 13%;"} Location
+            %th{style: "width: 11%;"} Ticket Type
+        %tbody
+          - @tickets.each do |ticket|
+            %tr
+              %td.text-muted{style: "font-size:13px;"}
+                \#{ticket.id}
+              %td
+                %span.tooltip-wrap{data: {tooltip: ticket.title}}
+                  %span.text-truncate-cell= ticket.title
+              %td
+                %span.tooltip-wrap{data: {tooltip: ticket.details}}
+                  %span.text-truncate-cell= ticket.details.presence || "-"
+              %td
+                - color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+                %span{class: "badge bg-#{color[ticket.status]}"}= ticket.status.humanize
+              %td{style: "font-size:13px;"}= ticket.created_at.strftime("%b %d, %Y %I:%M %p")
+              %td
+                %span.tooltip-wrap{data: {tooltip: ticket.customer&.email}}
+                  %span.text-truncate-cell= ticket.customer&.email || "-"
+              %td
+                %span.tooltip-wrap{data: {tooltip: ticket.location&.name}}
+                  %span.text-truncate-cell= ticket.location&.name || "-"
+              %td= ticket.type_label
+    - else
+      .text-center.text-muted.py-5
+        %i.bi.bi-file-earmark-bar-graph{style: "font-size: 2rem;"}
+        %p.mt-2 No tickets found for the selected filters.
+
+- if @tickets.total_pages > 1
+  .d-flex.justify-content-between.align-items-center.mt-3.px-1
+    %small.text-muted
+      Showing
+      %strong= @tickets.offset_value + 1
+      –
+      %strong= [@tickets.offset_value + @tickets.limit_value, @tickets.total_count].min
+      of
+      %strong= @tickets.total_count
+      tickets
+    = paginate @tickets

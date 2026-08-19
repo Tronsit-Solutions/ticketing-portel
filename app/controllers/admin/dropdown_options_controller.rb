@@ -9,7 +9,7 @@ class Admin::DropdownOptionsController < ApplicationController
 
   def index
     load_index_collections
-    @new_dropdown_option = DropdownOption.new(category: @active_category)
+    @new_dropdown_option = DropdownOption.new(category: @active_category, position: next_position_for(@active_category))
   end
 
   def create
@@ -47,6 +47,15 @@ class Admin::DropdownOptionsController < ApplicationController
       notice: "\"#{@dropdown_option.label}\" has been #{status}."
   end
 
+  def next_position
+    category = params[:category]
+    if DropdownOption::CATEGORIES.include?(category)
+      render json: { position: next_position_for(category) }
+    else
+      render json: { error: "Invalid category" }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def load_index_collections(category: nil)
@@ -69,6 +78,10 @@ class Admin::DropdownOptionsController < ApplicationController
 
   def tab_for(category)
     DropdownOption::TICKET_FORM_CATEGORIES.include?(category) ? "ticket_forms" : "hiring_termination"
+  end
+
+  def next_position_for(category)
+    (DropdownOption.where(category: category).maximum(:position) || 0) + 1
   end
 
   def dropdown_option_params

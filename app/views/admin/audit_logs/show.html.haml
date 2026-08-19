@@ -24,18 +24,23 @@
   .al-kv-row:last-child { border-bottom: none; }
   .al-kv-label { width: 160px; flex-shrink: 0; color: #6b7280; font-weight: 600; }
   .al-kv-value { color: #1f2937; word-break: break-word; }
-  .al-diff-pre {
-    background: #f8f9fb;
-    border: 1px solid #eef0f3;
-    border-radius: 10px;
-    padding: 16px;
-    font-size: 12.5px;
-    font-family: "SFMono-Regular", Consolas, monospace;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 420px;
-    overflow-y: auto;
+  .al-data-table {
+    font-size: 13.5px;
   }
+  .al-data-table th {
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom-width: 1px;
+  }
+  .al-data-table td {
+    word-break: break-word;
+    vertical-align: top;
+  }
+  .al-diff-old { color: #b42318; text-decoration: line-through; }
+  .al-diff-new { color: #067647; }
 
 = link_to admin_audit_logs_path, class: "btn btn-sm btn-outline-secondary mb-3" do
   %i.bi.bi-arrow-left
@@ -78,4 +83,30 @@
 
     - if @log.changed_data.present?
       %h6.mt-4.mb-2 Data
-      %pre.al-diff-pre= JSON.pretty_generate(@log.changed_data)
+      .table-responsive
+        - data = @log.changed_data
+        - if data.key?("changes")
+          %table.table.table-sm.al-data-table.mb-0
+            %thead
+              %tr
+                %th{style: "width: 30%;"} Field
+                %th{style: "width: 35%;"} From
+                %th{style: "width: 35%;"} To
+            %tbody
+              - data["changes"].each do |field, (before_value, after_value)|
+                %tr
+                  %td.fw-semibold= field.humanize
+                  %td.al-diff-old= display_audit_value(before_value)
+                  %td.al-diff-new= display_audit_value(after_value)
+        - else
+          - fields = data["after"] || data["before"] || data
+          %table.table.table-sm.al-data-table.mb-0
+            %thead
+              %tr
+                %th{style: "width: 30%;"} Field
+                %th Value
+            %tbody
+              - fields.each do |field, value|
+                %tr
+                  %td.fw-semibold= field.humanize
+                  %td= display_audit_value(value)

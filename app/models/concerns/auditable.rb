@@ -49,7 +49,7 @@ module Auditable
       category:     audit_category,
       description:  "#{audit_actor_name} created #{model_name.human.downcase} \"#{audit_label}\"",
       auditable:    self,
-      changed_data: { "after" => audit_snapshot },
+      changed_data: { "after" => audit_create_snapshot },
       request:      audit_request
     )
   end
@@ -91,5 +91,11 @@ module Auditable
 
   def audit_snapshot
     attributes.except(*audit_skipped_attributes)
+  end
+
+  # Creation logs only need enough to identify the record, not its whole
+  # schema — id plus whatever field audit_label is built from.
+  def audit_create_snapshot
+    { "id" => id, "label" => audit_label }
   end
 end

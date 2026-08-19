@@ -36,6 +36,14 @@ class User < ApplicationRecord
     is_active? ? super : :deactivated
   end
 
+  def ticket_stats
+    {
+      open:   assigned_tickets.open.count + assigned_tickets.in_progress.count,
+      closed: assigned_tickets.closed.count,
+      total:  assigned_tickets.count
+    }
+  end
+
   def audit_label
     fullname.presence || email
   end
