@@ -15,6 +15,9 @@ Rails.application.routes.draw do
       member do
         patch :toggle_active
       end
+      collection do
+        get :next_position
+      end
     end
     resources :audit_logs, only: [:index, :show]
   end
