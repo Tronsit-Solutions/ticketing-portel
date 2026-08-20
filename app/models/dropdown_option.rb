@@ -76,6 +76,10 @@ class DropdownOption < ApplicationRecord
 
   private
 
+  def audit_create_snapshot
+    { "id" => id, "label" => label }
+  end
+
   def default_value_to_label
     self.value = value.presence || label
   end
