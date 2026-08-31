@@ -84,6 +84,9 @@
             %small.text-muted Issue Category
             %div{style: "font-size:13px;"}= @ticket.metadata["issue"]
 
+    / Similar Tickets
+    = render "tickets/similar_tickets", ticket: @ticket, similar_tickets: @similar_tickets, variant: :agent
+
     / Assign form collapse
     - if current_user.admin? || current_user.manager?
       #assignForm.collapse.mb-3

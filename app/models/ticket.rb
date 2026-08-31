@@ -103,6 +103,39 @@ class Ticket < ApplicationRecord
     AuditLog::TICKETS
   end
 
+  # Similar tickets — same category, judged to mean the same thing regardless
+  # of wording. Computed asynchronously by ComputeSimilarTicketsJob and cached
+  # in metadata so we don't call the AI provider on every page view.
+  def similar_tickets
+    ids = metadata["similar_ticket_ids"]
+    return Ticket.none if ids.blank?
+
+    Ticket.where(id: ids).order(created_at: :desc)
+  end
+
+  def similar_tickets_computed?
+    metadata["similar_computed_at"].present?
+  end
+
+  SIMILAR_TICKETS_TTL = 1.hour
+
+  # Stale once the title has changed since the last computation, it's
+  # simply never been computed, or — for still-open tickets — enough time
+  # has passed that new tickets may have shown up worth matching against.
+  # (Recomputing on title change alone would miss the common case where
+  # *other* tickets are created/edited after this one was last checked.)
+  def similar_tickets_stale?
+    return true if metadata["similar_computed_for"] != title
+    return false if status.in?(%w[closed cancelled])
+
+    computed_at = metadata["similar_computed_at"]
+    computed_at.blank? || Time.zone.parse(computed_at) < SIMILAR_TICKETS_TTL.ago
+  end
+
+  def enqueue_similar_tickets_computation
+    ComputeSimilarTicketsJob.perform_later(id)
+  end
+
   def resolution_duration
     return "Pending" unless status == "closed"
     return "N/A" unless assigned_at.present? && resolved_at.present?
@@ -168,6 +201,8 @@ class Ticket < ApplicationRecord
   before_update        :set_resolved_at, if: :status_changed_to_closed?
   after_create_commit  :broadcast_unassigned_badge, if: :unassigned?
   after_update_commit  :broadcast_unassigned_badge, if: :saved_change_to_assignee_id?
+  after_create_commit  :enqueue_similar_tickets_computation
+  after_update_commit  :enqueue_similar_tickets_computation, if: :saved_change_to_title?
 
   private
 

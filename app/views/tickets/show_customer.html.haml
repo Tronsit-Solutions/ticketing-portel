@@ -186,6 +186,71 @@
     font-size: 14px;
     color: #0077b6;
   }
+  .similar-tickets-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  .similar-tickets-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+  .similar-tickets-header i { color: #f5a623; }
+  .similar-count {
+    margin-left: auto;
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 20px;
+    padding: 1px 9px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .similar-tickets-body { padding: 6px; }
+  .similar-ticket-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s;
+  }
+  .similar-ticket-chip:hover { background: #f3f4f6; }
+  .similar-ticket-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex-grow: 1;
+  }
+  .similar-ticket-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .similar-ticket-meta { font-size: 12px; color: #9ca3af; }
+  .similar-status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .similar-status-dot.status-open { background: #0d6efd; }
+  .similar-status-dot.status-in_progress { background: #ffc107; }
+  .similar-status-dot.status-closed { background: #198754; }
+  .similar-status-dot.status-cancelled { background: #dc3545; }
 
 :javascript
   function openMsgModal(data) {
@@ -220,6 +285,8 @@
     = link_to tickets_path, class: "category-chip" do
       %span My Tickets
       %span.chip-count= @my_tickets_count
+
+    = render "tickets/similar_tickets", ticket: @ticket, similar_tickets: @similar_tickets, variant: :customer
 
   / Right — Ticket Detail
   .right-panel

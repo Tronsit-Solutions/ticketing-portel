@@ -1,0 +1,38 @@
+- variant ||= :agent
+= turbo_stream_from ticket, :"similar_tickets_#{variant}"
+
+%div{id: "similar_tickets_#{variant}_#{ticket.id}"}
+  - if similar_tickets.any?
+    - if variant == :agent
+      .card.border-0.shadow-sm.mb-3
+        .card-header.bg-white.d-flex.align-items-center.gap-2
+          %i.bi.bi-stars.text-warning
+          %span.fw-bold Similar Tickets
+          %span.badge.rounded-pill.bg-light.text-secondary.border= similar_tickets.size
+        .card-body.p-0
+          - similar_tickets.each do |t|
+            = link_to ticket_path(t), class: "d-flex align-items-center justify-content-between gap-2 px-3 py-2 border-bottom text-decoration-none text-dark similar-ticket-row" do
+              .flex-grow-1.min-w-0
+                %div{style: "font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"}= t.title
+                %small.text-muted \##{t.id} &middot; #{t.created_at.strftime("%b %d, %Y")}
+              - status_color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+              %span{class: "badge bg-#{status_color[t.status]}", style: "font-size:10px;"}= t.status.humanize
+    - else
+      .similar-tickets-card
+        .similar-tickets-header
+          %i.bi.bi-stars
+          %span Similar Tickets
+          %span.similar-count= similar_tickets.size
+        .similar-tickets-body
+          - similar_tickets.each do |t|
+            = link_to ticket_path(t), class: "similar-ticket-chip" do
+              .similar-ticket-info
+                %span.similar-ticket-title= t.title
+                %span.similar-ticket-meta \##{t.id} &middot; #{t.created_at.strftime("%b %d, %Y")}
+              %span{class: "similar-status-dot status-#{t.status}"}
+  - elsif !ticket.similar_tickets_computed? || ticket.similar_tickets_stale?
+    - if variant == :agent
+      .card.border-0.shadow-sm.mb-3
+        .card-body.text-center.text-muted{style: "font-size:13px; padding: 18px;"}
+          %i.bi.bi-hourglass-split.me-1
+          Checking for similar tickets&hellip;
