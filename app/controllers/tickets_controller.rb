@@ -43,6 +43,8 @@ class TicketsController < ApplicationController
   def show
     @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
+    @ticket.enqueue_similar_tickets_computation if @ticket.similar_tickets_stale?
+    @similar_tickets = @ticket.similar_tickets
     if current_user.customer?
       @my_tickets_count = Ticket.where(customer: current_user).count
       render :show_customer
