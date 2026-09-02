@@ -103,9 +103,12 @@ class Ticket < ApplicationRecord
     AuditLog::TICKETS
   end
 
-  # Similar tickets — same category, judged to mean the same thing regardless
-  # of wording. Computed asynchronously by ComputeSimilarTicketsJob and cached
-  # in metadata so we don't call the AI provider on every page view.
+  # Similar tickets — same category, closed with resolution text, judged to
+  # mean the same thing as this ticket's title regardless of wording. Only
+  # resolved tickets are surfaced since the point is showing how a matching
+  # issue was actually resolved. Computed asynchronously by
+  # ComputeSimilarTicketsJob and cached in metadata so we don't recompute
+  # embeddings on every page view.
   def similar_tickets
     ids = metadata["similar_ticket_ids"]
     return Ticket.none if ids.blank?
@@ -119,13 +122,21 @@ class Ticket < ApplicationRecord
 
   SIMILAR_TICKETS_TTL = 1.hour
 
-  # Stale once the title has changed since the last computation, it's
-  # simply never been computed, or — for still-open tickets — enough time
-  # has passed that new tickets may have shown up worth matching against.
+  # Bump this whenever SimilarTicketFinder's matching rules change, so
+  # tickets/matches cached under the old rules (e.g. before matches were
+  # restricted to closed+resolved tickets) are treated as stale and
+  # recomputed, instead of showing stale matches forever on closed tickets.
+  SIMILAR_TICKETS_RULES_VERSION = 2
+
+  # Stale once the title has changed since the last computation, the
+  # matching rules have changed since it was last computed, it's simply
+  # never been computed, or — for still-open tickets — enough time has
+  # passed that new tickets may have shown up worth matching against.
   # (Recomputing on title change alone would miss the common case where
   # *other* tickets are created/edited after this one was last checked.)
   def similar_tickets_stale?
     return true if metadata["similar_computed_for"] != title
+    return true if metadata["similar_rules_version"] != SIMILAR_TICKETS_RULES_VERSION
     return false if status.in?(%w[closed cancelled])
 
     computed_at = metadata["similar_computed_at"]

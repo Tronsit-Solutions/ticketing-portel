@@ -36,15 +36,19 @@ class SimilarTicketFinder
 
   private
 
-  # Returns [[id, embedding_vector], ...] for same-category tickets,
-  # computing (and persisting) any embeddings that aren't cached yet.
+  # Returns [[id, embedding_vector], ...] for same-category tickets that
+  # have actually been resolved (closed, with resolution text) — an
+  # unresolved or resolution-less ticket has nothing useful to show in the
+  # similar-tickets modal, so it's not worth surfacing as a match.
+  # Computes (and persists) any embeddings that aren't cached yet.
   #
   # Deliberately not using find_each here: it always paginates by primary
   # key ascending and ignores any explicit order/limit on the relation, so
   # it would silently scan the oldest tickets instead of the most recent
   # CANDIDATE_LIMIT — the whole point of the ordering below.
   def fetch_candidates
-    candidates = Ticket.where(ticket_type: @ticket.ticket_type).where.not(id: @ticket.id)
+    candidates = Ticket.where(ticket_type: @ticket.ticket_type, status: "closed")
+                        .where.not(id: @ticket.id).where.not(resolution: [nil, ""])
                         .order(created_at: :desc).limit(CANDIDATE_LIMIT)
 
     candidates.filter_map do |candidate|
