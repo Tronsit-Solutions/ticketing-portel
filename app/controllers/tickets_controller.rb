@@ -44,7 +44,7 @@ class TicketsController < ApplicationController
     @ticket_messages    = @ticket.ticket_messages.recent
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
     @ticket.enqueue_similar_tickets_computation if @ticket.similar_tickets_stale?
-    @similar_tickets = @ticket.similar_tickets
+    @similar_tickets = @ticket.similar_tickets.page(params[:similar_page]).per(4)
     if current_user.customer?
       @my_tickets_count = Ticket.where(customer: current_user).count
       render :show_customer

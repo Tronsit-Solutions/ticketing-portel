@@ -3,32 +3,39 @@
 
 %div{id: "similar_tickets_#{variant}_#{ticket.id}"}
   - if similar_tickets.any?
-    - if variant == :agent
-      .card.border-0.shadow-sm.mb-3
-        .card-header.bg-white.d-flex.align-items-center.gap-2
-          %i.bi.bi-stars.text-warning
-          %span.fw-bold Similar Tickets
-          %span.badge.rounded-pill.bg-light.text-secondary.border= similar_tickets.size
-        .card-body.p-0
-          - similar_tickets.each do |t|
-            %button.d-flex.align-items-center.justify-content-between.gap-2.px-3.py-2.border-bottom.text-decoration-none.text-dark.similar-ticket-row.w-100.text-start.border-0.bg-transparent{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#similarTicketModal_#{variant}_#{ticket.id}", "data-title" => t.title, "data-description" => t.details, "data-resolution" => t.resolution, "data-resolved-at" => t.resolved_at&.strftime("%b %d, %Y %l:%M %p")}
-              .flex-grow-1.min-w-0
-                %div{style: "font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"}= t.title
-                %small.text-muted ##{t.id} &middot; Resolved #{t.resolved_at&.strftime("%b %d, %Y")}
-              %i.bi.bi-chevron-right.text-muted{style: "font-size:12px;"}
-    - else
-      .similar-tickets-card
-        .similar-tickets-header
-          %i.bi.bi-stars
-          %span Similar Tickets
-          %span.similar-count= similar_tickets.size
-        .similar-tickets-body
-          - similar_tickets.each do |t|
-            %button.similar-ticket-chip.border-0.bg-transparent.w-100.text-start{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#similarTicketModal_#{variant}_#{ticket.id}", "data-title" => t.title, "data-description" => t.details, "data-resolution" => t.resolution, "data-resolved-at" => t.resolved_at&.strftime("%b %d, %Y %l:%M %p")}
-              .similar-ticket-info
-                %span.similar-ticket-title= t.title
-                %span.similar-ticket-meta ##{t.id} &middot; Resolved #{t.resolved_at&.strftime("%b %d, %Y")}
-              %i.bi.bi-chevron-right.text-muted{style: "font-size:12px;"}
+    = turbo_frame_tag "similar_tickets_frame_#{variant}_#{ticket.id}" do
+      - if variant == :agent
+        .card.border-0.shadow-sm.mb-3
+          .card-header.bg-white.d-flex.align-items-center.gap-2
+            %i.bi.bi-stars.text-warning
+            %span.fw-bold Similar Tickets
+            %span.badge.rounded-pill.bg-light.text-secondary.border= similar_tickets.total_count
+          .card-body.p-0
+            - similar_tickets.each do |t|
+              %button.d-flex.align-items-center.justify-content-between.gap-2.px-3.py-2.border-bottom.text-decoration-none.text-dark.similar-ticket-row.w-100.text-start.border-0.bg-transparent{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#similarTicketModal_#{variant}_#{ticket.id}", "data-title" => t.title, "data-description" => t.display_description, "data-resolution" => t.resolution, "data-resolved-at" => t.resolved_at&.strftime("%b %d, %Y %l:%M %p")}
+                .flex-grow-1.min-w-0
+                  %div{style: "font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"}= t.title
+                  %small.text-muted ##{t.id} &middot; Resolved #{t.resolved_at&.strftime("%b %d, %Y")}
+                %i.bi.bi-chevron-right.text-muted{style: "font-size:12px;"}
+          - if similar_tickets.total_pages > 1
+            .card-footer.bg-white.d-flex.justify-content-center.py-2
+              = paginate similar_tickets, param_name: :similar_page
+      - else
+        .similar-tickets-card
+          .similar-tickets-header
+            %i.bi.bi-stars
+            %span Similar Tickets
+            %span.similar-count= similar_tickets.total_count
+          .similar-tickets-body
+            - similar_tickets.each do |t|
+              %button.similar-ticket-chip.border-0.bg-transparent.w-100.text-start{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#similarTicketModal_#{variant}_#{ticket.id}", "data-title" => t.title, "data-description" => t.display_description, "data-resolution" => t.resolution, "data-resolved-at" => t.resolved_at&.strftime("%b %d, %Y %l:%M %p")}
+                .similar-ticket-info
+                  %span.similar-ticket-title= t.title
+                  %span.similar-ticket-meta ##{t.id} &middot; Resolved #{t.resolved_at&.strftime("%b %d, %Y")}
+                %i.bi.bi-chevron-right.text-muted{style: "font-size:12px;"}
+          - if similar_tickets.total_pages > 1
+            .d-flex.justify-content-center.py-2
+              = paginate similar_tickets, param_name: :similar_page
 
     / Shared modal — filled from the clicked row's data-* attributes on show.bs.modal
     %div.modal.fade{id: "similarTicketModal_#{variant}_#{ticket.id}", tabindex: "-1", "aria-hidden" => "true"}
@@ -74,3 +81,17 @@
         .card-body.text-center.text-muted{style: "font-size:13px; padding: 18px;"}
           %i.bi.bi-hourglass-split.me-1
           Checking for similar tickets&hellip;
+
+    -# The computation is enqueued in the same request that renders this
+    -# placeholder, so on a fast job (warm embedding model, cached
+    -# candidates) the broadcast can arrive before the browser's Turbo
+    -# Stream WebSocket has finished subscribing — that broadcast is then
+    -# missed and this placeholder is stuck until a manual reload. As a
+    -# safety net, reload once if we're still waiting a few seconds later.
+    :javascript
+      setTimeout(function () {
+        var el = document.getElementById("similar_tickets_#{variant}_#{ticket.id}");
+        if (el && el.querySelector(".bi-hourglass-split")) {
+          Turbo.visit(window.location.href, { action: "replace" });
+        }
+      }, 4000);

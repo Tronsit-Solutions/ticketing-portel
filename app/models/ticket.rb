@@ -68,6 +68,17 @@ class Ticket < ApplicationRecord
     self.metadata = (metadata || {}).merge("details" => val)
   end
 
+  # Human-readable description for display (e.g. the similar-tickets
+  # modal). Many legacy tickets imported from the old system never got a
+  # "details"/"description" metadata key populated (their original request
+  # wasn't submitted through this app's structured form) — for those, fall
+  # back to the first customer message, which is the closest thing they
+  # have to an original description.
+  def display_description
+    metadata["details"].presence || metadata["description"].presence ||
+      first_message_description
+  end
+
   # Scopes
   scope :open,        -> { where(status: "open") }
   scope :in_progress, -> { where(status: "in_progress") }
@@ -216,6 +227,14 @@ class Ticket < ApplicationRecord
   after_update_commit  :enqueue_similar_tickets_computation, if: :saved_change_to_title?
 
   private
+
+  def first_message_description
+    message = ticket_messages.where(message_type: "customer_reply", internal_note: false)
+                              .order(:created_at).first
+    return nil unless message
+
+    message.is_html? ? ActionView::Base.full_sanitizer.sanitize(message.details).squish : message.details
+  end
 
   def unassigned?
     assignee_id.nil?
