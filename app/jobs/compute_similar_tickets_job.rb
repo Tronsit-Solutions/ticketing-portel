@@ -18,23 +18,11 @@ class ComputeSimilarTicketsJob < ApplicationJob
       metadata: ticket.metadata.merge(
         "similar_ticket_ids"    => ids,
         "similar_computed_at"   => Time.current.iso8601,
-        "similar_computed_for"  => ticket.title
+        "similar_computed_for"  => ticket.title,
+        "similar_rules_version" => Ticket::SIMILAR_TICKETS_RULES_VERSION
       )
     )
     broadcast_similar(ticket)
-
-    # Similarity should read the same from either side: if A finds B similar,
-    # B's page should show A too, without waiting on B's own recompute cycle.
-    Ticket.where(id: ids).find_each do |matched|
-      next if matched.metadata["similar_ticket_ids"].to_a.include?(ticket.id)
-
-      matched.update_columns(
-        metadata: matched.metadata.merge(
-          "similar_ticket_ids" => (matched.metadata["similar_ticket_ids"].to_a + [ticket.id]).uniq
-        )
-      )
-      broadcast_similar(matched)
-    end
   end
 
   private
