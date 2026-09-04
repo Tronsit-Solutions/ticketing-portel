@@ -16,10 +16,11 @@ class ComputeSimilarTicketsJob < ApplicationJob
 
     ticket.update_columns(
       metadata: ticket.metadata.merge(
-        "similar_ticket_ids"    => ids,
-        "similar_computed_at"   => Time.current.iso8601,
-        "similar_computed_for"  => ticket.title,
-        "similar_rules_version" => Ticket::SIMILAR_TICKETS_RULES_VERSION
+        "similar_ticket_ids"               => ids,
+        "similar_computed_at"              => Time.current.iso8601,
+        "similar_computed_for"             => ticket.title,
+        "similar_computed_for_description" => ticket.display_description,
+        "similar_rules_version"            => Ticket::SIMILAR_TICKETS_RULES_VERSION
       )
     )
     broadcast_similar(ticket)

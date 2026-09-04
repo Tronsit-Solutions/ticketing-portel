@@ -1,10 +1,15 @@
-# Finds other tickets that mean the same thing as a given ticket's title,
-# scoped to the same category. Titles can be worded completely differently
+# Finds other tickets that mean the same thing as a given ticket, scoped to
+# the same category. Titles can be worded completely differently
 # ("printer won't print" vs "unable to print documents"), so plain string
 # matching isn't enough — this compares sentence embeddings (via
 # TicketEmbedder) instead of asking an LLM to judge each pair. Embeddings
 # run locally, so there's no API key, no rate limit, and results are
-# deterministic given the same titles.
+# deterministic given the same inputs.
+#
+# Title is checked first, since it's the most direct signal of "same
+# issue". Only when a candidate's title doesn't match do we fall back to
+# comparing descriptions — two tickets can have very differently worded
+# titles but describe the identical underlying problem in the body text.
 class SimilarTicketFinder
   CANDIDATE_LIMIT = 200
 
@@ -20,50 +25,74 @@ class SimilarTicketFinder
   end
 
   # Returns an array of ticket ids (within the candidate set) judged to
-  # mean the same thing as @ticket's title. Returns [] if there's nothing
-  # to compare against.
+  # mean the same thing as @ticket, by title or (failing that) description.
+  # Returns [] if there's nothing to compare against.
   def call
     candidates = fetch_candidates
     return [] if candidates.empty?
 
-    target_vector = TicketEmbedder.embed(@ticket.title)
+    target_title_vector = TicketEmbedder.embed(@ticket.title)
+    target_description  = @ticket.display_description
 
-    candidates.filter_map do |id, vector|
-      similarity = cosine_similarity(target_vector, vector)
-      id if similarity >= SIMILARITY_THRESHOLD
+    candidates.filter_map do |candidate|
+      if cosine_similarity(target_title_vector, title_embedding_for(candidate)) >= SIMILARITY_THRESHOLD
+        candidate.id
+      elsif target_description.present?
+        candidate_description_vector = description_embedding_for(candidate)
+        next if candidate_description_vector.nil?
+
+        target_description_vector ||= TicketEmbedder.embed(target_description)
+        candidate.id if cosine_similarity(target_description_vector, candidate_description_vector) >= SIMILARITY_THRESHOLD
+      end
     end
   end
 
   private
 
-  # Returns [[id, embedding_vector], ...] for same-category tickets that
-  # have actually been resolved (closed, with resolution text) — an
-  # unresolved or resolution-less ticket has nothing useful to show in the
-  # similar-tickets modal, so it's not worth surfacing as a match.
-  # Computes (and persists) any embeddings that aren't cached yet.
+  # Returns same-category tickets that have actually been resolved (closed,
+  # with resolution text) — an unresolved or resolution-less ticket has
+  # nothing useful to show in the similar-tickets modal, so it's not worth
+  # surfacing as a match.
   #
   # Deliberately not using find_each here: it always paginates by primary
   # key ascending and ignores any explicit order/limit on the relation, so
   # it would silently scan the oldest tickets instead of the most recent
   # CANDIDATE_LIMIT — the whole point of the ordering below.
   def fetch_candidates
-    candidates = Ticket.where(ticket_type: @ticket.ticket_type, status: "closed")
-                        .where.not(id: @ticket.id).where.not(resolution: [nil, ""])
-                        .order(created_at: :desc).limit(CANDIDATE_LIMIT)
+    Ticket.where(ticket_type: @ticket.ticket_type, status: "closed")
+          .where.not(id: @ticket.id).where.not(resolution: [nil, ""])
+          .order(created_at: :desc).limit(CANDIDATE_LIMIT)
+  end
 
-    candidates.filter_map do |candidate|
-      vector = candidate.metadata["title_embedding"]
-      if vector.blank? || candidate.metadata["title_embedding_for"] != candidate.title
-        vector = TicketEmbedder.embed(candidate.title)
-        candidate.update_columns(
-          metadata: candidate.metadata.merge(
-            "title_embedding"     => vector,
-            "title_embedding_for" => candidate.title
-          )
-        )
-      end
-      [candidate.id, vector]
-    end
+  def title_embedding_for(candidate)
+    vector = candidate.metadata["title_embedding"]
+    return vector if vector.present? && candidate.metadata["title_embedding_for"] == candidate.title
+
+    vector = TicketEmbedder.embed(candidate.title)
+    candidate.update_columns(
+      metadata: candidate.metadata.merge(
+        "title_embedding"     => vector,
+        "title_embedding_for" => candidate.title
+      )
+    )
+    vector
+  end
+
+  def description_embedding_for(candidate)
+    description = candidate.display_description
+    return nil if description.blank?
+
+    vector = candidate.metadata["description_embedding"]
+    return vector if vector.present? && candidate.metadata["description_embedding_for"] == description
+
+    vector = TicketEmbedder.embed(description)
+    candidate.update_columns(
+      metadata: candidate.metadata.merge(
+        "description_embedding"     => vector,
+        "description_embedding_for" => description
+      )
+    )
+    vector
   end
 
   def cosine_similarity(a, b)
