@@ -135,18 +135,24 @@ class Ticket < ApplicationRecord
 
   # Bump this whenever SimilarTicketFinder's matching rules change, so
   # tickets/matches cached under the old rules (e.g. before matches were
-  # restricted to closed+resolved tickets) are treated as stale and
-  # recomputed, instead of showing stale matches forever on closed tickets.
-  SIMILAR_TICKETS_RULES_VERSION = 2
+  # restricted to closed+resolved tickets, or before description was used
+  # as a fallback signal) are treated as stale and recomputed, instead of
+  # showing stale matches forever on closed tickets.
+  SIMILAR_TICKETS_RULES_VERSION = 3
 
-  # Stale once the title has changed since the last computation, the
-  # matching rules have changed since it was last computed, it's simply
-  # never been computed, or — for still-open tickets — enough time has
-  # passed that new tickets may have shown up worth matching against.
-  # (Recomputing on title change alone would miss the common case where
-  # *other* tickets are created/edited after this one was last checked.)
+  # Stale once the title or description has changed since the last
+  # computation, the matching rules have changed since it was last
+  # computed, it's simply never been computed, or — for still-open
+  # tickets — enough time has passed that new tickets may have shown up
+  # worth matching against. (Recomputing on title/description change alone
+  # would miss the common case where *other* tickets are created/edited
+  # after this one was last checked.) Description is compared by value,
+  # not a saved_change_to_ callback, since display_description can change
+  # without any column changing (e.g. it falls back to the first customer
+  # message, which may not exist yet at ticket-creation time).
   def similar_tickets_stale?
     return true if metadata["similar_computed_for"] != title
+    return true if metadata["similar_computed_for_description"] != display_description
     return true if metadata["similar_rules_version"] != SIMILAR_TICKETS_RULES_VERSION
     return false if status.in?(%w[closed cancelled])
 
@@ -156,6 +162,10 @@ class Ticket < ApplicationRecord
 
   def enqueue_similar_tickets_computation
     ComputeSimilarTicketsJob.perform_later(id)
+  end
+
+  def enqueue_similar_tickets_computation_if_title_changed
+    enqueue_similar_tickets_computation if saved_change_to_title?
   end
 
   def resolution_duration
@@ -220,11 +230,18 @@ class Ticket < ApplicationRecord
   end
 
   # Callbacks
+  #
+  # NOTE: after_create_commit/after_update_commit for the *same* method name
+  # register as a single callback chain entry, so their :if conditions get
+  # merged onto that one entry rather than kept separate — a create-time
+  # callback paired with an update-time :if condition on the same method
+  # name would silently never fire on create. Each pair below uses a
+  # distinct method name per event to avoid that trap.
   before_update        :set_resolved_at, if: :status_changed_to_closed?
-  after_create_commit  :broadcast_unassigned_badge, if: :unassigned?
-  after_update_commit  :broadcast_unassigned_badge, if: :saved_change_to_assignee_id?
+  after_create_commit  :broadcast_unassigned_badge_on_create, if: :unassigned?
+  after_update_commit  :broadcast_unassigned_badge_on_assignee_change, if: :saved_change_to_assignee_id?
   after_create_commit  :enqueue_similar_tickets_computation
-  after_update_commit  :enqueue_similar_tickets_computation, if: :saved_change_to_title?
+  after_update_commit  :enqueue_similar_tickets_computation_if_title_changed
 
   private
 
@@ -238,6 +255,14 @@ class Ticket < ApplicationRecord
 
   def unassigned?
     assignee_id.nil?
+  end
+
+  def broadcast_unassigned_badge_on_create
+    broadcast_unassigned_badge
+  end
+
+  def broadcast_unassigned_badge_on_assignee_change
+    broadcast_unassigned_badge
   end
 
   def broadcast_unassigned_badge
