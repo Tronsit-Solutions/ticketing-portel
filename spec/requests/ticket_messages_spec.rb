@@ -119,4 +119,33 @@ RSpec.describe "TicketMessages", type: :request do
       end
     end
   end
+
+  describe "Teams notifications" do
+    before { allow(TeamsNotifier).to receive(:enabled?).and_return(true) }
+
+    it "posts a plain-text excerpt of a reply" do
+      sign_in customer
+
+      expect {
+        post ticket_ticket_messages_path(ticket), params: { details: "<p>Still <strong>broken</strong></p>" }
+      }.to have_enqueued_job(TeamsNotificationJob).once.with(hash_including(
+        event:       "replied",
+        summary:     "**#{customer.fullname}** replied to this ticket",
+        quote:       "Still broken",
+        quote_label: "Customer reply"
+      ))
+    end
+
+    it "announces an internal note without its text" do
+      sign_in agent
+
+      expect {
+        post ticket_ticket_messages_path(ticket), params: { details: "Secret", internal_note: "true" }
+      }.to have_enqueued_job(TeamsNotificationJob).once.with(hash_including(
+        event:   "noted",
+        summary: "**#{agent.fullname}** added an internal note",
+        quote:   nil
+      ))
+    end
+  end
 end

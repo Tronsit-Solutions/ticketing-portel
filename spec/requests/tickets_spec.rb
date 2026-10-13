@@ -493,4 +493,110 @@ RSpec.describe "Tickets", type: :request do
       end
     end
   end
+
+  describe "Teams notifications" do
+    before { allow(TeamsNotifier).to receive(:enabled?).and_return(true) }
+
+    it "posts once when a ticket is submitted" do
+      create(:user, :agent)
+      sign_in customer
+
+      expect {
+        post tickets_path, params: {
+          ticket: { ticket_type: "technical_support", title: "Issue", metadata: { details: "It is broken" } }
+        }
+      }.to have_enqueued_job(TeamsNotificationJob).once.with { |args|
+        created = Ticket.order(:id).last
+        expect(args).to include(
+          event:       "created",
+          reference:   "##{created.id} · Technical Support",
+          subject:     "Issue",
+          summary:     "**#{customer.fullname}** submitted a new ticket",
+          quote:       "It is broken",
+          quote_label: "Description",
+          url:         a_string_ending_with("/tickets/#{created.id}")
+        )
+        expect(args[:facts]).to include("Requester" => customer.fullname, "Assigned to" => "Unassigned", "Status" => "Open")
+      }
+    end
+
+    it "posts when a ticket is assigned" do
+      open_ticket = create(:ticket, :open, customer: customer)
+      sign_in admin
+
+      expect {
+        patch assign_ticket_path(open_ticket), params: { assignee_id: agent.id }
+      }.to have_enqueued_job(TeamsNotificationJob).once.with(hash_including(
+        event:   "assigned",
+        summary: "**#{admin.fullname}** assigned this ticket to **#{agent.fullname}**",
+        facts:   hash_including("Assigned to" => agent.fullname, "Status" => "In progress")
+      ))
+    end
+
+    it "posts a reassignment with its reason" do
+      assigned_ticket = create(:ticket, :assigned, assignee: agent, customer: customer)
+      new_agent       = create(:user, :agent)
+      sign_in admin
+
+      expect {
+        patch assign_ticket_path(assigned_ticket), params: { assignee_id: new_agent.id, reason: "On leave" }
+      }.to have_enqueued_job(TeamsNotificationJob).with(hash_including(
+        event:       "reassigned",
+        summary:     "**#{admin.fullname}** reassigned this ticket from **#{agent.fullname}** to **#{new_agent.fullname}**",
+        quote:       "On leave",
+        quote_label: "Reason"
+      ))
+    end
+
+    it "posts when a ticket is self-assigned" do
+      open_ticket = create(:ticket, :open, customer: customer)
+      sign_in agent
+
+      expect {
+        patch self_assign_ticket_path(open_ticket)
+      }.to have_enqueued_job(TeamsNotificationJob).once.with(hash_including(
+        event:   "assigned",
+        summary: "**#{agent.fullname}** picked up this ticket"
+      ))
+    end
+
+    it "posts the resolution when a ticket is closed" do
+      assigned_ticket = create(:ticket, :assigned, assignee: agent, customer: customer)
+      sign_in agent
+
+      expect {
+        patch close_ticket_path(assigned_ticket), params: { resolution: { how_resolved: "Restarted the service" } }
+      }.to have_enqueued_job(TeamsNotificationJob).once.with(hash_including(
+        event:       "closed",
+        summary:     "**#{agent.fullname}** closed this ticket",
+        quote:       "Restarted the service",
+        quote_label: "Resolution",
+        facts:       hash_including("Status" => "Closed")
+      ))
+    end
+
+    it "posts when a ticket is cancelled" do
+      open_ticket = create(:ticket, :open, customer: customer)
+      sign_in customer
+
+      expect {
+        patch cancel_ticket_path(open_ticket)
+      }.to have_enqueued_job(TeamsNotificationJob).once.with(hash_including(
+        event:   "cancelled",
+        summary: "**#{customer.fullname}** cancelled this ticket",
+        facts:   hash_including("Status" => "Cancelled")
+      ))
+    end
+
+    it "posts nothing when no webhook is configured" do
+      allow(TeamsNotifier).to receive(:enabled?).and_return(false)
+      sign_in customer
+
+      expect {
+        post tickets_path, params: {
+          ticket: { ticket_type: "technical_support", title: "Issue", metadata: {} }
+        }
+      }.not_to have_enqueued_job(TeamsNotificationJob)
+    end
+  end
 end

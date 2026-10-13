@@ -1,4 +1,6 @@
 class TicketsController < ApplicationController
+  include TeamsNotifications
+
   before_action :set_ticket,            only: [:show, :assign, :self_assign, :close, :cancel]
   before_action :authorize_show!,        only: [:show]
   before_action :authorize_assign!,      only: [:assign]
@@ -117,6 +119,7 @@ class TicketsController < ApplicationController
       reason:        params[:reason]
     )
     notify_assignee(new_assignee, assigned_by: current_user)
+    post_assignment_to_teams(@ticket, new_assignee, assigned_by: current_user, previous: before_assignee, reason: params[:reason])
     @ticket.notify_customer!(
       responded_by: current_user,
       details:      "Your ticket ##{@ticket.id} has been assigned to #{new_assignee.fullname}: \"#{@ticket.title}\""
@@ -138,6 +141,7 @@ class TicketsController < ApplicationController
       reason:      "Self-assigned"
     )
     notify_assignee(current_user, assigned_by: current_user)
+    post_assignment_to_teams(@ticket, current_user, assigned_by: current_user)
     @ticket.notify_customer!(
       responded_by: current_user,
       details:      "Your ticket ##{@ticket.id} has been assigned to #{current_user.fullname}: \"#{@ticket.title}\""
@@ -156,6 +160,7 @@ class TicketsController < ApplicationController
       responded_by: current_user,
       details:      "Your ticket ##{@ticket.id} has been closed: \"#{@ticket.title}\""
     )
+    post_closure_to_teams(@ticket)
     redirect_to @ticket, notice: "Ticket closed."
   end
 
@@ -166,6 +171,7 @@ class TicketsController < ApplicationController
       resolved_at: Time.current
     )
     notify_staff_of_cancellation
+    post_cancellation_to_teams(@ticket)
     redirect_to @ticket, notice: "Ticket cancelled."
   end
 
@@ -234,6 +240,7 @@ class TicketsController < ApplicationController
         status:       "unread"
       )
     end
+    post_new_ticket_to_teams(@ticket)
   end
 
   def notify_assignee(assignee, assigned_by:)

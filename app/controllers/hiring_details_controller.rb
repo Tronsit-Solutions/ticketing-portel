@@ -1,4 +1,6 @@
 class HiringDetailsController < ApplicationController
+  include TeamsNotifications
+
   before_action :set_ticket, only: [:new, :create]
   before_action :set_my_tickets_count, only: [:new, :create, :new_pending, :create_pending]
 
@@ -19,6 +21,7 @@ class HiringDetailsController < ApplicationController
     @hiring_detail = @ticket.build_hiring_detail(hiring_detail_params)
 
     if @hiring_detail.save
+      post_details_to_teams(@ticket, "hiring")
       redirect_to @ticket, notice: "Hiring details submitted successfully."
     else
       flash.now[:alert] = @hiring_detail.errors.full_messages.to_sentence
@@ -90,6 +93,7 @@ class HiringDetailsController < ApplicationController
         status:       "unread"
       )
     end
+    post_new_ticket_to_teams(ticket)
   end
 
   def hiring_detail_params
