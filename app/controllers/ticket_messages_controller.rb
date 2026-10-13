@@ -1,4 +1,6 @@
 class TicketMessagesController < ApplicationController
+  include TeamsNotifications
+
   before_action :set_ticket
   before_action :authorize_message!
 
@@ -32,6 +34,7 @@ class TicketMessagesController < ApplicationController
           details:      "#{current_user.fullname} replied to ticket ##{@ticket.id}: \"#{@ticket.title}\""
         )
       end
+      post_message_to_teams(@ticket, @message)
       redirect_to ticket_path(@ticket), notice: "Reply added."
     else
       redirect_to ticket_path(@ticket), alert: "Could not add reply."

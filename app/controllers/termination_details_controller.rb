@@ -1,4 +1,6 @@
 class TerminationDetailsController < ApplicationController
+  include TeamsNotifications
+
   before_action :set_ticket, only: [:new, :create]
   before_action :set_my_tickets_count, only: [:new, :create, :new_pending, :create_pending]
 
@@ -19,6 +21,7 @@ class TerminationDetailsController < ApplicationController
     @termination_detail = @ticket.build_termination_detail(termination_detail_params)
 
     if @termination_detail.save
+      post_details_to_teams(@ticket, "termination")
       redirect_to @ticket, notice: "Termination details submitted successfully."
     else
       flash.now[:alert] = @termination_detail.errors.full_messages.to_sentence
@@ -90,6 +93,7 @@ class TerminationDetailsController < ApplicationController
         status:       "unread"
       )
     end
+    post_new_ticket_to_teams(ticket)
   end
 
   def termination_detail_params
