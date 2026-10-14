@@ -30,7 +30,7 @@ RSpec.describe ComputeSimilarTicketsJob, type: :job do
       expect(ticket.reload.metadata["similar_computed_at"]).to be_nil
     end
 
-    it "broadcasts a replace to both the agent and customer similar-tickets streams" do
+    it "broadcasts a replace to the agent similar-tickets stream only" do
       ticket = create(:ticket, title: "Printer issue", metadata: {})
       allow_any_instance_of(SimilarTicketFinder).to receive(:call).and_return([])
 
@@ -42,8 +42,7 @@ RSpec.describe ComputeSimilarTicketsJob, type: :job do
       ComputeSimilarTicketsJob.perform_now(ticket.id)
 
       expect(broadcasts).to contain_exactly(
-        [[ticket, :similar_tickets_agent],    "similar_tickets_agent_#{ticket.id}"],
-        [[ticket, :similar_tickets_customer], "similar_tickets_customer_#{ticket.id}"]
+        [[ticket, :similar_tickets_agent], "similar_tickets_agent_#{ticket.id}"]
       )
     end
   end

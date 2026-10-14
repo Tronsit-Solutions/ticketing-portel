@@ -115,6 +115,25 @@ RSpec.describe "Tickets", type: :request do
       end
     end
 
+    context "when the ticket has similar tickets" do
+      let(:ticket) do
+        match = create(:ticket)
+        create(:ticket, customer: customer, metadata: { "similar_ticket_ids" => [match.id] })
+      end
+
+      it "shows them to staff" do
+        sign_in admin
+        get ticket_path(ticket)
+        expect(response.body).to include("Similar Tickets")
+      end
+
+      it "hides them from the customer" do
+        sign_in customer
+        get ticket_path(ticket)
+        expect(response.body).not_to include("Similar Tickets")
+      end
+    end
+
     context "as a different customer" do
       it "redirects (unauthorized)" do
         sign_in other
