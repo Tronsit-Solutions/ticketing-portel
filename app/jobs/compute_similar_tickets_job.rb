@@ -35,11 +35,9 @@ class ComputeSimilarTicketsJob < ApplicationJob
     # job has no way to know about.
     similar = ticket.similar_tickets.page(1).per(4)
 
-    %i[agent customer].each do |variant|
-      ticket.broadcast_replace_to [ticket, :"similar_tickets_#{variant}"],
-        target:  "similar_tickets_#{variant}_#{ticket.id}",
-        partial: "tickets/similar_tickets",
-        locals:  { ticket: ticket, similar_tickets: similar, variant: variant }
-    end
+    ticket.broadcast_replace_to [ticket, :similar_tickets_agent],
+      target:  "similar_tickets_agent_#{ticket.id}",
+      partial: "tickets/similar_tickets",
+      locals:  { ticket: ticket, similar_tickets: similar, variant: :agent }
   end
 end
