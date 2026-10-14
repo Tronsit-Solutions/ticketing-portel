@@ -132,6 +132,12 @@ RSpec.describe "Tickets", type: :request do
         get ticket_path(ticket)
         expect(response.body).not_to include("Similar Tickets")
       end
+
+      it "does not list the similar_* metadata among the customer's form fields" do
+        sign_in customer
+        get ticket_path(ticket)
+        expect(response.body).not_to include("Similar ticket ids")
+      end
     end
 
     context "as a different customer" do

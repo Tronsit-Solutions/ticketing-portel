@@ -160,6 +160,12 @@ class Ticket < ApplicationRecord
     computed_at.blank? || Time.zone.parse(computed_at) < SIMILAR_TICKETS_TTL.ago
   end
 
+  # What the requester submitted on the ticket form — metadata minus the
+  # similar_* bookkeeping keys ComputeSimilarTicketsJob caches alongside it.
+  def form_data
+    metadata.to_h.reject { |key, _| key.start_with?("similar_") }
+  end
+
   def enqueue_similar_tickets_computation
     ComputeSimilarTicketsJob.perform_later(id)
   end

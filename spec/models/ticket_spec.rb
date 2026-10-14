@@ -205,6 +205,19 @@ RSpec.describe Ticket, type: :model do
       end
     end
 
+    describe "#form_data" do
+      it "returns the submitted fields without the similar_* bookkeeping keys" do
+        ticket = build(:ticket, metadata: {
+          "details"             => "Testing",
+          "idea_types"          => ["Service Improvement"],
+          "similar_ticket_ids"  => [1, 2],
+          "similar_computed_at" => Time.current.iso8601
+        })
+
+        expect(ticket.form_data).to eq("details" => "Testing", "idea_types" => ["Service Improvement"])
+      end
+    end
+
     describe "#similar_tickets_computed?" do
       it "is false when never computed" do
         expect(build(:ticket, metadata: {}).similar_tickets_computed?).to be false

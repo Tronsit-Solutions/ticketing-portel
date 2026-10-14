@@ -239,7 +239,7 @@
         / Original ticket submission
         - ticket_modal_data = [{ label: "Subject", value: @ticket.title }]
         - ticket_modal_data << { label: "Issue", value: @ticket.metadata["details"] } if @ticket.metadata["details"].present?
-        - (@ticket.metadata.except("details") || {}).each { |k,v| ticket_modal_data << { label: k.humanize, value: v } if v.present? }
+        - @ticket.form_data.except("details").each { |k,v| ticket_modal_data << { label: k.humanize, value: v } if v.present? }
         - if @ticket.ticket_type.in?(%w[hiring departure])
           - if @ticket.departure? && (td = @ticket.termination_detail).present?
             - ticket_modal_data << { label: "Termination Reason", value: td.termination_reason }
@@ -289,7 +289,7 @@
               %span.field-label Description:
               %span.field-value= @ticket.metadata["details"]
 
-          - (@ticket.metadata.except("details") || {}).each do |key, value|
+          - @ticket.form_data.except("details").each do |key, value|
             - next if value.blank?
             .ticket-field
               %span.field-label= "#{key.humanize}:"
