@@ -1,4 +1,4 @@
-- active_filters = params.slice(:start_date, :end_date, :status, :location_id, :customer_id, :ticket_type).values.any?(&:present?)
+- active_filters = params.slice(:start_date, :end_date, :status, :location_id, :customer_id, :assignee_id, :ticket_type).values.any?(&:present?)
 .card.filter-bar.border-0.shadow-sm.mb-4
   .card-body.py-2
     = form_with url: request.path, method: :get, local: true, class: "row g-2 align-items-end", data: { controller: "auto-submit", action: "change->auto-submit#submit" } do |f|
@@ -20,6 +20,10 @@
       .col-md-2
         = label_tag :customer_id, "Customer", class: "form-label mb-1 fw-bold"
         = select_tag :customer_id, options_for_select([["All Customers", ""]] + @customers.map { |c| ["#{c.fullname} (#{c.email})", c.id] }, params[:customer_id]), class: "form-select form-select-sm"
+      - unless params[:report] == "agent_detail"
+        .col-md-2
+          = label_tag :assignee_id, "Agent", class: "form-label mb-1 fw-bold"
+          = select_tag :assignee_id, options_for_select([["All Agents", ""], ["Unassigned", "unassigned"]] + @assignees.map { |a| [a.fullname, a.id] }, params[:assignee_id]), class: "form-select form-select-sm"
       .col-md-2
         = label_tag :ticket_type, "Type", class: "form-label mb-1 fw-bold"
         - type_options = Ticket::TICKET_TYPES.map { |t| [Ticket::TYPE_LABELS[t] || t.humanize, t] }

@@ -35,6 +35,43 @@ RSpec.describe "Admin::Reports", type: :request do
     end
   end
 
+  describe "GET /admin/reports (tickets tab) agent column and filter" do
+    let(:other_agent) { create(:user, :agent, fullname: "Bob Other") }
+
+    before do
+      create(:ticket, assignee: agent,       title: "Alice's ticket")
+      create(:ticket, assignee: other_agent, title: "Bob's ticket")
+      create(:ticket, assignee: nil,         title: "Nobody's ticket")
+    end
+
+    it "shows the assigned agent's name, or Unassigned" do
+      get admin_reports_path
+      expect(response.body).to include("Alice Agent")
+      expect(response.body).to include("Bob Other")
+      expect(response.body).to include("Unassigned")
+    end
+
+    it "filters by assignee_id" do
+      get admin_reports_path(assignee_id: agent.id)
+      expect(response.body).to include("Alice&#39;s ticket")
+      expect(response.body).not_to include("Bob&#39;s ticket")
+      expect(response.body).not_to include("Nobody&#39;s ticket")
+    end
+
+    it "filters to unassigned tickets" do
+      get admin_reports_path(assignee_id: "unassigned")
+      expect(response.body).to include("Nobody&#39;s ticket")
+      expect(response.body).not_to include("Alice&#39;s ticket")
+    end
+
+    it "includes the agent in the CSV and honours the filter" do
+      get admin_reports_path(format: :csv, assignee_id: other_agent.id)
+      expect(response.body).to include("Customer (email),Agent,Location")
+      expect(response.body).to include("Bob Other")
+      expect(response.body).not_to include("Alice's ticket")
+    end
+  end
+
   describe "GET /admin/reports?report=agents" do
     it "returns 200 and renders the agents report with counts" do
       get admin_reports_path(report: "agents")
