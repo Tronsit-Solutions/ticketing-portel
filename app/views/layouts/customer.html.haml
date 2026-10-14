@@ -118,10 +118,11 @@
         min-height: 100vh;
       }
 
-  %body
+  %body{data: { controller: "sidebar", action: "keydown.esc@window->sidebar#close turbo:before-cache@document->sidebar#close" }}
 
     / Topbar
     .top-navbar
+      = render "shared/sidebar_toggle"
       .brand Customer Portal
 
       - if @ticket.present? && @ticket.persisted? && @ticket.status.in?(%w[open in_progress])
@@ -135,7 +136,7 @@
               %button.dropdown-item.text-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#cancelTicketModal"} Cancel Ticket
 
     / Sidebar
-    .sidebar
+    .sidebar#app-sidebar
 
       .sidebar-logo-wrap
         = image_tag "akpc.png", alt: "AKPC Logo"
@@ -163,6 +164,7 @@
           %i.bi.bi-power
           Logout
 
+    .sidebar-backdrop{data: { action: "click->sidebar#close" }}
     / Main Content
     .main-content
       = render "shared/flash"
