@@ -11,7 +11,7 @@ class ReportsController < ApplicationController
   end
 
   REPORTS = %w[tickets agents agent_detail].freeze
-  TICKETS_CSV_HEADERS = ["Ticket ID", "Title", "Description", "Status", "Created Date/Time", "Customer (email)", "Location", "Ticket Type"].freeze
+  TICKETS_CSV_HEADERS = ["Ticket ID", "Title", "Description", "Status", "Created Date/Time", "Customer (email)", "Agent", "Location", "Ticket Type"].freeze
 
   def index
     @report = REPORTS.include?(params[:report]) ? params[:report] : "tickets"
@@ -28,6 +28,7 @@ class ReportsController < ApplicationController
   def index_tickets
     @locations = Location.ordered
     @customers = User.customers.active.order(:fullname)
+    @assignees = report_assignees
     @tickets   = filtered_tickets
 
     respond_to do |format|
@@ -63,6 +64,12 @@ class ReportsController < ApplicationController
     redirect_to url_for(only_path: true, format: nil, report: "agents"), alert: "Agent not found."
   end
 
+  # Everyone a ticket can be assigned to: agents, plus any other staff
+  # (e.g. a manager who took a ticket themselves) already holding one.
+  def report_assignees
+    User.agents.or(User.where(id: Ticket.assigned.select(:assignee_id))).order(:fullname)
+  end
+
   def filtered_agents
     agents = User.agents.includes(:team)
     agents = agents.where(team_id: params[:team_id]) if params[:team_id].present?
@@ -86,10 +93,16 @@ class ReportsController < ApplicationController
   end
 
   def filtered_tickets
-    tickets = Ticket.all.recent.includes(:customer, :location)
+    tickets = Ticket.all.recent.includes(:customer, :location, :assignee)
     tickets = tickets.where(status: params[:status])           if params[:status].present?
     tickets = tickets.where(location_id: params[:location_id]) if params[:location_id].present?
     tickets = tickets.where(customer_id: params[:customer_id]) if params[:customer_id].present?
+
+    if params[:assignee_id] == "unassigned"
+      tickets = tickets.unassigned
+    elsif params[:assignee_id].present?
+      tickets = tickets.where(assignee_id: params[:assignee_id])
+    end
 
     tickets = tickets.where(ticket_type: params[:ticket_type]) if params[:ticket_type].present?
 
@@ -113,6 +126,7 @@ class ReportsController < ApplicationController
       ticket.status.humanize,
       ticket.created_at.strftime("%b %d, %Y %I:%M %p"),
       ticket.customer&.email,
+      ticket.assignee&.fullname,
       ticket.location&.name,
       ticket.type_label
     ]

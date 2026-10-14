@@ -5,13 +5,14 @@
         %thead.table-light
           %tr
             %th{style: "width: 6%;"} Ticket ID
-            %th{style: "width: 14%;"} Title
-            %th{style: "width: 16%;"} Description
-            %th{style: "width: 9%;"} Status
-            %th{style: "width: 14%;"} Created Date/Time
-            %th{style: "width: 17%;"} Customer (email)
-            %th{style: "width: 13%;"} Location
-            %th{style: "width: 11%;"} Ticket Type
+            %th{style: "width: 12%;"} Title
+            %th{style: "width: 14%;"} Description
+            %th{style: "width: 8%;"} Status
+            %th{style: "width: 13%;"} Created Date/Time
+            %th{style: "width: 15%;"} Customer (email)
+            %th{style: "width: 11%;"} Agent
+            %th{style: "width: 11%;"} Location
+            %th{style: "width: 10%;"} Ticket Type
         %tbody
           - @tickets.each do |ticket|
             %tr
@@ -30,6 +31,9 @@
               %td
                 %span.tooltip-wrap{data: {tooltip: ticket.customer&.email}}
                   %span.text-truncate-cell= ticket.customer&.email || "-"
+              %td
+                %span.tooltip-wrap{data: {tooltip: ticket.assignee&.fullname}}
+                  %span.text-truncate-cell= ticket.assignee&.fullname || "Unassigned"
               %td
                 %span.tooltip-wrap{data: {tooltip: ticket.location&.name}}
                   %span.text-truncate-cell= ticket.location&.name || "-"
