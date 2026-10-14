@@ -124,21 +124,22 @@
         padding: 90px 32px 32px;
         min-height: 100vh;
       }
-  %body
+  %body{data: { controller: "sidebar", action: "keydown.esc@window->sidebar#close turbo:before-cache@document->sidebar#close" }}
     / Topbar
     %nav.top-navbar
+      = render "shared/sidebar_toggle"
       .brand Manager Portal
       .nav-right
         = turbo_stream_from current_user, :ticket_notifications
         %a.bell-wrap{:href => ticket_notifications_path}
           %i.bi.bi-bell-fill
           = render "shared/notification_bell_badge", user: current_user, badge_class: "position-absolute", badge_style: "top:-6px; right:-8px; font-size:9px; padding:2px 5px;"
-        %span
+        %span.nav-user
           %i.bi.bi-person-fill.me-1
           = current_user.fullname
-        = link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete }
+        = link_to "Logout", destroy_user_session_path, class: "nav-logout", data: { turbo_method: :delete }
     / Sidebar
-    .sidebar
+    .sidebar#app-sidebar
       .sidebar-logo-wrap
         = image_tag "akpc.png", alt: "AKPC Logo"
       .sidebar-nav
@@ -166,6 +167,7 @@
         = link_to destroy_user_session_path, data: { turbo_method: :delete } do
           %i.bi.bi-power
           Logout
+    .sidebar-backdrop{data: { action: "click->sidebar#close" }}
     / Main Content
     .main-content
       = render "shared/flash"

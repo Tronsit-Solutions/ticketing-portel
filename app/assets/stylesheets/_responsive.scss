@@ -1,0 +1,384 @@
+// Phone & tablet layout.
+//
+// Each portal layout (and several pages) declares its styles in an inline
+// <style> block, which comes after this stylesheet and so would win a tie.
+// Everything here is therefore nested under `body`, one extra element of
+// specificity, so these small-screen overrides apply regardless of order.
+
+$drawer-breakpoint: 991.98px; // below Bootstrap's lg: sidebar becomes a drawer
+$stack-breakpoint: 767.98px;  // below md: tables become stacked rows
+
+// The ☰ button only exists on small screens.
+.sidebar-toggle {
+  display: none;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: $drawer-breakpoint) {
+  body {
+    // ── Top bar ────────────────────────────────────────────────────
+    .top-navbar {
+      padding: 0 12px 0 6px;
+      gap: 6px;
+    }
+
+    .sidebar-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #ffffff;
+      font-size: 26px;
+      cursor: pointer;
+
+      &:hover,
+      &:focus-visible {
+        background: rgba(255, 255, 255, 0.14);
+      }
+    }
+
+    .top-navbar .brand {
+      font-size: 17px;
+      letter-spacing: 0.5px;
+      margin-right: auto;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .top-navbar .nav-right {
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    // The drawer already carries Logout; the name stays visible from tablet up.
+    .top-navbar .nav-logout {
+      display: none;
+    }
+
+    // ── Sidebar drawer ─────────────────────────────────────────────
+    .sidebar {
+      width: min(300px, 84vw);
+      min-height: 0;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      border-right: 0;
+      overscroll-behavior: contain;
+    }
+
+    .sidebar-logo-wrap {
+      padding: 20px;
+    }
+
+    .sidebar-nav a {
+      padding: 14px 22px;
+    }
+
+    .sidebar-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(15, 23, 42, 0.45);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    &.sidebar-open {
+      overflow: hidden;
+
+      .sidebar {
+        transform: translateX(0);
+        box-shadow: 8px 0 32px rgba(15, 23, 42, 0.18);
+      }
+
+      .sidebar-backdrop {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    // ── Page body ──────────────────────────────────────────────────
+    .main-content {
+      margin-left: 0;
+      padding: 84px 20px 28px;
+    }
+
+    // ── Customer portal: two-column pages become one column ────────
+    // The left "Categories" panel only holds the My Tickets chip, so it
+    // shrinks to that chip sitting above the page content.
+    .tickets-layout,
+    .show-layout,
+    .new-ticket-layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .left-panel {
+      .panel-title {
+        display: none;
+      }
+
+      .category-chip {
+        display: inline-flex;
+        gap: 10px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: #ffffff;
+      }
+    }
+
+    .right-panel {
+      min-width: 0;
+    }
+
+    // Customer ticket page: breadcrumb wraps between items, never inside one.
+    .ticket-detail-header {
+      padding: 14px 18px;
+    }
+
+    .ticket-breadcrumb {
+      flex-wrap: wrap;
+      row-gap: 2px;
+
+      > span {
+        white-space: nowrap;
+      }
+    }
+
+    .ticket-message-block {
+      padding: 16px 18px;
+    }
+
+    #flash-container {
+      left: 12px;
+      right: 12px;
+      max-width: none;
+    }
+  }
+}
+
+@media (max-width: $stack-breakpoint) {
+  body {
+    .top-navbar .nav-user {
+      display: none;
+    }
+
+    .main-content {
+      padding: 78px 14px 24px;
+    }
+
+    // Page headers: title on top, actions wrap underneath instead of
+    // pushing past the screen edge.
+    .main-content > .d-flex.justify-content-between,
+    .main-content > div > .d-flex.justify-content-between:first-child {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    h4 {
+      font-size: 1.25rem;
+    }
+
+    .card {
+      border-radius: 12px;
+    }
+
+    // Dashboard KPI tiles sit two to a row; shrink the icon and padding
+    // so the label and figure still fit beside it.
+    .col-6 > .card > .card-body.gap-3 {
+      gap: 10px !important;
+      padding: 14px 12px;
+
+      > .rounded-circle {
+        width: 38px !important;
+        height: 38px !important;
+      }
+    }
+
+    // Filter bars: two fields per row instead of a full screen of
+    // single-field rows; free-text search keeps the full width.
+    .filter-bar .row > [class*="col-"] {
+      flex: 0 0 50%;
+      max-width: 50%;
+      margin-top: 0 !important;
+
+      &:has(input[type="text"], input[type="search"]) {
+        flex-basis: 100%;
+        max-width: 100%;
+      }
+    }
+
+    // Staff ticket forms (new / hiring / termination details).
+    .form-card {
+      padding: 22px 18px;
+
+      // Submit / Cancel become full-width stacked buttons.
+      .d-flex.gap-3 {
+        flex-wrap: wrap;
+        gap: 10px !important;
+
+        > .btn,
+        > a {
+          flex: 1 1 100%;
+          text-align: center;
+        }
+      }
+    }
+
+    // Manager dashboard "Top Agents": name and email get the full width,
+    // the stat pills drop to their own line under them.
+    .agent-row {
+      flex-wrap: wrap;
+
+      > .flex-grow-1 {
+        flex-basis: calc(100% - 52px);
+
+        small {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
+      > .d-flex:last-child {
+        margin-left: 52px;
+      }
+    }
+
+    // Sign-in / password-reset cards keep a gutter from the screen edge.
+    .login-card {
+      max-width: calc(100vw - 32px);
+      padding: 32px 24px 28px;
+    }
+
+    // ── Tables → stacked rows ──────────────────────────────────────
+    // Each row becomes a block; each cell a "LABEL ··· value" line, with
+    // the label copied from the column heading by responsive_tables.js.
+    .table {
+      display: block;
+      width: 100%;
+      table-layout: auto;
+      margin-bottom: 0;
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100% !important;
+      }
+
+      tbody tr {
+        padding: 12px 16px;
+        border-bottom: 1px solid #edf0f3;
+
+        &:last-child {
+          border-bottom: 0;
+        }
+      }
+
+      tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 34px;
+        padding: 5px 0 !important;
+        border: 0;
+        text-align: right !important;
+        font-size: 14px;
+        background: transparent;
+
+        &::before {
+          content: attr(data-label);
+          flex-shrink: 0;
+          max-width: 45%;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          text-align: left;
+          color: #8a94a3;
+        }
+
+        &[data-label=""]::before,
+        &:not([data-label])::before {
+          display: none;
+        }
+
+        // Cells without a heading (row actions, empty-state messages)
+        // centre their content instead of hugging the right edge.
+        &[data-label=""],
+        &:not([data-label]) {
+          justify-content: center;
+          text-align: center !important;
+        }
+
+        // First column reads as the row's title.
+        &:first-child {
+          font-weight: 600;
+        }
+
+        > .tooltip-wrap,
+        > .text-truncate-cell {
+          min-width: 0;
+          flex: 0 1 auto;
+          text-align: right;
+        }
+
+        > .d-flex {
+          justify-content: flex-end;
+          flex-wrap: wrap;
+        }
+      }
+    }
+
+    // Tables already wrapped for horizontal scrolling don't need it now.
+    .table-responsive {
+      overflow-x: visible;
+    }
+
+    // ── Pagination footers ─────────────────────────────────────────
+    .pagination {
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: 4px;
+    }
+
+    .d-flex.justify-content-between:has(> .pagination, > nav > .pagination, > small + nav) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    // ── Modals: near full-width sheets ─────────────────────────────
+    .modal-dialog {
+      margin: 12px;
+    }
+  }
+}
+
+// Touch screens have no hover, so a tapped cell would leave its tooltip
+// stuck open. On narrow screens the hidden bubbles would also still widen
+// the page, and the stacked rows show the full text anyway.
+@media (hover: none), (max-width: $stack-breakpoint) {
+  .tooltip-wrap::before,
+  .tooltip-wrap::after {
+    display: none;
+  }
+}
