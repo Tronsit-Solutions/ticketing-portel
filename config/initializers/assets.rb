@@ -10,3 +10,7 @@ Rails.application.config.assets.version = "1.0"
 # application.js, application.css, and all non-JS/CSS in the app/assets
 # folder are already added.
 # Rails.application.config.assets.precompile += %w[ admin.js admin.css ]
+
+# Sprockets writes assets in parallel threads; on Windows two threads writing the same
+# .gz file collide on rename (Errno::EACCES), so export sequentially there.
+Rails.application.config.assets.export_concurrent = false if Gem.win_platform?
