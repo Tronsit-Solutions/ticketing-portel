@@ -46,7 +46,8 @@ Rails.application.configure do
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   # Can be used together with config.force_ssl for Strict-Transport-Security and secure cookies.
-  # config.assume_ssl = true
+  # Set ASSUME_SSL=true when Caddy (or another HTTPS proxy) forwards plain HTTP to Puma.
+  config.assume_ssl = ENV["ASSUME_SSL"] == "true"
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # Set FORCE_SSL=false when serving plain HTTP directly from Puma (no TLS proxy in front).

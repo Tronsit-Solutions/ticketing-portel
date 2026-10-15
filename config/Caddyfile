@@ -1,0 +1,19 @@
+# HTTPS reverse proxy for the ticketing portal.
+# Caddy terminates TLS on 443 and forwards to Puma on 127.0.0.1:3000.
+#
+# Run from the project root:  caddy run --config config/Caddyfile
+# Matching .env on the server:  ASSUME_SSL=true  (and no FORCE_SSL=false)
+
+# --- Now: internal IP, certificate issued by Caddy's own local CA ---
+10.10.10.24 {
+	tls internal
+	reverse_proxy 127.0.0.1:3000
+}
+
+# --- Later: public domain, free Let's Encrypt certificate (auto-renewed) ---
+# Replace the block above with this once DNS points at the server
+# and ports 80 and 443 are open from the internet.
+#
+# portal.example.com {
+# 	reverse_proxy 127.0.0.1:3000
+# }
