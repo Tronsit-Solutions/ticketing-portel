@@ -3,8 +3,6 @@ class Manager::UsersController < ApplicationController
   before_action :set_user, only: [:update, :destroy, :deactivate, :activate, :reset_password]
   layout "manager"
 
-  RESET_PASSWORD = "123456".freeze
-
   SORT_COLUMNS = { "name" => :fullname, "email" => :email }.freeze
 
   def index
@@ -81,8 +79,8 @@ class Manager::UsersController < ApplicationController
   end
 
   def reset_password
-    @user.update!(password: RESET_PASSWORD, password_confirmation: RESET_PASSWORD)
-    redirect_back fallback_location: manager_users_path, notice: "#{@user.fullname}'s password has been reset to the default password."
+    flash[:temporary_password] = { "name" => @user.fullname, "password" => @user.reset_to_temporary_password! }
+    redirect_back fallback_location: manager_users_path
   end
 
   private

@@ -228,7 +228,7 @@
                 %i.bi.bi-file-image.text-primary{style: "font-size:16px;"}
               - else
                 %i.bi.bi-file-earmark.text-secondary{style: "font-size:16px;"}
-              = link_to attachment.filename.to_s, "#", class: "text-decoration-none text-dark", style: "font-size:13px;", "data-bs-toggle" => "modal", "data-bs-target" => "#attachmentPreviewModal", "data-attachment-url" => url_for(attachment), "data-attachment-name" => attachment.filename.to_s, "data-attachment-image" => attachment.blob.content_type.start_with?("image/").to_s
+              = link_to attachment.filename.to_s, "#", class: "text-decoration-none text-dark", style: "font-size:13px;", "data-bs-toggle" => "modal", "data-bs-target" => "#attachmentPreviewModal", "data-attachment-url" => ticket_attachment_path(@ticket, attachment), "data-attachment-name" => attachment.filename.to_s, "data-attachment-image" => attachment.blob.content_type.start_with?("image/").to_s
 
     / Assignment History
     .card.border-0.shadow-sm

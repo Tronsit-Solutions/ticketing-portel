@@ -116,10 +116,28 @@ RSpec.describe "Users", type: :request do
   describe "PATCH /users/:id/reset_password" do
     before { sign_in admin }
 
-    it "resets the user's password to the default password" do
+    it "sets a random temporary password, shows it once, and requires a change" do
       patch reset_password_user_path(customer)
       expect(response).to redirect_to(user_path(customer))
-      expect(customer.reload.valid_password?("123456")).to eq(true)
+
+      temporary = flash[:temporary_password]["password"]
+      expect(temporary).to match(/\A[A-Za-z0-9]{12}\z/)
+      customer.reload
+      expect(customer.valid_password?(temporary)).to eq(true)
+      expect(customer.valid_password?("123456")).to eq(false)
+      expect(customer.must_change_password?).to eq(true)
+
+      follow_redirect!
+      expect(response.body).to include(temporary)
+      get user_path(customer)
+      expect(response.body).not_to include(temporary)
+    end
+
+    it "gives a different password on each reset" do
+      patch reset_password_user_path(customer)
+      first = flash[:temporary_password]["password"]
+      patch reset_password_user_path(customer)
+      expect(flash[:temporary_password]["password"]).not_to eq(first)
     end
   end
 end

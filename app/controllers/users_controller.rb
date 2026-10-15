@@ -2,8 +2,6 @@ class UsersController < ApplicationController
   before_action :require_admin!
   before_action :set_user, only: [:show, :update, :destroy, :deactivate, :reset_password]
 
-  RESET_PASSWORD = "123456".freeze
-
   SORT_COLUMNS = { "name" => :fullname, "email" => :email }.freeze
 
   def index
@@ -75,8 +73,8 @@ class UsersController < ApplicationController
   end
 
   def reset_password
-    @user.update!(password: RESET_PASSWORD, password_confirmation: RESET_PASSWORD)
-    redirect_to user_path(@user), notice: "#{@user.fullname}'s password has been reset to the default password."
+    flash[:temporary_password] = { "name" => @user.fullname, "password" => @user.reset_to_temporary_password! }
+    redirect_to user_path(@user)
   end
 
   private

@@ -148,7 +148,7 @@
       .d-flex.align-items-center.gap-2
         %span{class: "badge bg-#{role_color[@user.role]}"}= @user.role.humanize
         - if @user.customer?
-          %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_user_path(@user), "data-action-message" => "Reset #{@user.fullname}'s password to the default password?", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
+          %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_user_path(@user), "data-action-message" => "Reset #{@user.fullname}'s password? They will get a one-time temporary password and must choose a new one at their next sign-in.", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
     .card-body
       .row.mb-3
         .col-md-4.text-muted Email

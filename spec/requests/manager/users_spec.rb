@@ -116,12 +116,16 @@ RSpec.describe "Manager::Users", type: :request do
   end
 
   describe "PATCH /manager/users/:id/reset_password" do
-    it "resets the customer's password to the default password" do
+    it "sets a random temporary password and requires a change at next sign-in" do
       customer = create(:user, :customer)
       patch reset_password_manager_user_path(customer)
       expect(response).to redirect_to(manager_users_path)
+
+      temporary = flash[:temporary_password]["password"]
       customer.reload
-      expect(customer.valid_password?("123456")).to eq(true)
+      expect(customer.valid_password?(temporary)).to eq(true)
+      expect(customer.valid_password?("123456")).to eq(false)
+      expect(customer.must_change_password?).to eq(true)
     end
   end
 
