@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :authenticate_user!
+  before_action :require_password_change
   before_action :set_current_attributes
 
   layout :set_layout
@@ -25,6 +26,15 @@ class ApplicationController < ActionController::Base
 
   def require_admin_or_agent!
     unauthorized! unless current_user.admin? || current_user.agent?
+  end
+
+  # After a reset the account holds a temporary password someone else has
+  # seen, so nothing else is reachable until the user picks their own.
+  def require_password_change
+    return unless user_signed_in? && current_user.must_change_password?
+    return if devise_controller? || is_a?(PasswordChangesController)
+
+    redirect_to edit_password_change_path
   end
 
   def require_staff!

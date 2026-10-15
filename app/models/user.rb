@@ -15,6 +15,17 @@ class User < ApplicationRecord
   has_many :assigned_tickets,  class_name: "Ticket", foreign_key: :assignee_id, dependent: :nullify
   has_many :customer_tickets,  class_name: "Ticket", foreign_key: :customer_id,  dependent: :nullify
 
+  TEMPORARY_PASSWORD_LENGTH = 12
+
+  # Replaces the password with a random one-time password the user must
+  # change at their next sign-in. Returns the new password so the staff
+  # member who reset it can pass it on; it is not stored anywhere else.
+  def reset_to_temporary_password!
+    temporary = SecureRandom.alphanumeric(TEMPORARY_PASSWORD_LENGTH)
+    update!(password: temporary, password_confirmation: temporary, must_change_password: true)
+    temporary
+  end
+
   ROLES = %w[admin agent manager customer].freeze
   # validates :fullname,  presence: true
   validates :role,      inclusion: { in: ROLES }

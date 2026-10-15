@@ -7,9 +7,23 @@
     .flash-alert.alert.alert-danger.alert-dismissible{:role => "alert"}
       = alert
       %button.btn-close{"data-bs-dismiss" => "alert", :type => "button"}
+  / Shown once, right after a reset, and deliberately not auto-faded:
+  / the staff member needs time to copy it and pass it on.
+  - if (temporary = flash[:temporary_password]).present?
+    .temporary-password-alert.alert.alert-warning.alert-dismissible{:role => "alert"}
+      .fw-semibold.mb-1 #{temporary["name"]}'s password has been reset.
+      %div{style: "font-size:13px;"} Give them this temporary password. They will be asked to choose a new one when they sign in. It won't be shown again.
+      .d-flex.align-items-center.gap-2.mt-2
+        %code.temporary-password-value.px-2.py-1.bg-white.border.rounded.text-dark{style: "font-size:15px; user-select:all;"}= temporary["password"]
+        %button.btn.btn-sm.btn-outline-dark{type: "button", onclick: "navigator.clipboard.writeText(this.previousElementSibling.textContent); this.textContent = 'Copied';"} Copy
+      %button.btn-close{"data-bs-dismiss" => "alert", :type => "button"}
 
 :javascript
   (function () {
+    // Never let a temporary password survive into Turbo's back-button cache.
+    document.querySelectorAll('#flash-container .temporary-password-alert').forEach(function (el) {
+      document.addEventListener('turbo:before-cache', function () { el.remove(); }, { once: true });
+    });
     document.querySelectorAll('#flash-container .flash-alert').forEach(function (el) {
       setTimeout(function () {
         el.classList.add('fading');

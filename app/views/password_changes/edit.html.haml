@@ -1,0 +1,26 @@
+- content_for :title, "Choose a New Password | Ticketing Portal"
+.login-card
+  .avatar-circle
+    %i.bi.bi-shield-lock-fill
+  .login-title Choose a New Password
+  .login-subtitle Your password was reset. Choose a new one to continue.
+  - if current_user.errors.any?
+    .alert.alert-danger.py-2.text-start{:style => "font-size:13px;"}
+      = current_user.errors.full_messages.to_sentence
+  = form_with scope: :user, url: password_change_path, method: :patch, local: true, html: { "data-turbo" => "false" } do |f|
+    .mb-3
+      = f.password_field :password,     |
+        autofocus: true,                |
+        autocomplete: "new-password",   |
+        required: true,                 |
+        class: "form-control",          |
+        placeholder: "New password"     |
+    .mb-4
+      = f.password_field :password_confirmation, |
+        autocomplete: "new-password",            |
+        required: true,                          |
+        class: "form-control",                   |
+        placeholder: "Confirm new password"      |
+    = f.submit "Save Password", class: "btn-login"
+  .login-footer
+    = link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete }

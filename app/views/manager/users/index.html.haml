@@ -60,7 +60,7 @@
               %td.d-flex.gap-1
                 = link_to "View", manager_user_path(customer), class: "btn btn-sm btn-outline-secondary"
                 %button.btn.btn-sm.btn-outline-primary{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "##{dom_id(customer, :edit)}"} Edit
-                %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_manager_user_path(customer), "data-action-message" => "Reset #{customer.fullname}'s password to the default password?", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
+                %button.btn.btn-sm.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_manager_user_path(customer), "data-action-message" => "Reset #{customer.fullname}'s password? They will get a one-time temporary password and must choose a new one at their next sign-in.", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"} Reset Password
                 - if customer.is_active?
                   %button.btn.btn-sm.btn-outline-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => deactivate_manager_user_path(customer), "data-action-message" => "Deactivate #{customer.fullname}?", "data-action-label" => "Deactivate", "data-action-class" => "btn-danger"} Deactivate
                 - else

@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   root "home#index"
   resources :password_reset_requests, only: [:new, :create]
+  resource  :password_change, only: [:edit, :update]
   namespace :admin do
     root "dashboard#index"
     resources :reports, only: [:index], controller: "/reports"
@@ -70,6 +71,7 @@ Rails.application.routes.draw do
       patch :cancel
     end
     resources :ticket_messages, only: [:create]
+    resources :attachments, only: [:show], controller: "ticket_attachments"
     resource  :hiring_detail,      only: [:new, :create]
     resource  :termination_detail, only: [:new, :create]
   end

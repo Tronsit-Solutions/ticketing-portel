@@ -22,6 +22,12 @@ module TicketingPortal
     # in config/environments, which are processed later.
     #
     config.time_zone = "UTC"
+
+    # Active Storage's built-in /rails/active_storage/* routes serve any file
+    # to whoever has the link, without checking the session. Attachments are
+    # served by TicketAttachmentsController instead, behind login and the
+    # same access rules as the ticket.
+    config.active_storage.draw_routes = false
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end
