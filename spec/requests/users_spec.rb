@@ -55,6 +55,22 @@ RSpec.describe "Users", type: :request do
       get user_path(agent)
       expect(response.body).not_to include("Reset Password")
     end
+
+    it "shows the user's recent activity" do
+      AuditLog.record!(actor: agent, action: AuditLog::LOGIN, category: AuditLog::AUTH, description: "Agent signed in for the audit test")
+      sign_in admin
+      get user_path(agent)
+      expect(response.body).to include("Recent Activity")
+      expect(response.body).to include("Agent signed in for the audit test")
+    end
+
+    it "lists the tickets a customer raised" do
+      create(:ticket, customer: customer, title: "Printer will not print")
+      sign_in admin
+      get user_path(customer)
+      expect(response.body).to include("Raised Tickets")
+      expect(response.body).to include("Printer will not print")
+    end
   end
 
   describe "GET /users/new" do

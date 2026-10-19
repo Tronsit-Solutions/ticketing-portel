@@ -1,303 +1,361 @@
 = turbo_stream_from @ticket, :messages
 
-/ ── Two-column layout ───────────────────────────────────────────
-.row.g-3
+- status_color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+- initials_for = ->(user) { user.fullname.to_s.split.first(2).map { |part| part[0] }.join.upcase.presence || user.email.to_s.first.to_s.upcase }
+- closed       = @ticket.status == "closed"
+- cancelled    = @ticket.status == "cancelled"
+- first_reply  = @ticket_messages.find { |m| m.sender.present? && !m.sender.customer? && !m.internal_note? }
+- details_val  = @ticket.metadata["details"].presence || @ticket.metadata["description"].presence
+- phone        = @ticket.metadata["mobile"].presence || @ticket.customer&.contact_no.presence
+- fmt          = ->(time) { time&.strftime("%b %d, %Y %I:%M %p") }
 
-  / ── Left: Ticket Info + Attachments + History ──────────────────
-  .col-md-6
+-# Progress steps: done ones are filled, the first unfinished one is "current".
+- steps = [{ label: "Submitted", time: @ticket.created_at, note: @ticket.customer&.fullname, done: true },
+  { label: "Assigned", time: @ticket.assigned_at, note: @ticket.assignee&.fullname, done: @ticket.assignee_id.present? || closed },
+  { label: "First response", time: first_reply&.created_at, note: first_reply&.sender&.fullname, done: first_reply.present? || closed },
+  { label: cancelled ? "Cancelled" : "Closed", time: @ticket.resolved_at, note: @ticket.resolved_by&.fullname, done: closed || cancelled, failed: cancelled }]
+- current_step = steps.index { |step| !step[:done] }
 
-    / ── Merged: Header + Info + Details ────────────────────────────
-    - status_color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
-    .card.border-0.shadow-sm.mb-3
-      .card-body
-        / Status + actions row
-        .d-flex.justify-content-between.align-items-start.mb-3
-          .d-flex.align-items-center.gap-2
-            %span{class: "badge bg-#{status_color[@ticket.status]}"}= @ticket.status.humanize
-            - if @ticket.status.in?(%w[closed cancelled]) && @ticket.resolved_at.present?
-              %small.text-muted{style: "font-size:12px;"}
-                closed on #{@ticket.resolved_at.strftime("%b %d, %Y %I:%M %p")}
-                - if @ticket.resolved_by.present?
-                  by #{@ticket.resolved_by.fullname}
-          .d-flex.gap-2
-            - if @ticket.status != "closed" && (current_user.admin? || @ticket.assignee == current_user)
-              %button.btn.btn-sm.btn-outline-danger{"data-bs-toggle" => "modal", "data-bs-target" => "#closeTicketModal", type: "button"} Close
-            - if (current_user.admin? || current_user.manager?) && @ticket.status != "closed"
-              %button.btn.btn-sm.btn-outline-primary{"data-bs-toggle" => "collapse", "data-bs-target" => "#assignForm"}
-                = @ticket.assignee_id.nil? ? "Assign" : "Reassign"
-            - if current_user.agent? && @ticket.assignee_id.nil? && @ticket.status != "cancelled"
-              = button_to "Self Assign", self_assign_ticket_path(@ticket), method: :patch, class: "btn btn-sm btn-outline-success"
+.ticket-page
+  -# ── Header ──────────────────────────────────────────────────────────
+  .card.border-0.shadow-sm.ticket-hero.mb-4{class: "status-#{@ticket.status}"}
+    .ticket-hero-body
+      .ticket-hero-main
+        = link_to tickets_path, class: "ticket-back" do
+          %i.bi.bi-arrow-left
+          Tickets
+        .ticket-hero-chips
+          %span.ticket-id= "##{@ticket.id}"
+          %span{class: "badge rounded-pill bg-#{status_color[@ticket.status]}"}= @ticket.status.humanize
+          %span.ticket-chip
+            %i.bi.bi-tag
+            = @ticket.type_label
+          - if @ticket.on_behalf?
+            %span.ticket-chip.ticket-chip-warn
+              %i.bi.bi-person-up
+              On Behalf — #{@ticket.created_by.fullname}
+          - if @ticket.status.in?(%w[closed cancelled]) && @ticket.resolved_at.present?
+            %span.ticket-closed-note
+              closed on #{fmt.(@ticket.resolved_at)}
+              - if @ticket.resolved_by.present?
+                by #{@ticket.resolved_by.fullname}
+        %h3.ticket-title= @ticket.title
+        .ticket-meta
+          %span
+            %i.bi.bi-calendar3
+            Submitted #{fmt.(@ticket.created_at)}
+          %span
+            %i.bi.bi-person
+            = @ticket.customer&.fullname || "Unknown customer"
+          %span
+            %i.bi.bi-geo-alt
+            = @ticket.location&.name || "No location"
 
-        / Title
-        %h5.fw-bold.mb-0= @ticket.title
-        - if @ticket.on_behalf?
-          %span.badge.mt-1{style: "font-size:10px; background-color: #fdf2d0; color: #7d5a00;"}
-            On Behalf — #{@ticket.created_by.fullname}
-        %small.text-muted.d-block.mb-3 \##{@ticket.id} &middot; Submitted #{@ticket.created_at.strftime("%b %d, %Y %I:%M %p")}
+      .ticket-actions
+        - if current_user.agent? && @ticket.assignee_id.nil? && @ticket.status != "cancelled"
+          = button_to self_assign_ticket_path(@ticket), method: :patch, class: "btn btn-success" do
+            %i.bi.bi-person-check.me-1
+            Self Assign
+        - if (current_user.admin? || current_user.manager?) && !closed
+          %button.btn.btn-outline-primary{"data-bs-toggle" => "collapse", "data-bs-target" => "#assignForm", type: "button"}
+            %i.bi.bi-person-gear.me-1
+            = @ticket.assignee_id.nil? ? "Assign" : "Reassign"
+        - if !closed && (current_user.admin? || @ticket.assignee == current_user)
+          %button.btn.btn-danger{"data-bs-toggle" => "modal", "data-bs-target" => "#closeTicketModal", type: "button"}
+            %i.bi.bi-check2-circle.me-1
+            Close Ticket
 
-        %hr.my-2
+    %ol.ticket-steps
+      - steps.each_with_index do |step, i|
+        - state = step[:failed] ? "failed" : (step[:done] ? "done" : (i == current_step ? "current" : "todo"))
+        %li{class: "is-#{state}"}
+          .ticket-step-dot
+            - if state == "failed"
+              %i.bi.bi-x-lg
+            - elsif state == "done"
+              %i.bi.bi-check-lg
+            - else
+              = i + 1
+          .ticket-step-text
+            .ticket-step-label= step[:label]
+            .ticket-step-time
+              - if step[:time]
+                %span{title: fmt.(step[:time])}= step[:time].strftime("%b %d, %I:%M %p")
+              - elsif state == "current"
+                Pending
+              - else
+                —
+            - if step[:note].present? && step[:done]
+              .ticket-step-note= step[:note]
 
-        / Key fields
-        .mb-2
-          %small.text-muted Ticket Type
-          %div= @ticket.ticket_type.humanize
-        - if @ticket.customer&.contact_no.present?
-          .mb-2
-            %small.text-muted Phone
-            %div= @ticket.metadata["mobile"]
-        .mb-2
-          %small.text-muted Location
-          %div= @ticket.location&.name || "-"
-        .mb-2
-          %small.text-muted Customer
-          %div= @ticket.customer&.fullname || "-"
-        .mb-2
-          %small.text-muted Assignee
-          %div= @ticket.assignee&.fullname || "<span class='text-danger'>Unassigned</span>".html_safe
-        - if @ticket.assigned_by.present?
-          .mb-2
-            %small.text-muted Assigned By
-            %div= @ticket.assigned_by.fullname
-        - if @ticket.assigned_at.present?
-          .mb-2
-            %small.text-muted Assigned At
-            %div= @ticket.assigned_at.strftime("%b %d, %Y %I:%M %p")
-        - if @ticket.resolved_at.present?
-          .mb-2
-            %small.text-muted Resolved At
-            %div= @ticket.resolved_at.strftime("%b %d, %Y %I:%M %p")
-        - if @ticket.resolved_by.present?
-          .mb-2
-            %small.text-muted Closed By
-            %div= @ticket.resolved_by.fullname
-
-        / Description / issue — only when present
-        - details_val = @ticket.metadata["details"].presence || @ticket.metadata["description"].presence
-        - if details_val.present? || @ticket.metadata["issue"].present?
-          %hr.my-2
-        - if details_val.present?
-          .mb-2
-            %small.text-muted Description
-            %div{style: "font-size:13px;"}= details_val
-        - if @ticket.metadata["issue"].present?
-          .mb-0
-            %small.text-muted Issue Category
-            %div{style: "font-size:13px;"}= @ticket.metadata["issue"]
-
-    / Similar Tickets
-    = render "tickets/similar_tickets", ticket: @ticket, similar_tickets: @similar_tickets, variant: :agent
-
-    / Assign form collapse
-    - if current_user.admin? || current_user.manager?
-      #assignForm.collapse.mb-3
-        .card.card-body.border-0.shadow-sm
+  -# ── Assign form ─────────────────────────────────────────────────────
+  - if current_user.admin? || current_user.manager?
+    #assignForm.collapse
+      .card.border-0.shadow-sm.mb-4
+        .card-body.p-4
           = form_with url: assign_ticket_path(@ticket), method: :patch, local: true do |f|
-            .row.g-2.align-items-end
-              .col-md-5
-                = label_tag :assignee_id, "Assign to Agent", class: "form-label fw-bold"
+            .row.g-3.align-items-end
+              .col-5
+                = label_tag :assignee_id, "Assign to agent", class: "form-label fw-semibold"
                 - agent_options = User.agents.active.order(:fullname).map { |a| [a.fullname, a.id] }
                 - assignee_options = current_user.manager? ? [["Myself (#{current_user.fullname})", current_user.id]] + agent_options : agent_options
                 = select_tag :assignee_id, options_for_select(assignee_options, @ticket.assignee_id), class: "form-select", prompt: "Select agent"
-              .col-md-5
-                = label_tag :reason, "Reason (optional)", class: "form-label fw-bold"
+              .col-5
+                = label_tag :reason, "Reason (optional)", class: "form-label fw-semibold"
                 = text_field_tag :reason, nil, class: "form-control", placeholder: "Reason for assignment"
-              .col-md-2
+              .col-2
                 = f.submit "Assign", class: "btn btn-primary w-100"
 
-    / Hiring / Termination Detail card
-    - if @ticket.ticket_type.in?(%w[hiring departure])
-      - if @ticket.departure?
-        - td = @ticket.termination_detail
-        .card.border-0.shadow-sm.mb-3
-          .card-header.bg-white.d-flex.justify-content-between.align-items-center
-            %span.fw-bold Termination Details
-            - unless td.present?
-              = link_to "Fill Details", new_ticket_termination_detail_path(@ticket), class: "btn btn-sm btn-outline-primary"
-          .card-body
-            - if td.present?
-              .row.g-3
-                .col-md-6
-                  %small.text-muted Termination Reason
-                  %div= td.termination_reason || "-"
-                .col-md-6
-                  %small.text-muted Termination Date
-                  %div= td.termination_date&.strftime("%b %d, %Y") || "-"
-                .col-md-6
-                  %small.text-muted Time to Process
-                  %div= td.termination_time || "-"
-                .col-md-6
-                  %small.text-muted Email Address
-                  %div= td.email_address || "-"
-                .col-md-6
-                  %small.text-muted Key Card
-                  %div= td.key_card || "-"
-                .col-md-6
-                  %small.text-muted Email Forward Needed?
-                  %div= td.email_forward_needed? ? "Yes" : "No"
-                .col-md-6
-                  %small.text-muted Forward Email To
-                  %div= td.email_forwarded_to.presence || "-"
-                .col-md-6
-                  %small.text-muted Historical Email Access?
-                  %div= td.historical_email_access? ? "Yes" : "No"
-                .col-md-12
-                  %small.text-muted Additional Instructions
-                  %div= td.additional_instructions || "-"
-            - else
-              %p.text-muted.mb-0 Termination details not yet submitted.
-      - else
-        - hd = @ticket.hiring_detail
-        .card.border-0.shadow-sm.mb-3
-          .card-header.bg-white.d-flex.justify-content-between.align-items-center
-            %span.fw-bold New Team Member Details
-            - unless hd.present?
-              = link_to "Fill Details", new_ticket_hiring_detail_path(@ticket), class: "btn btn-sm btn-outline-primary"
-          .card-body
-            - if hd.present?
-              .row.g-3
-                .col-md-6
-                  %small.text-muted Start Date
-                  %div= hd.start_date&.strftime("%b %d, %Y") || "-"
-                .col-md-6
-                  %small.text-muted Date of Birth
-                  %div= hd.date_of_birth&.strftime("%b %d, %Y") || "-"
-                .col-md-6
-                  %small.text-muted Title / Position
-                  %div= hd.title_position || "-"
-                .col-md-6
-                  %small.text-muted Is Provider?
-                  %div= hd.is_provider? ? "Yes" : "No"
-                - if hd.is_provider?
-                  .col-md-6
-                    %small.text-muted Name of the Billing Provider
-                    %div= hd.billing_provider_name || "-"
-                  .col-md-6
-                    %small.text-muted Provider NPI
-                    %div= hd.provider_npi || "-"
-                  .col-md-6
-                    %small.text-muted Q5/Q6 Modifier Required?
-                    %div= hd.q5_q6_modifier_required? ? "Yes" : "No"
-                  - if hd.q5_q6_modifier_required?
-                    .col-md-6
-                      %small.text-muted Selected Modifier
-                      %div= hd.q5_q6_modifier || "-"
-                .col-md-6
-                  %small.text-muted Department
-                  %div= hd.department || "-"
-                .col-md-6
-                  %small.text-muted Gender
-                  %div= hd.gender || "-"
-                .col-md-6
-                  %small.text-muted Cell Phone
-                  %div= hd.cell_phone || "-"
-                .col-md-6
-                  %small.text-muted Badge Number
-                  %div= hd.badge_number || "-"
-                .col-md-12
-                  %small.text-muted Access / Systems Needed
-                  %div= Array(hd.access_systems).reject(&:blank?).join(", ").presence || "-"
-                .col-md-12
-                  %small.text-muted Distribution Groups
-                  %div= Array(hd.distribution_groups).reject(&:blank?).join(", ").presence || "-"
-                .col-md-6
-                  %small.text-muted Microsoft Teams Department
-                  %div= Array(hd.microsoft_teams_department).reject(&:blank?).join(", ").presence || "-"
-                .col-md-6
-                  %small.text-muted Credentials Send To
-                  %div= hd.credentials_send_to || "-"
-                .col-md-6
-                  %small.text-muted PC Requirement
-                  %div= hd.pc_requirement || "-"
-                .col-md-6
-                  %small.text-muted Existing PC User
-                  %div= hd.existing_pc_user || "-"
-                .col-md-12
-                  %small.text-muted Additional Info
-                  %div= hd.additional_info || "-"
-            - else
-              %p.text-muted.mb-0 Hiring details not yet submitted.
+  .row.g-4
+    -# ── Main column ───────────────────────────────────────────────────
+    .col-8
+      - if closed && @ticket.resolution.present?
+        .card.border-0.shadow-sm.ticket-resolution.mb-4
+          .ticket-resolution-icon
+            %i.bi.bi-check-circle-fill
+          .flex-grow-1
+            .ticket-resolution-title Resolution
+            %p.mb-1= @ticket.resolution
+            - if @ticket.resolved_by.present?
+              %small.text-muted
+                Resolved by
+                %strong= @ticket.resolved_by.fullname
+                = " · #{@ticket.resolved_at.strftime('%b %d, %Y')}" if @ticket.resolved_at.present?
 
-    / Attachments
-    - if @ticket.attachments.any?
-      .card.border-0.shadow-sm.mb-3
-        .card-header.bg-white.fw-bold Attachments
-        .card-body.p-0
-          - @ticket.attachments.each do |attachment|
-            .d-flex.align-items-center.gap-2.px-3.py-2.border-bottom
-              - if attachment.image?
-                %i.bi.bi-file-image.text-primary{style: "font-size:16px;"}
-              - else
-                %i.bi.bi-file-earmark.text-secondary{style: "font-size:16px;"}
-              = link_to attachment.filename.to_s, "#", class: "text-decoration-none text-dark", style: "font-size:13px;", "data-bs-toggle" => "modal", "data-bs-target" => "#attachmentPreviewModal", "data-attachment-url" => ticket_attachment_path(@ticket, attachment), "data-attachment-name" => attachment.filename.to_s, "data-attachment-image" => attachment.blob.content_type.start_with?("image/").to_s
+      - if details_val.present? || @ticket.metadata["issue"].present?
+        .card.border-0.shadow-sm.profile-panel.mb-4
+          .profile-panel-header
+            .profile-panel-title
+              %i.bi.bi-card-text
+              Description
+            - if @ticket.metadata["issue"].present?
+              %span.ticket-chip
+                %i.bi.bi-bookmark
+                = @ticket.metadata["issue"]
+          .ticket-description= details_val.presence || "No description provided."
 
-    / Assignment History
-    .card.border-0.shadow-sm
-      .card-header.bg-white.fw-bold Assignment History
-      .card-body.p-0
-        - if @ticket_assignments.any?
-          - @ticket_assignments.each do |a|
-            .px-3.py-2.border-bottom
-              %small.text-muted= a.created_at.strftime("%b %d, %Y at %-I:%M %p")
-              %div{style: "font-size:13px;"}
-                - if a.assigned_from.present?
-                  %span.text-danger= a.assigned_from.fullname
-                  →
-                  %span.text-success= a.assigned_to.fullname
-                - else
-                  Assigned to
-                  %span.text-success= a.assigned_to.fullname
-              - if a.reason.present?
-                %small.text-muted.fst-italic= a.reason
+      - if @ticket.ticket_type.in?(%w[hiring departure])
+        - yes_no = ->(value) { value ? "Yes" : "No" }
+        - if @ticket.departure?
+          - td = @ticket.termination_detail
+          - title, fill_path = "Termination Details", new_ticket_termination_detail_path(@ticket)
+          - fields = td && [["Termination Reason", td.termination_reason],
+            ["Termination Date", td.termination_date&.strftime("%b %d, %Y")],
+            ["Time to Process", td.termination_time],
+            ["Email Address", td.email_address],
+            ["Key Card", td.key_card],
+            ["Email Forward Needed?", yes_no.(td.email_forward_needed?)],
+            ["Forward Email To", td.email_forwarded_to.presence],
+            ["Historical Email Access?", yes_no.(td.historical_email_access?)],
+            ["Additional Instructions", td.additional_instructions, :wide]]
         - else
-          .px-3.py-2.text-muted{style: "font-size:13px;"} No assignments yet.
+          - hd = @ticket.hiring_detail
+          - title, fill_path = "New Team Member Details", new_ticket_hiring_detail_path(@ticket)
+          - fields = hd && [["Start Date", hd.start_date&.strftime("%b %d, %Y")],
+            ["Date of Birth", hd.date_of_birth&.strftime("%b %d, %Y")],
+            ["Title / Position", hd.title_position],
+            ["Is Provider?", yes_no.(hd.is_provider?)],
+            *(hd.is_provider? ? [["Name of the Billing Provider", hd.billing_provider_name], ["Provider NPI", hd.provider_npi], ["Q5/Q6 Modifier Required?", yes_no.(hd.q5_q6_modifier_required?)]] : []),
+            *(hd.is_provider? && hd.q5_q6_modifier_required? ? [["Selected Modifier", hd.q5_q6_modifier]] : []),
+            ["Department", hd.department],
+            ["Gender", hd.gender],
+            ["Cell Phone", hd.cell_phone],
+            ["Badge Number", hd.badge_number],
+            ["Microsoft Teams Department", Array(hd.microsoft_teams_department).reject(&:blank?).join(", ").presence],
+            ["Credentials Send To", hd.credentials_send_to],
+            ["PC Requirement", hd.pc_requirement],
+            ["Existing PC User", hd.existing_pc_user],
+            ["Access / Systems Needed", Array(hd.access_systems).reject(&:blank?).join(", ").presence, :wide],
+            ["Distribution Groups", Array(hd.distribution_groups).reject(&:blank?).join(", ").presence, :wide],
+            ["Additional Info", hd.additional_info, :wide]]
+        .card.border-0.shadow-sm.profile-panel.mb-4
+          .profile-panel-header
+            .profile-panel-title
+              %i.bi{class: @ticket.departure? ? "bi-person-dash" : "bi-person-plus"}
+              = title
+            - unless fields
+              = link_to "Fill Details", fill_path, class: "btn btn-sm btn-outline-primary"
+          - if fields
+            .ticket-fields
+              - fields.each do |label, value, width|
+                %div{class: ["ticket-field", ("is-wide" if width == :wide)]}
+                  .ticket-field-label= label
+                  .ticket-field-value= value.presence || "—"
+          - else
+            .profile-empty
+              %i.bi.bi-clipboard
+              %p= "#{title.sub(' Details', '')} details not yet submitted."
 
-  / ── Right: Conversation + Reply ────────────────────────────────
-  .col-md-6
+      -# Conversation
+      - visible_messages = @ticket_messages.reject { |msg| msg.details.match?(/<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i) }
+      .card.border-0.shadow-sm.profile-panel.ticket-conversation
+        .profile-panel-header
+          .profile-panel-title
+            %i.bi.bi-chat-dots
+            Conversation
+          %span.text-muted.small= pluralize(visible_messages.size, "message")
+        .ticket-messages#ticket_messages_agent{data: { controller: "chat-scroll" }}
+          - if visible_messages.any?
+            = render partial: "ticket_messages/message_agent", collection: visible_messages, as: :message
+          - else
+            .no-messages-placeholder.profile-empty
+              %i.bi.bi-chat-square-text
+              %p No messages yet.
 
-    / Resolution card — shown only when closed and resolution exists
-    - if @ticket.status == "closed" && @ticket.resolution.present?
-      .card.border-0.mb-3{style: "border-left: 4px solid #198754 !important; background: #f0fdf4;"}
-        .card-body
-          .d-flex.align-items-center.gap-2.mb-2
-            %i.bi.bi-check-circle-fill.text-success
-            %span.fw-bold.text-success Resolution
-          %p.mb-1{style: "font-size:14px; color:#1a1a1a;"}= @ticket.resolution
-          - if @ticket.resolved_by.present?
-            %small.text-muted
-              Resolved by
-              %strong= @ticket.resolved_by.fullname
-              = " · #{@ticket.resolved_at.strftime('%b %d, %Y')}" if @ticket.resolved_at.present?
-
-    / Conversation
-    .card.border-0.shadow-sm.mb-3
-      .card-header.bg-white.fw-bold Conversation
-      .card-body#ticket_messages_agent
-        - visible_messages = @ticket_messages.reject { |msg| msg.details.match?(/<\s*(p|br|div|span|ul|ol|li|strong|em|a|img|table|tr|td|h[1-6])\b/i) }
-        - if visible_messages.any?
-          = render partial: "ticket_messages/message_agent", collection: visible_messages, as: :message
-        - else
-          %p.text-muted.mb-0.no-messages-placeholder No messages yet.
-
-    / Reply form
-    - if @ticket.status != "closed"
-      - if current_user.admin? || @ticket.assignee == current_user
-        .card.border-0.shadow-sm
-          .card-header.bg-white.fw-bold Add Reply
-          .card-body
+        - if !closed && (current_user.admin? || @ticket.assignee == current_user)
+          .ticket-composer
             = form_with url: ticket_ticket_messages_path(@ticket), method: :post, local: true do |f|
-              = f.text_area :details, rows: 4, class: "form-control mb-2", placeholder: "Write your reply here..."
-              - if current_user.admin? || current_user.agent?
-                .form-check.mb-2
-                  = f.check_box :internal_note, { class: "form-check-input" }, "true", "false"
-                  = f.label :internal_note, "Mark as internal note", class: "form-check-label text-muted"
-              = f.submit "Send Reply", class: "btn btn-primary"
+              = f.text_area :details, rows: 3, class: "form-control", placeholder: "Write your reply here..."
+              .ticket-composer-actions
+                - if current_user.admin? || current_user.agent?
+                  .form-check.mb-0
+                    = f.check_box :internal_note, { class: "form-check-input" }, "true", "false"
+                    = f.label :internal_note, "Mark as internal note", class: "form-check-label text-muted"
+                - else
+                  %span
+                = button_tag type: "submit", class: "btn btn-primary" do
+                  %i.bi.bi-send.me-1
+                  Send Reply
 
-/ ── Attachment Preview Modal ─────────────────────────────────────
+    -# ── Side column ───────────────────────────────────────────────────
+    .col-4
+      .card.border-0.shadow-sm.profile-panel.mb-4
+        .profile-panel-header
+          .profile-panel-title
+            %i.bi.bi-people
+            People
+        .ticket-people
+          .ticket-person
+            - if @ticket.customer
+              .ticket-avatar.is-customer= initials_for.(@ticket.customer)
+              .min-w-0
+                .ticket-person-role Customer
+                .ticket-person-name= @ticket.customer.fullname
+                .ticket-person-sub= @ticket.customer.email
+                - if phone
+                  .ticket-person-sub
+                    %i.bi.bi-telephone.me-1
+                    = phone
+            - else
+              .ticket-avatar.is-empty
+                %i.bi.bi-person
+              .min-w-0
+                .ticket-person-role Customer
+                .ticket-person-name.text-muted —
+          .ticket-person
+            - if @ticket.assignee
+              .ticket-avatar.is-staff= initials_for.(@ticket.assignee)
+              .min-w-0
+                .ticket-person-role Assignee
+                .ticket-person-name= @ticket.assignee.fullname
+                - if @ticket.assigned_by.present?
+                  .ticket-person-sub= "Assigned by #{@ticket.assigned_by.fullname}"
+            - else
+              .ticket-avatar.is-empty
+                %i.bi.bi-person-dash
+              .min-w-0
+                .ticket-person-role Assignee
+                .ticket-person-name.text-danger Unassigned
+
+      .card.border-0.shadow-sm.profile-panel.mb-4
+        .profile-panel-header
+          .profile-panel-title
+            %i.bi.bi-info-circle
+            Details
+        %dl.profile-list
+          .profile-list-row
+            %dt
+              %i.bi.bi-tag
+              Ticket Type
+            %dd= @ticket.type_label
+          .profile-list-row
+            %dt
+              %i.bi.bi-geo-alt
+              Location
+            %dd= @ticket.location&.name || "—"
+          .profile-list-row
+            %dt
+              %i.bi.bi-calendar3
+              Submitted
+            %dd= fmt.(@ticket.created_at)
+          - if @ticket.assigned_at.present?
+            .profile-list-row
+              %dt
+                %i.bi.bi-person-check
+                Assigned At
+              %dd= fmt.(@ticket.assigned_at)
+          - if @ticket.resolved_at.present?
+            .profile-list-row
+              %dt
+                %i.bi.bi-flag
+                Resolved At
+              %dd= fmt.(@ticket.resolved_at)
+          - if @ticket.resolved_by.present?
+            .profile-list-row
+              %dt
+                %i.bi.bi-person-check-fill
+                Closed By
+              %dd= @ticket.resolved_by.fullname
+          .profile-list-row
+            %dt
+              %i.bi.bi-stopwatch
+              Resolution Time
+            %dd= @ticket.resolution_duration
+
+      = render "tickets/similar_tickets", ticket: @ticket, similar_tickets: @similar_tickets, variant: :agent
+
+      - if @ticket.attachments.any?
+        .card.border-0.shadow-sm.profile-panel.mb-4
+          .profile-panel-header
+            .profile-panel-title
+              %i.bi.bi-paperclip
+              Attachments
+            %span.text-muted.small= @ticket.attachments.size
+          .ticket-attachments
+            - @ticket.attachments.each do |attachment|
+              = link_to "#", class: "ticket-attachment", "data-bs-toggle" => "modal", "data-bs-target" => "#attachmentPreviewModal", "data-attachment-url" => ticket_attachment_path(@ticket, attachment), "data-attachment-name" => attachment.filename.to_s, "data-attachment-image" => attachment.blob.content_type.start_with?("image/").to_s do
+                %span.ticket-attachment-icon
+                  %i.bi{class: attachment.image? ? "bi-file-image" : "bi-file-earmark-text"}
+                %span.ticket-attachment-name= attachment.filename.to_s
+                %span.ticket-attachment-size= number_to_human_size(attachment.blob.byte_size)
+
+      .card.border-0.shadow-sm.profile-panel
+        .profile-panel-header
+          .profile-panel-title
+            %i.bi.bi-arrow-left-right
+            Assignment History
+        - if @ticket_assignments.any?
+          %ul.profile-timeline
+            - @ticket_assignments.each do |a|
+              %li
+                .profile-timeline-icon.text-bg-primary
+                  %i.bi{class: a.assigned_from.present? ? "bi-arrow-left-right" : "bi-person-check"}
+                .profile-timeline-body
+                  .profile-timeline-text
+                    - if a.assigned_from.present?
+                      %span.text-danger= a.assigned_from.fullname
+                      →
+                      %span.text-success= a.assigned_to.fullname
+                    - else
+                      Assigned to
+                      %span.text-success= a.assigned_to.fullname
+                  - if a.reason.present?
+                    .fst-italic.small.text-muted= a.reason
+                  .profile-timeline-meta
+                    = a.created_at.strftime("%b %d, %Y at %-I:%M %p")
+                    - if a.assigned_by.present?
+                      = "· by #{a.assigned_by.fullname}"
+        - else
+          .profile-empty
+            %i.bi.bi-arrow-left-right
+            %p No assignments yet.
+
+-# ── Attachment Preview Modal ─────────────────────────────────────────
 #attachmentPreviewModal.modal.fade{"aria-labelledby" => "attachmentPreviewLabel", "aria-hidden" => "true", tabindex: "-1"}
   .modal-dialog.modal-dialog-centered.modal-lg
     .modal-content
       .modal-header.border-0.pb-0
-        %h6.modal-title#attachmentPreviewLabel.fw-bold{"id" => "attachmentPreviewLabel"} Attachment
+        %h6.modal-title#attachmentPreviewLabel.fw-bold Attachment
         %button.btn-close{"data-bs-dismiss" => "modal", "aria-label" => "Close", type: "button"}
       .modal-body.text-center.p-3
         #attachmentImageContainer{style: "display:none;"}
@@ -312,10 +370,10 @@
   document.getElementById('attachmentPreviewModal').addEventListener('show.bs.modal', function(event) {
     var trigger = event.relatedTarget;
     var url = trigger.getAttribute('data-attachment-url');
-    var name = trigger.getAttribute('data-attachment-name');
     var isImage = trigger.getAttribute('data-attachment-image') === 'true';
 
     document.getElementById('attachmentDownloadLink').href = url;
+    document.getElementById('attachmentPreviewLabel').textContent = trigger.getAttribute('data-attachment-name');
 
     var imageContainer = document.getElementById('attachmentImageContainer');
     var fileContainer = document.getElementById('attachmentFileContainer');
@@ -339,8 +397,8 @@
     document.getElementById('attachmentIframe').src = '';
   });
 
-/ ── Close Ticket Modal ──────────────────────────────────────────
-- if @ticket.status != "closed"
+-# ── Close Ticket Modal ───────────────────────────────────────────────
+- unless closed
   #closeTicketModal.modal.fade{"aria-labelledby" => "closeTicketModalLabel", "aria-hidden" => "true", tabindex: "-1"}
     .modal-dialog.modal-dialog-centered
       .modal-content

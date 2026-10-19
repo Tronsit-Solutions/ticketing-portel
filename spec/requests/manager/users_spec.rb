@@ -175,6 +175,20 @@ RSpec.describe "Manager::Users", type: :request do
       get manager_user_path(agent)
       expect(response.body).not_to include("Reset Password")
     end
+
+    it "shows the ticket mix instead of audit activity, and no unlock button" do
+      agent.lock_access!
+      get manager_user_path(agent)
+      expect(response.body).to include("Ticket Mix")
+      expect(response.body).not_to include("Recent Activity")
+      expect(response.body).not_to include("Unlock")
+    end
+
+    it "filters the ticket list by status" do
+      create(:ticket, :assigned, assignee: agent, title: "Still open ticket")
+      get manager_user_path(agent, status: "closed")
+      expect(response.body).not_to include("Still open ticket")
+    end
   end
 
   context "when signed in as customer" do

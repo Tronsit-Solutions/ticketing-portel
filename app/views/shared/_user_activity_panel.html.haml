@@ -1,0 +1,25 @@
+-# Recent audit-log entries performed by the user.
+.card.border-0.shadow-sm.profile-panel.h-100
+  .profile-panel-header
+    .profile-panel-title
+      %i.bi.bi-activity
+      Recent Activity
+    = link_to admin_audit_logs_path(actor_id: user.id), class: "profile-panel-link" do
+      View all
+      %i.bi.bi-arrow-right
+  - if activity.any?
+    %ul.profile-timeline
+      - activity.each do |log|
+        %li
+          .profile-timeline-icon{class: "text-bg-#{log.badge_color}"}
+            %i.bi{class: log.icon}
+          .profile-timeline-body
+            = link_to log.description, admin_audit_log_path(log), class: "profile-timeline-text"
+            .profile-timeline-meta
+              = log.category_label
+              ·
+              %span{title: log.created_at.strftime("%b %d, %Y %I:%M %p")}= "#{time_ago_in_words(log.created_at)} ago"
+  - else
+    .profile-empty
+      %i.bi.bi-activity
+      %p No activity recorded yet.
