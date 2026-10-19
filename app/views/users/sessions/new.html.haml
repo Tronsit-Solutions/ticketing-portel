@@ -112,6 +112,11 @@
       - if flash[:alert]
         .alert.alert-danger.py-2.text-start{:style => "font-size:13px;"}
           = flash[:alert]
+      - if @unlocks_at
+        .alert.alert-warning.py-2.text-start{style: "font-size:13px;", data: { controller: "unlock-countdown", unlock_countdown_seconds_value: (@unlocks_at - Time.current).ceil }}
+          %i.bi.bi-clock.me-1
+          %span{data: { unlock_countdown_target: "message" }}
+            Try again in #{distance_of_time_in_words(Time.current, @unlocks_at)}.
       = form_for(resource, as: resource_name, url: session_path(resource_name), html: { "data-turbo" => "false" }) do |f|
         .mb-3
           = f.email_field :email,  |

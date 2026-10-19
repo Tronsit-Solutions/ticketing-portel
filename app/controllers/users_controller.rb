@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_action :require_admin!
-  before_action :set_user, only: [:show, :update, :destroy, :deactivate, :reset_password]
+  before_action :set_user, only: [:show, :update, :destroy, :deactivate, :reset_password, :unlock]
 
   SORT_COLUMNS = { "name" => :fullname, "email" => :email }.freeze
 
@@ -75,6 +75,11 @@ class UsersController < ApplicationController
   def reset_password
     flash[:temporary_password] = { "name" => @user.fullname, "password" => @user.reset_to_temporary_password! }
     redirect_to user_path(@user)
+  end
+
+  def unlock
+    @user.unlock_access!
+    redirect_to user_path(@user), notice: "#{@user.fullname}'s account has been unlocked."
   end
 
   private
