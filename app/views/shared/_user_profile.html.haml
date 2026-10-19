@@ -1,0 +1,275 @@
+-# Shared user profile page for the admin, manager and agent portals.
+-#
+-# Locals:
+-#   portal             - :admin, :manager or :agent
+-#   profile_path       - route helper name for this page, e.g. :user_path
+-#   back_path          - where "back" goes, with back_label naming it
+-#   edit_url           - target of the edit modal's form (nil when edit_path is given)
+-#   edit_path          - link to a separate edit page instead of the modal
+-#   reset_password_url - shown for customers when given
+-#   unlock_url         - shown for locked accounts when given
+-#   include_role_team  - passed through to the edit modal
+- edit_url           = local_assigns[:edit_url]
+- edit_path          = local_assigns[:edit_path]
+- reset_password_url = local_assigns[:reset_password_url]
+- unlock_url         = local_assigns[:unlock_url]
+- admin_view         = portal == :admin
+-# Only admins can open audit logs, so other portals get the ticket mix instead.
+- third_card         = admin_view ? :activity : (@tickets ? :ticket_mix : nil)
+- card_col           = third_card ? "col-4" : "col-6"
+- role_color   = { "admin" => "danger", "agent" => "success", "manager" => "primary", "customer" => "secondary" }
+- status_color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
+- initials     = @user.fullname.to_s.split.first(2).map { |part| part[0] }.join.upcase.presence || @user.email.first.upcase
+- last_sign_in = @user.current_sign_in_at
+
+.user-profile
+  -# ── Hero ──────────────────────────────────────────────────────────────
+  .card.border-0.shadow-sm.profile-hero.mb-4
+    .profile-cover{class: "role-#{@user.role}"}
+      = link_to back_path, class: "profile-back" do
+        %i.bi.bi-arrow-left
+        = back_label
+    .profile-hero-body
+      .profile-avatar{class: "role-#{@user.role}"}= initials
+      .profile-identity
+        %h3.profile-name= @user.fullname.presence || @user.email
+        .profile-email
+          %i.bi.bi-envelope
+          = @user.email
+        .profile-chips
+          %span{class: "badge rounded-pill bg-#{role_color[@user.role]}"}= @user.role.humanize
+          - if @user.is_active?
+            %span.badge.rounded-pill.bg-success-subtle.text-success.border.border-success-subtle
+              %i.bi.bi-circle-fill.me-1{style: "font-size:7px; vertical-align:middle;"}
+              Active
+          - else
+            %span.badge.rounded-pill.bg-secondary-subtle.text-secondary.border.border-secondary-subtle Inactive
+          - if @user.access_locked?
+            %span.badge.rounded-pill.bg-danger-subtle.text-danger.border.border-danger-subtle
+              %i.bi.bi-lock-fill.me-1
+              Locked
+          - if @user.must_change_password?
+            %span.badge.rounded-pill.bg-warning-subtle.text-warning-emphasis.border.border-warning-subtle
+              %i.bi.bi-key-fill.me-1
+              Password change pending
+      .profile-actions
+        - if unlock_url && @user.access_locked?
+          %button.btn.btn-danger{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => unlock_url, "data-action-message" => "Unlock #{@user.fullname}'s account? They can sign in again straight away; their password is not changed.", "data-action-label" => "Unlock", "data-action-class" => "btn-danger"}
+            %i.bi.bi-unlock.me-1
+            Unlock
+        - if reset_password_url && @user.customer?
+          %button.btn.btn-outline-warning{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "#confirmActionModal", "data-action-url" => reset_password_url, "data-action-message" => "Reset #{@user.fullname}'s password? They will get a one-time temporary password and must choose a new one at their next sign-in.", "data-action-label" => "Reset Password", "data-action-class" => "btn-warning"}
+            %i.bi.bi-key.me-1
+            Reset Password
+        - if edit_path
+          = link_to edit_path, class: "btn btn-primary" do
+            %i.bi.bi-pencil-square.me-1
+            Edit Profile
+        - else
+          %button.btn.btn-primary{type: "button", "data-bs-toggle" => "modal", "data-bs-target" => "##{dom_id(@user, :edit)}"}
+            %i.bi.bi-pencil-square.me-1
+            Edit Profile
+
+    .profile-facts
+      .profile-fact
+        .profile-fact-label
+          %i.bi.bi-people
+          Team
+        .profile-fact-value= @user.team&.name || "—"
+      .profile-fact
+        .profile-fact-label
+          %i.bi.bi-calendar3
+          Member since
+        .profile-fact-value= @user.created_at.strftime("%b %d, %Y")
+      .profile-fact
+        .profile-fact-label
+          %i.bi.bi-box-arrow-in-right
+          Last sign-in
+        .profile-fact-value{title: last_sign_in&.strftime("%b %d, %Y %I:%M %p")}
+          = last_sign_in ? "#{time_ago_in_words(last_sign_in)} ago" : "Never"
+      .profile-fact
+        .profile-fact-label
+          %i.bi.bi-arrow-repeat
+          Total sign-ins
+        .profile-fact-value= number_with_delimiter(@user.sign_in_count)
+
+  -# ── Ticket stats (agents, managers, customers) ───────────────────────
+  - if @tickets
+    - active_count = @status_counts.fetch("open", 0) + @status_counts.fetch("in_progress", 0)
+    - stats = [{ label: "Total tickets", value: @total_count,                         icon: "bi-ticket-perforated", tone: "slate" },
+      { label: "Active",                 value: active_count,                         icon: "bi-hourglass-split",   tone: "blue" },
+      { label: "Closed",                 value: @status_counts.fetch("closed", 0),    icon: "bi-check2-circle",     tone: "green" },
+      { label: "Cancelled",              value: @status_counts.fetch("cancelled", 0), icon: "bi-x-circle",          tone: "red" }]
+    .row.g-4.mb-4
+      - stats.each do |stat|
+        .col-3
+          .card.border-0.shadow-sm.profile-stat{class: "tone-#{stat[:tone]}"}
+            .profile-stat-icon
+              %i.bi{class: stat[:icon]}
+            .profile-stat-body
+              .profile-stat-value= number_with_delimiter(stat[:value])
+              .profile-stat-label
+                = stat[:label]
+                - unless stat[:tone] == "slate" || @total_count.zero?
+                  - share = stat[:value] * 100.0 / @total_count
+                  %span.profile-stat-share= "· #{share.positive? && share < 1 ? '<1' : share.round}%"
+            - unless stat[:tone] == "slate"
+              .profile-stat-bar
+                %span{style: "width: #{@total_count.zero? ? 0 : (stat[:value] * 100.0 / @total_count).round(1)}%;"}
+
+  -# ── Details, security, activity ──────────────────────────────────────
+  .row.g-4
+    %div{class: card_col}
+      .card.border-0.shadow-sm.profile-panel.h-100
+        .profile-panel-header
+          .profile-panel-title
+            %i.bi.bi-person-vcard
+            Contact Details
+        %dl.profile-list
+          .profile-list-row
+            %dt
+              %i.bi.bi-envelope
+              Email
+            %dd= mail_to @user.email, @user.email, class: "text-decoration-none"
+          .profile-list-row
+            %dt
+              %i.bi.bi-telephone
+              Phone
+            %dd= @user.contact_no.presence || "—"
+          .profile-list-row
+            %dt
+              %i.bi.bi-people
+              Team
+            %dd= @user.team&.name || "—"
+          .profile-list-row
+            %dt
+              %i.bi.bi-geo-alt
+              Address
+            %dd= @user.address.presence || "—"
+
+    %div{class: card_col}
+      .card.border-0.shadow-sm.profile-panel.h-100
+        .profile-panel-header
+          .profile-panel-title
+            %i.bi.bi-shield-lock
+            Account & Security
+        %dl.profile-list
+          .profile-list-row
+            %dt
+              %i.bi.bi-toggle-on
+              Status
+            %dd
+              - if @user.is_active?
+                %span.text-success.fw-semibold Active
+              - else
+                %span.text-secondary.fw-semibold Deactivated
+          .profile-list-row
+            %dt
+              %i.bi.bi-lock
+              Sign-in lock
+            %dd
+              - if @user.access_locked?
+                %span.text-danger.fw-semibold{title: @user.unlocks_at.strftime("%b %d, %Y %I:%M %p")}
+                  = "Locked · unlocks in #{distance_of_time_in_words(Time.current, @user.unlocks_at)}"
+              - else
+                %span.text-success.fw-semibold Not locked
+          - if admin_view
+            .profile-list-row
+              %dt
+                %i.bi.bi-exclamation-triangle
+                Failed attempts
+              %dd= "#{@user.failed_attempts} of #{Devise.maximum_attempts}"
+          .profile-list-row
+            %dt
+              %i.bi.bi-key
+              Password
+            %dd= @user.must_change_password? ? "Temporary — change pending" : "Set by user"
+          - if admin_view
+            .profile-list-row
+              %dt
+                %i.bi.bi-pc-display
+                Last sign-in IP
+              %dd.font-monospace= @user.current_sign_in_ip.presence || "—"
+          - else
+            .profile-list-row
+              %dt
+                %i.bi.bi-box-arrow-in-right
+                Last sign-in
+              %dd= @user.current_sign_in_at&.strftime("%b %d, %Y %I:%M %p") || "—"
+          .profile-list-row
+            %dt
+              %i.bi.bi-clock
+              Previous sign-in
+            %dd= @user.last_sign_in_at&.strftime("%b %d, %Y %I:%M %p") || "—"
+
+    - if third_card
+      .col-4
+        - if third_card == :activity
+          = render "shared/user_activity_panel", user: @user, activity: @recent_activity
+        - else
+          = render "shared/user_ticket_mix", type_counts: @type_counts, total: @total_count
+
+  -# ── Ticket history ───────────────────────────────────────────────────
+  - if @tickets
+    - person_label  = @person_association == :customer ? "Customer" : "Assigned to"
+    - filter_params = request.query_parameters.except("page", "status")
+    - sort_params   = request.query_parameters.merge(id: @user.id)
+    .card.border-0.shadow-sm.profile-panel.mt-4
+      .profile-panel-header
+        .profile-panel-title
+          %i.bi.bi-clock-history
+          = @user.customer? ? "Raised Tickets" : "Assigned Tickets"
+        .profile-filters
+          = link_to send(profile_path, @user, filter_params), class: "profile-filter #{'active' if params[:status].blank?}" do
+            All
+            %span.profile-filter-count= number_with_delimiter(@total_count)
+          - Ticket::STATUSES.each do |status|
+            = link_to send(profile_path, @user, filter_params.merge(status: status)), class: "profile-filter #{'active' if params[:status] == status}" do
+              = status.humanize
+              %span.profile-filter-count= number_with_delimiter(@status_counts.fetch(status, 0))
+
+      - if @tickets.any?
+        %table.table.table-hover.mb-0.profile-table
+          %thead
+            %tr
+              %th.text-start{style: "width: 10%;"}= sortable_column_link(profile_path, "#", "id", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: sort_params)
+              %th.text-start{style: "width: 21%;"}= sortable_column_link(profile_path, "Title", "title", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: sort_params)
+              %th{style: "width: 13%;"} Type
+              %th{style: "width: 11%;"}= sortable_column_link(profile_path, "Status", "status", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: sort_params)
+              %th{style: "width: 14%;"}= sortable_column_link(profile_path, person_label, "person", current_sort: @ticket_sort, current_direction: @ticket_direction, sort_param: :ticket_sort, direction_param: :ticket_direction, extra_params: sort_params)
+              %th{style: "width: 10%;"} Location
+              %th{style: "width: 11%;"} Created
+              %th{style: "width: 10%;"} Resolved
+          %tbody
+            - @tickets.each do |ticket|
+              - person = ticket.public_send(@person_association)
+              %tr
+                %td.text-muted= "##{ticket.id}"
+                %td.text-start
+                  %span.tooltip-wrap{data: {tooltip: ticket.title}}
+                    = link_to ticket.title, ticket_path(ticket), class: "text-dark text-decoration-none fw-semibold text-truncate-cell"
+                %td
+                  %span.tooltip-wrap{data: {tooltip: ticket.type_label}}
+                    %span.profile-type.text-truncate-cell= ticket.type_label
+                %td
+                  %span{class: "badge rounded-pill bg-#{status_color[ticket.status]}"}= ticket.status.humanize
+                %td
+                  %span.tooltip-wrap{data: {tooltip: person&.fullname}}
+                    %span.text-truncate-cell= person&.fullname || "—"
+                %td
+                  %span.tooltip-wrap{data: {tooltip: ticket.location&.name}}
+                    %span.text-truncate-cell= ticket.location&.name || "—"
+                %td.text-muted{title: ticket.created_at&.strftime("%b %d, %Y %I:%M %p")}= ticket.created_at&.strftime("%b %d, %Y") || "—"
+                %td.text-muted= ticket.resolution_duration
+        .profile-panel-footer
+          %span.text-muted.small= page_entries_info @tickets
+          .pagination-wrapper
+            = paginate @tickets
+      - else
+        .profile-empty
+          %i.bi.bi-ticket-perforated
+          %p= params[:status].present? ? "No #{params[:status].humanize.downcase} tickets." : "No tickets yet."
+
+- if edit_url
+  = render "shared/user_edit_modal", user: @user, url: edit_url, include_role_team: local_assigns.fetch(:include_role_team, false)
+= render "shared/confirm_action_modal"

@@ -43,7 +43,7 @@ class TicketsController < ApplicationController
   end
 
   def show
-    @ticket_messages    = @ticket.ticket_messages.recent
+    @ticket_messages    = @ticket.ticket_messages.recent.includes(:sender)
     @ticket_assignments = @ticket.ticket_assignments.recent.includes(:assigned_to, :assigned_from, :assigned_by)
     if current_user.customer?
       @my_tickets_count = Ticket.where(customer: current_user).count

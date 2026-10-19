@@ -1,0 +1,26 @@
+-# Breakdown of a user's tickets by type, largest first.
+- shown = type_counts.first(5)
+- other = type_counts.drop(5).sum { |_, count| count }
+- shown += [["__other", other]] if other.positive?
+.card.border-0.shadow-sm.profile-panel.h-100
+  .profile-panel-header
+    .profile-panel-title
+      %i.bi.bi-pie-chart
+      Ticket Mix
+    %span.text-muted.small by type
+  - if total.positive?
+    %ul.profile-mix
+      - shown.each do |type, count|
+        - share = count * 100.0 / total
+        %li
+          .profile-mix-row
+            %span.profile-mix-label= type == "__other" ? "Other types" : (Ticket::TYPE_LABELS[type] || type.humanize)
+            %span.profile-mix-value
+              = number_with_delimiter(count)
+              %span.text-muted= "· #{share.positive? && share < 1 ? '<1' : share.round}%"
+          .profile-mix-bar
+            %span{style: "width: #{share.round(1)}%;"}
+  - else
+    .profile-empty
+      %i.bi.bi-pie-chart
+      %p No tickets yet.

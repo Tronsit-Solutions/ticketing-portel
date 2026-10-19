@@ -1,4 +1,6 @@
 class Agent::UsersController < ApplicationController
+  include UserProfile
+
   before_action :require_admin_or_agent!
   before_action :set_user, only: [:show, :edit, :update]
   layout "agent"
@@ -35,13 +37,7 @@ class Agent::UsersController < ApplicationController
   end
 
   def show
-    @assigned_tickets = @user.assigned_tickets.recent.includes(:customer, :location)
-    @open_count       = @user.assigned_tickets.open.count + @user.assigned_tickets.in_progress.count
-    @closed_count     = @user.assigned_tickets.closed.count
-    @total_count      = @user.assigned_tickets.count
-
-    @assigned_tickets = @assigned_tickets.where(status: params[:status]) if params[:status].present?
-    @assigned_tickets = @assigned_tickets.page(params[:page]).per(25)
+    load_user_profile(@user)
   end
 
   def edit; end

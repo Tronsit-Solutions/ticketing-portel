@@ -1,0 +1,446 @@
+// Admin → user profile page (users/show). Laid out for desktop.
+
+$profile-roles: (
+  admin:    (#b71c1c, #ef5350),
+  agent:    (#1b5e20, #43a047),
+  manager:  (#0d47a1, #42a5f5),
+  customer: (#37474f, #78909c)
+);
+
+.user-profile, .ticket-page {
+  --profile-radius: 14px;
+  --profile-muted: #6c757d;
+  --profile-line: #eef0f3;
+
+  .card { border-radius: var(--profile-radius); }
+
+  // ── Hero ────────────────────────────────────────────────────────────────
+  .profile-hero { overflow: hidden; }
+
+  .profile-cover {
+    position: relative;
+    height: 110px;
+    padding: 16px 24px;
+
+    @each $role, $colors in $profile-roles {
+      &.role-#{$role} {
+        background:
+          radial-gradient(circle at 85% -20%, rgba(255, 255, 255, 0.25), transparent 45%),
+          linear-gradient(120deg, nth($colors, 1), nth($colors, 2));
+      }
+    }
+  }
+
+  .profile-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    color: #fff;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(4px);
+    transition: background 0.15s;
+
+    &:hover { background: rgba(255, 255, 255, 0.28); color: #fff; }
+  }
+
+  .profile-hero-body {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    padding: 0 28px 20px;
+    margin-top: -52px;
+  }
+
+  .profile-avatar {
+    flex-shrink: 0;
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+
+    @each $role, $colors in $profile-roles {
+      &.role-#{$role} { background: linear-gradient(135deg, nth($colors, 1), nth($colors, 2)); }
+    }
+  }
+
+  // The avatar overlaps the cover; name and actions start just below it.
+  .profile-identity {
+    flex-grow: 1;
+    min-width: 0;
+    padding-top: 64px;
+  }
+
+  .profile-name {
+    margin: 0 0 4px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1d21;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .profile-email {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--profile-muted);
+    margin-bottom: 10px;
+  }
+
+  .profile-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    .badge { font-weight: 600; font-size: 12px; padding: 5px 11px; }
+  }
+
+  .profile-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    padding-top: 68px;
+
+    .btn { border-radius: 9px; font-weight: 500; font-size: 14px; padding: 7px 16px; }
+  }
+
+  .profile-facts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--profile-line);
+    background: #fafbfc;
+  }
+
+  .profile-fact {
+    padding: 14px 28px;
+
+    & + & { border-left: 1px solid var(--profile-line); }
+  }
+
+  .profile-fact-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--profile-muted);
+    margin-bottom: 3px;
+  }
+
+  .profile-fact-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1d21;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // ── Stat tiles ──────────────────────────────────────────────────────────
+  .profile-stat {
+    position: relative;
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px 22px;
+    overflow: hidden;
+
+    $tones: (slate: #546e7a, blue: #1565c0, green: #2e7d32, red: #c62828);
+    @each $tone, $color in $tones {
+      &.tone-#{$tone} {
+        .profile-stat-icon { color: $color; background: rgba($color, 0.1); }
+        .profile-stat-bar span { background: $color; }
+      }
+    }
+  }
+
+  .profile-stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    flex-shrink: 0;
+  }
+
+  .profile-stat-value { font-size: 26px; font-weight: 700; line-height: 1.1; color: #1a1d21; }
+  .profile-stat-label { font-size: 13px; color: var(--profile-muted); }
+  .profile-stat-share { font-weight: 600; }
+
+  .profile-stat-bar {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 10px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--profile-line);
+
+    span { display: block; height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+  }
+
+  // ── Panels ──────────────────────────────────────────────────────────────
+  .profile-panel { overflow: hidden; }
+
+  .profile-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--profile-line);
+  }
+
+  .profile-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1d21;
+    white-space: nowrap;
+
+    .bi { color: #1565c0; font-size: 17px; }
+  }
+
+  .profile-panel-link {
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+
+    .bi { transition: transform 0.15s; }
+    &:hover .bi { transform: translateX(3px); }
+  }
+
+  .profile-panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--profile-line);
+
+    .pagination { margin: 0; }
+  }
+
+  .profile-filters {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 10px;
+    background: #f1f3f6;
+  }
+
+  .profile-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover { color: #1a1d21; background: rgba(255, 255, 255, 0.7); }
+
+    &.active {
+      color: #1565c0;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+      .profile-filter-count { background: #e3f0ff; color: #1565c0; }
+    }
+  }
+
+  .profile-filter-count {
+    min-width: 22px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-align: center;
+    background: #e4e7eb;
+    color: #495057;
+  }
+
+  .profile-table {
+    thead th { background: #fafbfc; }
+    thead th:first-child, tbody td:first-child { padding-left: 20px; }
+    thead th, tbody td { padding-left: 0.6rem; padding-right: 0.6rem; }
+    tbody td { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    tbody tr:last-child td { border-bottom: 0; }
+  }
+
+  .profile-type {
+    display: inline-block;
+    max-width: 100%;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background: #f1f3f6;
+    color: #495057;
+  }
+
+  .profile-empty {
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--profile-muted);
+
+    .bi { font-size: 2rem; opacity: 0.5; }
+    p { margin: 8px 0 0; }
+  }
+
+  // ── Definition lists (contact, security) ────────────────────────────────
+  .profile-list { margin: 0; padding: 6px 20px; }
+
+  .profile-list-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+
+    & + & { border-top: 1px dashed var(--profile-line); }
+
+    dt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--profile-muted);
+
+      .bi { width: 16px; }
+    }
+
+    dd {
+      margin: 0;
+      min-width: 0;
+      font-size: 13.5px;
+      font-weight: 500;
+      text-align: right;
+      color: #1a1d21;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  // ── Activity timeline ───────────────────────────────────────────────────
+  .profile-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 8px 20px 14px;
+
+    li {
+      position: relative;
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+
+      // Connector line between icons
+      &:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: 15px;
+        top: 42px;
+        bottom: -10px;
+        width: 2px;
+        background: var(--profile-line);
+      }
+    }
+  }
+
+  .profile-timeline-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+
+  .profile-timeline-body { min-width: 0; padding-top: 1px; }
+
+  .profile-timeline-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 13.5px;
+    color: #1a1d21;
+    text-decoration: none;
+
+    &:hover { color: #1565c0; }
+  }
+
+  .profile-timeline-meta { font-size: 12px; color: var(--profile-muted); margin-top: 2px; }
+}
+
+// ── Ticket mix (by type) ─────────────────────────────────────────────────
+.user-profile {
+  .profile-mix {
+    list-style: none;
+    margin: 0;
+    padding: 10px 20px 16px;
+
+    li { padding: 9px 0; }
+  }
+
+  .profile-mix-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+    font-size: 13.5px;
+  }
+
+  .profile-mix-label {
+    font-weight: 500;
+    color: #1a1d21;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .profile-mix-value { font-weight: 600; white-space: nowrap; }
+
+  .profile-mix-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--profile-line);
+
+    span {
+      display: block;
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #1565c0, #42a5f5);
+    }
+  }
+}
