@@ -133,11 +133,61 @@ RSpec.describe "Users", type: :request do
       expect(response.body).not_to include(temporary)
     end
 
+    it "unlocks an account locked by failed sign-ins" do
+      customer.lock_access!
+
+      patch reset_password_user_path(customer)
+
+      expect(customer.reload.access_locked?).to be false
+      expect(customer.failed_attempts).to eq(0)
+    end
+
     it "gives a different password on each reset" do
       patch reset_password_user_path(customer)
       first = flash[:temporary_password]["password"]
       patch reset_password_user_path(customer)
       expect(flash[:temporary_password]["password"]).not_to eq(first)
+    end
+  end
+
+  describe "PATCH /users/:id/unlock" do
+    before { customer.lock_access! }
+
+    it "lets an admin unlock a locked account" do
+      sign_in admin
+      patch unlock_user_path(customer)
+
+      expect(response).to redirect_to(user_path(customer))
+      expect(customer.reload.access_locked?).to be false
+      expect(customer.failed_attempts).to eq(0)
+    end
+
+    it "does not let a non-admin unlock an account" do
+      sign_in agent
+      patch unlock_user_path(customer)
+
+      expect(customer.reload.access_locked?).to be true
+    end
+  end
+
+  describe "Unlock button on GET /users/:id" do
+    before { sign_in admin }
+
+    it "is shown for a locked user" do
+      customer.lock_access!
+      get user_path(customer)
+      expect(response.body).to include(unlock_user_path(customer))
+    end
+
+    it "is shown for a locked agent" do
+      agent.lock_access!
+      get user_path(agent)
+      expect(response.body).to include(unlock_user_path(agent))
+    end
+
+    it "is hidden for an unlocked user" do
+      get user_path(customer)
+      expect(response.body).not_to include(unlock_user_path(customer))
     end
   end
 end

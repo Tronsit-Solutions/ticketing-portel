@@ -4,6 +4,14 @@ class Users::SessionsController < Devise::SessionsController
   skip_before_action :authenticate_user!
   layout false
 
+  # A failed sign-in re-renders this action with the submitted params, so the
+  # entered email tells us whether to show the unlock countdown.
+  def new
+    email = params.dig(:user, :email)
+    @unlocks_at = User.find_for_authentication(email: email)&.unlocks_at if email.present?
+    super
+  end
+
   def create
     super do |user|
       AuditLog.record!(

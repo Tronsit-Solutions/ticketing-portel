@@ -94,6 +94,7 @@ Rails.application.routes.draw do
     member do
       patch :deactivate
       patch :reset_password
+      patch :unlock
     end
   end
 end
