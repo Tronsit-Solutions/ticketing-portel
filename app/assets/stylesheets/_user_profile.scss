@@ -1,4 +1,5 @@
-// Admin → user profile page (users/show). Laid out for desktop.
+// User profile pages (admin, manager and agent users/show), plus the shared
+// pieces the staff ticket page borrows. Phone overrides sit at the bottom.
 
 $profile-roles: (
   admin:    (#b71c1c, #ef5350),
@@ -441,6 +442,128 @@ $profile-roles: (
       height: 100%;
       border-radius: 3px;
       background: linear-gradient(90deg, #1565c0, #42a5f5);
+    }
+  }
+}
+
+// ── Tablet: hero actions drop under the identity ──────────────────────────
+@media (max-width: 1199.98px) {
+  .user-profile {
+    .profile-hero-body { flex-wrap: wrap; }
+
+    .profile-actions {
+      flex-wrap: wrap;
+      width: 100%;
+      padding-top: 0;
+    }
+  }
+}
+
+// ── Phone: hero centred and stacked, facts and stats two to a row ────────
+@media (max-width: 767.98px) {
+  .user-profile {
+    .row.g-4 { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
+    .profile-hero.mb-4, .row.g-4.mb-4 { margin-bottom: 0.75rem !important; }
+    .profile-panel.mt-4 { margin-top: 0.75rem !important; }
+
+    .profile-cover { height: 84px; padding: 12px 14px; }
+
+    .profile-hero-body {
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px 16px;
+      margin-top: -44px;
+      text-align: center;
+    }
+
+    .profile-avatar {
+      width: 84px;
+      height: 84px;
+      border-width: 4px;
+      font-size: 28px;
+    }
+
+    .profile-identity { width: 100%; padding-top: 0; }
+
+    .profile-name {
+      font-size: 21px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .profile-email {
+      justify-content: center;
+      font-size: 13.5px;
+      overflow-wrap: anywhere;
+    }
+
+    .profile-chips { justify-content: center; }
+
+    .profile-actions .btn { flex: 1 1 100%; }
+
+    .profile-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .profile-fact {
+      padding: 12px 16px;
+
+      & + & { border-left: 0; }
+      &:nth-child(even) { border-left: 1px solid var(--profile-line); }
+      &:nth-child(n + 3) { border-top: 1px solid var(--profile-line); }
+    }
+
+    .profile-fact-label { font-size: 10.5px; }
+    .profile-fact-value { font-size: 14px; }
+
+    .profile-stat {
+      gap: 10px;
+      padding: 14px 12px 20px;
+    }
+
+    .profile-stat-icon { width: 36px; height: 36px; font-size: 17px; border-radius: 10px; }
+    .profile-stat-value { font-size: 21px; }
+    .profile-stat-label { font-size: 12px; }
+    .profile-stat-bar { left: 12px; right: 12px; bottom: 8px; }
+
+    .profile-panel-header {
+      flex-wrap: wrap;
+      padding: 14px 16px;
+    }
+
+    // Status filters scroll sideways instead of overflowing the card.
+    .profile-filters {
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+
+      &::-webkit-scrollbar { display: none; }
+    }
+
+    .profile-filter { flex-shrink: 0; }
+
+    .profile-list { padding: 4px 16px; }
+
+    // Long values (addresses, emails) wrap under their label.
+    .profile-list-row {
+      flex-wrap: wrap;
+      gap: 2px 16px;
+
+      dd { flex: 1 1 auto; }
+    }
+
+    .profile-timeline, .profile-mix { padding-left: 16px; padding-right: 16px; }
+
+    .profile-table tbody td {
+      white-space: normal;
+      overflow: visible;
+    }
+
+    .profile-panel-footer {
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 16px;
+      text-align: center;
     }
   }
 }

@@ -95,20 +95,20 @@
         .card-body.p-4
           = form_with url: assign_ticket_path(@ticket), method: :patch, local: true do |f|
             .row.g-3.align-items-end
-              .col-5
+              .col-12.col-md-5
                 = label_tag :assignee_id, "Assign to agent", class: "form-label fw-semibold"
                 - agent_options = User.agents.active.order(:fullname).map { |a| [a.fullname, a.id] }
                 - assignee_options = current_user.manager? ? [["Myself (#{current_user.fullname})", current_user.id]] + agent_options : agent_options
                 = select_tag :assignee_id, options_for_select(assignee_options, @ticket.assignee_id), class: "form-select", prompt: "Select agent"
-              .col-5
+              .col-12.col-md-5
                 = label_tag :reason, "Reason (optional)", class: "form-label fw-semibold"
                 = text_field_tag :reason, nil, class: "form-control", placeholder: "Reason for assignment"
-              .col-2
+              .col-12.col-md-2
                 = f.submit "Assign", class: "btn btn-primary w-100"
 
   .row.g-4
     -# ── Main column ───────────────────────────────────────────────────
-    .col-8
+    .col-12.col-xl-8
       - if closed && @ticket.resolution.present?
         .card.border-0.shadow-sm.ticket-resolution.mb-4
           .ticket-resolution-icon
@@ -218,7 +218,7 @@
                   Send Reply
 
     -# ── Side column ───────────────────────────────────────────────────
-    .col-4
+    .col-12.col-xl-4
       .card.border-0.shadow-sm.profile-panel.mb-4
         .profile-panel-header
           .profile-panel-title

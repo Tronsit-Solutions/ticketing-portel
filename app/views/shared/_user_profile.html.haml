@@ -16,7 +16,7 @@
 - admin_view         = portal == :admin
 -# Only admins can open audit logs, so other portals get the ticket mix instead.
 - third_card         = admin_view ? :activity : (@tickets ? :ticket_mix : nil)
-- card_col           = third_card ? "col-4" : "col-6"
+- card_col           = third_card ? "col-12 col-lg-6 col-xxl-4" : "col-12 col-lg-6"
 - role_color   = { "admin" => "danger", "agent" => "success", "manager" => "primary", "customer" => "secondary" }
 - status_color = { "open" => "primary", "in_progress" => "warning", "closed" => "success", "cancelled" => "danger" }
 - initials     = @user.fullname.to_s.split.first(2).map { |part| part[0] }.join.upcase.presence || @user.email.first.upcase
@@ -102,7 +102,7 @@
       { label: "Cancelled",              value: @status_counts.fetch("cancelled", 0), icon: "bi-x-circle",          tone: "red" }]
     .row.g-4.mb-4
       - stats.each do |stat|
-        .col-3
+        .col-6.col-xl-3
           .card.border-0.shadow-sm.profile-stat{class: "tone-#{stat[:tone]}"}
             .profile-stat-icon
               %i.bi{class: stat[:icon]}
@@ -203,7 +203,7 @@
             %dd= @user.last_sign_in_at&.strftime("%b %d, %Y %I:%M %p") || "—"
 
     - if third_card
-      .col-4
+      .col-12.col-xxl-4
         - if third_card == :activity
           = render "shared/user_activity_panel", user: @user, activity: @recent_activity
         - else
